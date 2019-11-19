@@ -3,6 +3,8 @@ Postcode.nl International Address API module for Magento 2
 
 Adds autocompletion for addresses to the checkout page. Multiple countries are supported using official postal data via the [Postcode.nl](https://postcode.nl) API.
 
+This module has been created for Postcode.nl by [Flekto](https://www.flekto.nl).
+
 
 Postcode.nl Account
 =============
