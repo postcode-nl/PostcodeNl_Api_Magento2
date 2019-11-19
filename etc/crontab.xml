@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="flekto_postcode_update_countries" instance="Flekto\Postcode\Cron\UpdateCountries" method="execute">
+            <schedule>3 3 * * 7</schedule>
+        </job>
+    </group>
+</config>

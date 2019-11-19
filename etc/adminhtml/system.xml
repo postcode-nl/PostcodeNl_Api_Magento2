@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="postcodenl_api" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="999" translate="label">
+            <label>Postcode.nl API Autocomplete</label>
+            <tab>sales</tab>
+            <resource>Flekto_Postcode::config_flekto_postcode</resource>
+            <group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+                <label>Configuration</label>
+                <field id="enabled" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select" canRestore="1">
+                    <label>Enabled</label>
+                    <comment/>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="text">
+                    <label>Api key</label>
+                    <comment/>
+                </field>
+                <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="password">
+                    <label>Api secret</label>
+                    <comment/>
+                </field>
+                <field id="api_key_is_valid" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+                    <label>Account is valid</label>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                </field>
+
+                <field id="supported_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+                    <label>Supported Countries</label>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                </field>
+
+                <field id="account_name" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+                    <label>Account Name</label>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                </field>
+
+                <field id="api_key_checker" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="41" translate="label" type="button">
+                    <button_label></button_label>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Apikey\Checker</frontend_model>
+                    <comment><![CDATA[
+                        You can <a href="https://account.postcode.nl/" target="_blank">login here </a>to view your postcode.nl account status
+                        <br />
+                        <p style="width: 71%; cursor: pointer;" onclick="window.open('https://account.postcode.nl/', '_blank');"><img style="width:100%;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNjAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+DQoJPGRlZnM+DQoJCTxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyR3JhZGllbnQ0Nzc2IiB4MT0iLTIyLjA4MiIgeDI9IjYxLjk4MyIgeTE9Ii0yMC44MTYiIHkyPSItMjAuODE2IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDExLjMxMiAwIDAgNS43Nzk5IDI0OS43OSAxNzAuMzEpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQoJCQk8c3RvcCBzdG9wLWNvbG9yPSIjMDAzYjRkIiBvZmZzZXQ9IjAiLz4NCgkJCTxzdG9wIHN0b3AtY29sb3I9IiMyOGFiY2EiIG9mZnNldD0iMSIvPg0KCQk8L2xpbmVhckdyYWRpZW50Pg0KCTwvZGVmcz4NCgk8cmVjdCB5PSItMS4xNTI0ZS01IiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNsaW5lYXJHcmFkaWVudDQ3NzYpIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIuMzMiLz4NCgk8ZyBmaWxsPSIjZmZmIj4NCgkJPHBhdGggZD0ibTE2MS4xMiAzMS44MThhOS45MDMyIDkuOTAzMiAwIDAgMSAxMC4xOTUgMTAuMTM3IDkuNzM3NCA5LjczNzQgMCAwIDEtMi45MTgyIDcuMjI1MSA5LjkxMjUgOS45MTI1IDAgMCAxLTcuMjk1NCAyLjkxODJoLTguNjIxOHYxMi40MjVoLTIuNDc5MXYtMzIuNzA1em0wIDE3Ljg5NmE3LjQ2NzggNy40Njc4IDAgMCAwIDUuNTQwNS0yLjE4OTkgNy41ODQ2IDcuNTg0NiAwIDAgMCAyLjE3MTQtNS41NzEgNy42NTM1IDcuNjUzNSAwIDAgMC0yLjE3MTQtNS42MDgyIDcuNDY3OCA3LjQ2NzggMCAwIDAtNS41NDA1LTIuMTg5OWgtOC42NDU3djE1LjU3OXoiLz4NCgkJPHBhdGggZD0ibTIwMy43IDYwLjExM2ExNi4yMjIgMTYuMjIyIDAgMCAxLTExLjk2NyA0LjkzNyAxNi4yMjIgMTYuMjIyIDAgMCAxLTExLjk1Ni00LjkzNyAxNi4yOSAxNi4yOSAwIDAgMS00Ljg2OC0xMS45MzggMTYuMzE1IDE2LjMxNSAwIDAgMSA0Ljg2OC0xMS45NDcgMTYuMjUxIDE2LjI1MSAwIDAgMSAxMS45NTYtNC45MjY0IDE2LjI1MSAxNi4yNTEgMCAwIDEgMTEuOTY3IDQuOTI2NCAxNi4zMTUgMTYuMzE1IDAgMCAxIDQuODY4IDExLjk0NyAxNi4yOSAxNi4yOSAwIDAgMS00Ljg2OCAxMS45Mzh6bS0yMi4xNzEtMS42ODQ2YTEzLjc5NSAxMy43OTUgMCAwIDAgMTAuMjA0IDQuMjM1MyAxMy43OTUgMTMuNzk1IDAgMCAwIDEwLjIxNC00LjIzNTMgMTQuMDAyIDE0LjAwMiAwIDAgMCA0LjE4NzYtMTAuMjUzIDE0LjA0IDE0LjA0IDAgMCAwLTQuMTg3Ni0xMC4yNjMgMTMuODI3IDEzLjgyNyAwIDAgMC0xMC4yMTQtNC4yMjYgMTMuODI3IDEzLjgyNyAwIDAgMC0xMC4yMDQgNC4yMjYgMTQuMDQgMTQuMDQgMCAwIDAtNC4xODc2IDEwLjI2MyAxNC4wMDIgMTQuMDAyIDAgMCAwIDQuMTg3NiAxMC4yNTN6Ii8+DQoJCTxwYXRoIGQ9Im0yMjMuMjQgNjUuMDVhMTMuNjkgMTMuNjkgMCAwIDEtNy42OTMzLTIuMDgzOCAxMC4yNjMgMTAuMjYzIDAgMCAxLTQuMjc1MS01LjYyODFsMi4xNTE1LTEuMjY1NGE4LjYyMTggOC42MjE4IDAgMCAwIDMuMzg5IDQuODA5NyAxMC44MDggMTAuODA4IDAgMCAwIDYuNDI2NiAxLjc4MTQgOS4wOTQgOS4wOTQgMCAwIDAgNi4xMDE2LTEuODMwNSA1Ljg5MDcgNS44OTA3IDAgMCAwIDIuMTIyMy00LjcxMjggNC43OTExIDQuNzkxMSAwIDAgMC0yLjA1NzMtNC4xNjc3IDI0LjkxNyAyNC45MTcgMCAwIDAtNi4zODAyLTIuODQ5MmwtMi4zMDgtMC44MzY5OC0yLjA4MzgtMC43NjAwNWExMS40MjIgMTEuNDIyIDAgMCAxLTIuMDE2Mi0wLjkxNTI0Yy0wLjQzNzcyLTAuMjgyNTMtMC45NzM2LTAuNjYzMjItMS41Njc4LTEuMTMwMWE1LjEzMDcgNS4xMzA3IDAgMCAxLTEuMzUzLTEuMzgyMSA5LjM1OCA5LjM1OCAwIDAgMS0wLjczODgyLTEuNzQwMyA2Ljg5NzUgNi44OTc1IDAgMCAxLTAuMzMxNjEtMi4yMjA1IDcuOTc0NSA3Ljk3NDUgMCAwIDEgMi44MjQtNi4zNzc1IDEwLjU0NSAxMC41NDUgMCAwIDEgNy4wODg1LTIuNDQ0NiAxMS4wNyAxMS4wNyAwIDAgMSA2LjU0MzMgMS45NDcyIDExLjMxNCAxMS4zMTQgMCAwIDEgMy45NzkzIDQuOTI2NGwtMi4xMDM3IDEuMTY4NmE4LjQyMjkgOC40MjI5IDAgMCAwLTguNDEyMi01LjY1NzIgNy43OTAyIDcuNzkwMiAwIDAgMC01LjM1NDggMS43NzIxIDUuNzgzMyA1Ljc4MzMgMCAwIDAtMi4wMTYyIDQuNTM3NyA0LjQ5NzkgNC40OTc5IDAgMCAwIDEuODY5IDMuOTYzNCAyNC43OCAyNC43OCAwIDAgMCA2LjEyNDIgMi43MTY1bDQuMjE2NyAxLjU2NzhhMTkuMTI1IDE5LjEyNSAwIDAgMSAzLjI3MjMgMS42NzUzIDcuMDAwOSA3LjAwMDkgMCAwIDEgMi41NDE0IDIuNjE5NyA3LjU2MDcgNy41NjA3IDAgMCAxIDAuNzk1ODYgMy41MzUgOC4wNzI3IDguMDcyNyAwIDAgMS0yLjkxODIgNi41MjM0IDExLjc4MSAxMS43ODEgMCAwIDEtNy44MzUyIDIuNDU3OXoiLz4NCgkJPHBhdGggZD0ibTI1OC41MyAzMS44MTh2Mi4zMzcyaC0xMC4yODN2MzAuMzc1aC0yLjUzMDh2LTMwLjM3NWgtMTAuMjgzdi0yLjMzNzJ6Ii8+DQoJCTxwYXRoIGQ9Im0yNzYuMzMgNjUuMTg3YTE2LjYyMiAxNi42MjIgMCAwIDEtMTcuMDIxLTE3LjAxIDE2LjYwMiAxNi42MDIgMCAwIDEgMTcuMDIxLTE3LjAxIDE2Ljc3NyAxNi43NzcgMCAwIDEgOC4xMzEgMi4wMjU1IDE1LjUxMSAxNS41MTEgMCAwIDEgNS44MzYzIDUuNTQwNWwtNi40NTU4IDMuNzM5MmE3LjMzMjUgNy4zMzI1IDAgMCAwLTMuMDg2Ni0yLjkxODIgOS40OTMzIDkuNDkzMyAwIDAgMC00LjQ3OTQtMS4wNTE5IDkuMjUwNiA5LjI1MDYgMCAwIDAtNi44OTc1IDIuNjUyOSA5LjY2ODQgOS42Njg0IDAgMCAwLTIuNTk5OCA3LjA1OTMgOS42ODMgOS42ODMgMCAwIDAgMi41OTk4IDcuMDU5MyA5LjI0IDkuMjQgMCAwIDAgNi45NDI2IDIuNjUyOSA5LjU3MTYgOS41NzE2IDAgMCAwIDQuNTA5OS0xLjA3MDQgNy4yNzQyIDcuMjc0MiAwIDAgMCAzLjA1NzQtMi45MTgybDYuNDU1OCAzLjczOTJhMTUuMDM0IDE1LjAzNCAwIDAgMS01LjgzNjMgNS41NDA1IDE2Ljg2NCAxNi44NjQgMCAwIDEtOC4xNzc1IDEuOTY5OHoiLz4NCgkJPHBhdGggZD0ibTM0My40NCAzMS44MThhMTUuMTcgMTUuMTcgMCAwIDEgMTEuMzM0IDQuNjkyOSAxNi4xMDYgMTYuMTA2IDAgMCAxIDQuNTU2MyAxMS42ODUgMTYuMDY2IDE2LjA2NiAwIDAgMS00LjU1NjMgMTEuNjg1IDE1LjE0MSAxNS4xNDEgMCAwIDEtMTEuMzM0IDQuNjQyNWgtMTMuMDg3di0zMi43MDV6bTAgMjUuNTIxYTguMzM1MyA4LjMzNTMgMCAwIDAgNi4yODA3LTIuNTAzIDkuMTgxNiA5LjE4MTYgMCAwIDAgMi40MDQ4LTYuNjYgOS4xODE2IDkuMTgxNiAwIDAgMC0yLjQwNDgtNi42NiA4LjMzNTMgOC4zMzUzIDAgMCAwLTYuMjgwNy0yLjUwM2gtNS42MDgydjE4LjMyNnoiLz4NCgkJPHBhdGggZD0ibTM3MC41NSA1Ny4zMzhoMTMuMDg3djcuMTg2NmgtMjAuNTZ2LTMyLjcwN2gyMC4zMzJ2Ny4xOTU5aC0xMi44NTN2NS40MjM4aDExLjY4NXY3LjA5NzhoLTExLjY4NXoiLz4NCgkJPHBhdGggZD0ibTM5NC4yNCA2My44ODJhNC40MzAzIDQuNDMwMyAwIDEgMSAwLjk3NDkzLTQuODM0OSA0LjQzMDMgNC40MzAzIDAgMCAxLTAuOTc0OTMgNC44MzQ5eiIvPg0KCQk8cGF0aCBkPSJtNDE4LjIyIDMxLjgxOGg3LjQ3ODR2MzIuNzA3aC01LjYwODJsLTEyLjY1OC0xNy43NjF2MTcuNzYxaC03LjQ3ODR2LTMyLjcwN2g1LjYwODJsMTIuNjU4IDE3Ljc2MXoiLz4NCgkJPHBhdGggZD0ibTQzOC4zMiA1Ny4zMzhoMTEuNjg1djcuMTg2NmgtMTkuMTYzdi0zMi43MDdoNy40Nzg0eiIvPg0KCQk8cGF0aCBkPSJtMzI0LjkyIDUxLjAzLTE0Ljk0OCAzMS40OTktMTQuOTQ2LTMxLjQ5OWExMy4xMTYgMTMuMTE2IDAgMCAxLTEuMDIyNy01LjU4OTYgMTUuOTY5IDE1Ljk2OSAwIDEgMSAzMS45MzggMCAxMy4xMTYgMTMuMTE2IDAgMCAxLTEuMDIyNyA1LjU4OTZ6bS0xNC45NDgtMTMuNTc1YTcuOTgzOCA3Ljk4MzggMCAxIDAgNy45ODM4IDcuOTgzOCA3Ljk4MzggNy45ODM4IDAgMCAwLTcuOTgzOC03Ljk4Mzh6Ii8+DQoJPC9nPg0KPC9zdmc+DQo=" /></p>
+                        ]]></comment>
+                </field>
+            </group>
+            <group id="advanced_config" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+                <label>Advanced Configuration</label>
+                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="select" canRestore="1">
+                    <label>Debug</label>
+                    <comment/>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

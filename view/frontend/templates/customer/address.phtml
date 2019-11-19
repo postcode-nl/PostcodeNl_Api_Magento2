@@ -1,0 +1,99 @@
+<?php
+
+$apiHelper = $this->helper('Flekto\Postcode\Helper\ApiClientHelper');
+$countries = json_encode($apiHelper->formatSupportedCountriesJs($apiHelper->getStoreConfig('postcodenl_api/general/supported_countries')));
+$enabled = $apiHelper->getStoreConfig('postcodenl_api/general/enabled');
+if ($enabled == 1) :
+?>
+ <div class="postcode-results"></div>
+
+ <style type="text/css" media="screen">
+ 	#street_2, #street_3{
+	 	display: none !important;
+ 	}
+ </style>
+
+<script type="text/javascript">
+	this.localContext = 'nld';
+    require(['jquery','Flekto_Postcode/js/postcode_autofill_client'],function($, postcodenl){
+
+      	const inputElement = document.querySelector('#street_1'),
+		resultElement = document.querySelector('.postcode-results'),
+		form = document.querySelector('.form-address-edit');
+
+		var autocomplete = initAutoComplete();
+
+		// selects a address in the list
+		jQuery('#street_2, #street_3').hide();
+		disableFields();
+		inputElement.addEventListener('autocomplete-select', function (e) {
+			if (e.detail.precision === 'Address') {
+	    		autocomplete.getDetails(e.detail.context, function (result) {
+	                result = result[0].response;
+
+	                $('#city').val(result.address['locality']).change();
+	                $('#zip').val(result.address['postcode']).change();
+	                $('#street_1').val(result.address['street'] + " " + result.address['building']);
+	                enableFields();
+	    		});
+	    	}
+		});
+
+
+
+
+		$('#country').on('change', function(e){
+			autocomplete.setCountry(this.value);
+			value =  $("#country option:selected").val();
+            var countriesArr = <?php echo $countries; ?>;
+            if (jQuery.inArray(value, countriesArr) !== -1) {
+                disableFields();
+
+            } else {
+                enableFields();
+            }
+
+
+		});
+
+
+
+		function initAutoComplete(){
+			autocomplete = new PostcodeNl.AutocompleteAddress(inputElement, {
+				autocompleteUrl: '/rest/default/V1/flekto/postcode-international/autocomplete', // Required
+				addressDetailsUrl: '/rest/default/V1/flekto/postcode-international/getdetails', // Required
+	            context: $('#country option:selected').val()
+			});
+
+			console.log(autocomplete);
+
+			return autocomplete;
+		}
+
+		function enableFields(){
+			$('#city').prop('disabled', false);
+            $('#zip').prop('disabled', false);
+            inputElement.addEventListener('autocomplete-menubeforeopen', preventDefaultFunc, false);
+            inputElement.addEventListener('autocomplete-search', preventDefaultFunc, false);
+
+		}
+
+		function disableFields(){
+			inputElement.removeEventListener('autocomplete-menubeforeopen', preventDefaultFunc);
+            inputElement.removeEventListener('autocomplete-search', preventDefaultFunc);
+			$('#city').prop('disabled', true);
+            $('#zip').prop('disabled', true);
+		}
+
+		function preventDefaultFunc(event) {
+            event = event || null;
+            if (event !== null) {
+                event.preventDefault();
+            }
+        }
+
+    });
+
+</script>
+
+<?php endif; ?>

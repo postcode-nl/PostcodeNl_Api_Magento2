@@ -1,0 +1,46 @@
+<?php /* @var $block \Flekto\Postcode\Block\System\Config\Checker */ ?>
+
+    <script>
+        require([
+            'jquery',
+            'prototype',
+        ], function (jQuery) {
+
+            function apicheck() {
+
+                var params = {  
+                    apikey :    jQuery("#postcodenl_api_general_api_key").val(),
+                    apisecret : jQuery("#postcodenl_api_general_api_secret").val()
+                };
+
+                new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+                    loaderArea: true,
+                    asynchronous: true,
+                    parameters: params,
+                    onSuccess: function (jsonresponse) {
+                        var response = JSON.parse(jsonresponse.responseText)
+
+                        if (response.key_is_valid == 'no') {
+                            jQuery(".api_key_message").css("color", "red");
+                        } else {
+                            jQuery(".api_key_message").css("color", "");
+                        }
+
+                        jQuery(".api_key_message").text(response.message)
+                        jQuery("#postcodenl_api_general_api_key_is_valid").val(response.key_is_valid)
+                        jQuery("#postcodenl_api_general_account_name").val(response.account_name)
+                        jQuery("#postcodenl_api_general_supported_countries").val(response.supported_countries)
+                    }
+                })
+            }
+
+            jQuery('#check_button').click(function (event) {
+                event.preventDefault();
+                apicheck();
+            });
+        });
+    </script>
+    
+<?php echo $block->getButtonHtml() ?>
+<br />
+<span class="api_key_message" style="font-weight: bold;"></span>

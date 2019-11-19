@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/flekto/postcode-international/autocomplete/:context/:term" method="GET">
+        <service class="Flekto\Postcode\Model\PostcodeModel" method="getAddressAutocomplete"/>
+        <resources>
+           <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <route url="/V1/flekto/postcode-international/getdetails/:context" method="GET">
+        <service class="Flekto\Postcode\Model\PostcodeModel" method="getAddressDetails"/>
+        <resources>
+           <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <route url="/V1/flekto/postcode-international/getdetails/:context/:dispatchCountry" method="GET">
+        <service class="Flekto\Postcode\Model\PostcodeModel" method="getAddressDetailsCountry"/>
+        <resources>
+           <resource ref="anonymous" />
+        </resources>
+    </route>
+</routes>
