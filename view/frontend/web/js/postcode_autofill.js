@@ -95,8 +95,8 @@ define([
                 if (!$(this).hasClass('postcodenl-autocomplete-address-input')) {
 
                     that.autocomplete = new PostcodeNl.AutocompleteAddress($(this).get(0), {
-                    	autocompleteUrl: '/rest/default/V1/flekto/postcode-international/autocomplete',
-                    	addressDetailsUrl: '/rest/default/V1/flekto/postcode-international/getdetails',
+                    	autocompleteUrl: '/rest/V1/flekto/postcode-international/autocomplete',
+                    	addressDetailsUrl: '/rest/V1/flekto/postcode-international/getdetails',
                         context: $(that.currentCountryElement).children('option:selected').val()
                     });
 
