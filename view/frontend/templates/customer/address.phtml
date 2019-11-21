@@ -60,8 +60,8 @@ if ($enabled == 1) :
 
 		function initAutoComplete(){
 			autocomplete = new PostcodeNl.AutocompleteAddress(inputElement, {
-				autocompleteUrl: '/rest/default/V1/flekto/postcode-international/autocomplete', // Required
-				addressDetailsUrl: '/rest/default/V1/flekto/postcode-international/getdetails', // Required
+				autocompleteUrl: '/rest/V1/flekto/postcode-international/autocomplete', // Required
+				addressDetailsUrl: '/rest/V1/flekto/postcode-international/getdetails', // Required
 	            context: $('#country option:selected').val()
 			});
 
