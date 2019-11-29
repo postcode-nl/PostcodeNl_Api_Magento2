@@ -18,7 +18,7 @@ Installation instructions
 1. Install this component using Composer: 
 
 ```bash
-$ composer require flekto/postcode
+$ composer require postcode-nl/api-magento2-module
 ```
 
 2. Upgrade, compile & clear cache:
