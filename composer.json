@@ -7,14 +7,6 @@
     "type": "magento2-module",
     "license": "BSD-2-Clause",
     "homepage": "https://www.postcode.nl/en",
-    "extra": {
-        "map": [
-            [
-                "*",
-                "Flekto/Postcode"
-            ]
-        ]
-    },
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
