@@ -15,12 +15,6 @@ define([
         currentCountryElement: null,
         fieldsScope: null,
 
-
-        initObservable: function () {
-            this._super();
-            return this;
-        },
-
         initialize: function () {
 
             this._super();
@@ -31,54 +25,7 @@ define([
                 registry.async(this.provider)(function () {
 
                     that.initModules();
-
-                    var found = false;
-                    $(window).on('hashchange', function(){
-
-                        var exitCondition = setInterval(function() {
-
-                                if ($(that.streetFieldSelector).length == 2 && $("#checkout-payment-method-load [name='country_id']").val()) {
-
-                                    that.fieldsScope = "#checkout-payment-method-load";
-                                    that.currentStreetElement = $(that.fieldsScope+" input[name='street[0]']").get(0);
-                                    that.currentCountryElement = $(that.fieldsScope+" [name='country_id']").get(0);
-
-                                    that.initPostcodeAutocompleteLibrary();
-                                    that.countryObserver(that.autocomplete);
-                                    clearInterval(exitCondition);
-                                }
-                        }, 100);
-                    });
-
-                    var exitCondition = setInterval(function() {
-
-                        if ($(that.streetFieldSelector).length && $("#opc-new-shipping-address [name='country_id']").val()) {
-                            that.fieldsScope = "#opc-new-shipping-address";
-                            that.currentStreetElement = $(that.fieldsScope+" input[name='street[0]']").get(0);
-                            that.currentCountryElement = $(that.fieldsScope+" [name='country_id']").get(0);
-
-                            that.initPostcodeAutocompleteLibrary();
-                            that.countryObserver(that.autocomplete);
-                            clearInterval(exitCondition);
-                            found = true;
-                        }
-                    }, 100);
-
-                    if (found === false) {
-                        var exitCondition = setInterval(function() {
-
-                            if ($(that.streetFieldSelector).length && $("#checkout-step-shipping [name='country_id']").val()) {
-                                that.fieldsScope = "#checkout-step-shipping";
-                                that.currentStreetElement = $(that.fieldsScope+" input[name='street[0]']").get(0);
-                                that.currentCountryElement = $(that.fieldsScope+" [name='country_id']").get(0);
-
-                                that.initPostcodeAutocompleteLibrary();
-                                that.countryObserver(that.autocomplete);
-                                clearInterval(exitCondition);
-                            }
-                        }, 100);
-                    }
-
+                    that.initWatcher();
 
                 });
             }
@@ -86,11 +33,31 @@ define([
             return this;
         },
 
+        initWatcher: function () {
+
+            var that = this;
+
+            $('body').on('focus', "[name='street[0]']", function() {
+
+                var form = this.closest("form");
+                if (form) {
+
+                    that.fieldsScope = form;
+                    that.currentStreetElement = $(form).find(that.streetFieldSelector).get(0);
+                    that.currentCountryElement = $(form).find("[name='country_id']").get(0);
+
+                    that.initPostcodeAutocompleteLibrary();
+                    that.countryObserver(that.autocomplete);
+                }
+            });
+
+        },
+
         initPostcodeAutocompleteLibrary: function () {
 
             var that = this;
 
-            $('[name="street[0]"]').each(function(i, obj) {
+            $(that.streetFieldSelector).each(function(i, obj) {
 
                 if (!$(this).hasClass('postcodenl-autocomplete-address-input')) {
 
@@ -106,11 +73,10 @@ define([
                     	{
                     		that.autocomplete.getDetails(e.detail.context, function (result) {
                                 result = result[0].response;
-                                $(that.fieldsScope+' [name="city"]').val(result.address['locality']).change();
-                                $(that.fieldsScope+' [name="postcode"]').val(result.address['postcode']).change();
+                                $(that.fieldsScope).find('[name="city"]').val(result.address['locality']).change();
+                                $(that.fieldsScope).find('[name="postcode"]').val(result.address['postcode']).change();
                                 $(that.currentStreetElement).val(result.address['street']+" "+result.address['building']).change();
                                 that.countryChanged($(that.currentCountryElement).children('option:selected').val());
-                                //debugger;
                     		});
                     	}
                     });
@@ -130,16 +96,16 @@ define([
         },
 
         disableFields: function () {
-            $(this.fieldsScope+' [name="city"]').prop('disabled', true);
-            $(this.fieldsScope+' [name="postcode"]').prop('disabled', true);
+            $(this.fieldsScope).find('[name="city"]').prop('disabled', true);
+            $(this.fieldsScope).find('[name="postcode"]').prop('disabled', true);
 
             this.currentStreetElement.removeEventListener('autocomplete-menubeforeopen', this.preventDefaultFunc);
             this.currentStreetElement.removeEventListener('autocomplete-search', this.preventDefaultFunc);
         },
 
         enableFields: function () {
-            $(this.fieldsScope+' [name="city"]').prop('disabled', false);
-            $(this.fieldsScope+' [name="postcode"]').prop('disabled', false);
+            $(this.fieldsScope).find('[name="city"]').prop('disabled', false);
+            $(this.fieldsScope).find('[name="postcode"]').prop('disabled', false);
 
             this.currentStreetElement.addEventListener('autocomplete-menubeforeopen', this.preventDefaultFunc, false);
             this.currentStreetElement.addEventListener('autocomplete-search', this.preventDefaultFunc, false);
