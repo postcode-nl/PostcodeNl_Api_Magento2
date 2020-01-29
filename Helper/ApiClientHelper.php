@@ -124,7 +124,12 @@ class ApiClientHelper extends AbstractHelper
         $storeLang = $objectManager->get('Magento\Framework\Locale\Resolver')->getLocale();
 
         try {
-            $sessionStr = $this->generateSessionString();
+
+            $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
+            if (empty($sessionStr)) {
+                $sessionStr = $this->generateSessionString();
+            }
+
             $response = $client->internationalAutocomplete($context, $term, $sessionStr, $storeLang);
             $response['session_id'] = $sessionStr;
 
@@ -142,7 +147,6 @@ class ApiClientHelper extends AbstractHelper
      * @access public
      * @param String $context
      * @param String $dispatchCountry
-     * @param String $session
      * @return void
      */
     public function getAddressDetails(String $context, String $dispatchCountry="")
@@ -154,8 +158,13 @@ class ApiClientHelper extends AbstractHelper
         $client = $this->prepareApiClient();
 
         try {
-            $ression = $this->request->getHeader($client::SESSION_HEADER_KEY);
-            $response = $client->internationalGetDetails($context, $ression);
+
+            $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
+            if (empty($sessionStr)) {
+                $sessionStr = $this->generateSessionString();
+            }
+
+            $response = $client->internationalGetDetails($context, $sessionStr);
             return $this->prepareResponse($response, $client);
 
         } catch (\Exception $e) {
