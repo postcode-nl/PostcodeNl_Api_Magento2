@@ -20,4 +20,11 @@
            <resource ref="anonymous" />
         </resources>
     </route>
+
+    <route url="/V1/flekto/postcode-international/nlzipcode/:zipCode/:houseNumber" method="GET">
+        <service class="Flekto\Postcode\Model\PostcodeModel" method="getNlAddress"/>
+        <resources>
+           <resource ref="anonymous" />
+        </resources>
+    </route>
 </routes>
