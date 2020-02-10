@@ -14,6 +14,7 @@ use Flekto\Postcode\Helper\Exception\InvalidPostcodeException;
 use Flekto\Postcode\Helper\Exception\ServerUnavailableException;
 use Flekto\Postcode\Helper\Exception\TooManyRequestsException;
 use Flekto\Postcode\Helper\Exception\UnexpectedException;
+use Flekto\Postcode\Helper\Exception\NotFoundException;
 
 class PostcodeApiClient extends AbstractHelper
 {
@@ -200,6 +201,8 @@ class PostcodeApiClient extends AbstractHelper
                 throw new AuthenticationException('Could not authenticate your request, please make sure your API credentials are correct.');
             case 403:
                 throw new ForbiddenException('Your account currently has no access to the international API, make sure you have an active subscription.');
+            case 404:
+                throw new NotFoundException('Combination not found.');
             case 429:
                 throw new TooManyRequestsException('Too many requests made, please slow down: ' . $response);
             case 503:

@@ -12,11 +12,16 @@
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="text">
+                <field id="nl_input_behavior" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="select">
+                    <label>Adresaanvulling voor Nederland</label>
+                    <comment/>
+                    <source_model>Flekto\Postcode\Model\Config\Source\NlInputBehavior</source_model>
+                </field>
+                <field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="text">
                     <label>Api key</label>
                     <comment/>
                 </field>
-                <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="password">
+                <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="password">
                     <label>Api secret</label>
                     <comment/>
                 </field>
@@ -25,17 +30,17 @@
                     <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
                 </field>
 
-                <field id="supported_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+                <field id="supported_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
                     <label>Supported Countries</label>
                     <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
                 </field>
 
-                <field id="account_name" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+                <field id="account_name" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="text">
                     <label>Account Name</label>
                     <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
                 </field>
 
-                <field id="api_key_checker" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="41" translate="label" type="button">
+                <field id="api_key_checker" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="button">
                     <button_label></button_label>
                     <frontend_model>Flekto\Postcode\Block\System\Config\Form\Apikey\Checker</frontend_model>
                     <comment><![CDATA[
@@ -45,9 +50,9 @@
                         ]]></comment>
                 </field>
             </group>
-            <group id="advanced_config" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+            <group id="advanced_config" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="80" translate="label">
                 <label>Advanced Configuration</label>
-                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="select" canRestore="1">
+                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="90" translate="label" type="select" canRestore="1">
                     <label>Debug</label>
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

@@ -23,7 +23,8 @@ class PostcodeModel
      * @param apiClientHelper $apiClientHelper
      * @return void
      */
-    public function __construct(ApiClientHelper $apiClientHelper) {
+    public function __construct(ApiClientHelper $apiClientHelper)
+    {
         $this->apiClientHelper = $apiClientHelper;
     }
 
@@ -69,6 +70,21 @@ class PostcodeModel
     public function getAddressDetailsCountry(String $context, String $dispatchCountry)
     {
         $result = $this->apiClientHelper->getAddressDetails($context, $dispatchCountry);
+        return [$result];
+    }
+
+
+    /**
+     * getNlAddress function.
+     *
+     * @access public
+     * @param String $zipCode
+     * @param String $houseNumber
+     * @return void
+     */
+    public function getNlAddress(String $zipCode, String $houseNumber)
+    {
+        $result = $this->apiClientHelper->getNlAddress($zipCode, $houseNumber);
         return [$result];
     }
 

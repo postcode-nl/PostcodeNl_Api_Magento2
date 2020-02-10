@@ -13,6 +13,8 @@ use Flekto\Postcode\Helper\CountryCodeConvertorHelper;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
 use Magento\Framework\Stdlib\DateTime;
+use Flekto\Postcode\Helper\Exception\NotFoundException;
+
 
 class ApiClientHelper extends AbstractHelper
 {
@@ -59,7 +61,13 @@ class ApiClientHelper extends AbstractHelper
         $settings = [
             "enabled" => $this->getStoreConfig('postcodenl_api/general/enabled'),
             "supported_countries" => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
-            "debug" => $this->isDebugging()
+            "nl_input_behavior" => $this->getStoreConfig('postcodenl_api/general/nl_input_behavior'),
+            "debug" => $this->isDebugging(),
+            "translations" => [
+                'flekto_nl_zip_label' => __('Postcode and house number'),
+                'flekto_nl_zip_placeholder' => __('1234AB 1'),
+                'flekto_nl_zip_warning' => __('Enter a postcode and house number.'),
+            ]
         ];
 
         return $settings;
@@ -70,12 +78,12 @@ class ApiClientHelper extends AbstractHelper
      * formatSupportedCountriesJs function.
      *
      * @access public
-     * @param String $countries (default: "")
+     * @param Mixed $countries (default: Array)
      * @return String
      */
-    public function formatSupportedCountriesJs(String $countries = "")
+    public function formatSupportedCountriesJs($countries=[])
     {
-        if (empty($countries)) return "";
+        if (empty($countries)) return [];
 
         $countries = explode(", ", $countries);
         $countriesReturn = [];
@@ -174,6 +182,30 @@ class ApiClientHelper extends AbstractHelper
 
 
     /**
+     * getNlAddress function.
+     *
+     * @access public
+     * @param String $zipCode
+     * @param String $houseNumber
+     * @return void
+     */
+    public function getNlAddress(String $zipCode, String $houseNumber)
+    {
+        $client = $this->prepareApiClient();
+
+        $houseNumber = (int) preg_replace('/[^0-9]/', '', $houseNumber);
+
+        try {
+            $response = $client->dutchAddressByPostcode($zipCode, $houseNumber/*  , ?string $houseNumberAddition = null */);
+            return $this->prepareResponse($response, $client);
+
+        } catch (\Exception $e) {
+            return $this->handleClientException($e);
+        }
+    }
+
+
+    /**
      * generateSessionString function.
      *
      * @access private
@@ -194,15 +226,21 @@ class ApiClientHelper extends AbstractHelper
      */
     private function handleClientException($exception)
     {
-        $response['messageTarget'] = 'housenumber';
-        $response['useManual'] = true;
+        $response['error'] = true;
+
+        // only in this case we actually pass error
+        // to front-end without debug option needed
+        if ($exception instanceof NotFoundException) {
+            $response['message_details'] = $exception->getMessage();
+        }
 
         if (!$this->isDebugging()) {
             return $response;
         }
 
         $exceptionClass = get_class($exception);
-        $response['message'] = "Exception $exceptionClass occurred: ".$exception->getTraceAsString();
+        $response['message'] = sprintf(__('Exception %s occurred '), $exceptionClass).$exception->getTraceAsString();
+
         $response['message_details'] = $exception->getMessage();
         $response['debugInfo'] = $this->getDebugInfo();
 
