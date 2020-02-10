@@ -78,12 +78,12 @@ class ApiClientHelper extends AbstractHelper
      * formatSupportedCountriesJs function.
      *
      * @access public
-     * @param String $countries (default: "")
+     * @param Mixed $countries (default: Array)
      * @return String
      */
-    public function formatSupportedCountriesJs(String $countries = "")
+    public function formatSupportedCountriesJs($countries=[])
     {
-        if (empty($countries)) return "";
+        if (empty($countries)) return [];
 
         $countries = explode(", ", $countries);
         $countriesReturn = [];
