@@ -14,6 +14,7 @@ use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
 use Magento\Framework\Stdlib\DateTime;
 use Flekto\Postcode\Helper\Exception\NotFoundException;
+use Magento\Store\Model\StoreManagerInterface;
 
 
 class ApiClientHelper extends AbstractHelper
@@ -35,13 +36,15 @@ class ApiClientHelper extends AbstractHelper
      * @param Context $context
      * @param Request $request
      * @param Response $response
+     * @param StoreManagerInterface $storeManager
      * @return void
      */
-    public function __construct(ModuleListInterface $moduleList, Data $developerHelper, Context $context, Request $request, Response $response) {
+    public function __construct(ModuleListInterface $moduleList, Data $developerHelper, Context $context, Request $request, Response $response, StoreManagerInterface $storeManager) {
         $this->moduleList = $moduleList;
         $this->developerHelper = $developerHelper;
         $this->request = $request;
         $this->response = $response;
+        $this->storeManager = $storeManager;
         parent::__construct($context);
     }
 
@@ -62,6 +65,7 @@ class ApiClientHelper extends AbstractHelper
             "enabled" => $this->getStoreConfig('postcodenl_api/general/enabled'),
             "supported_countries" => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
             "nl_input_behavior" => $this->getStoreConfig('postcodenl_api/general/nl_input_behavior'),
+            "base_url" => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
             "debug" => $this->isDebugging(),
             "translations" => [
                 'flekto_nl_zip_label' => __('Postcode and house number'),
