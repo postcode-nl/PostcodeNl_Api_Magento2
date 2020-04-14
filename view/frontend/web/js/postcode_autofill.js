@@ -149,9 +149,10 @@ define([
 
         delayGetNlPostcodeAddress: function (event) {
 
-            this.logDebug('delayGetNlPostcodeAddress');
-
             var that = event.data.scope;
+
+            that.logDebug('delayGetNlPostcodeAddress');
+
             clearTimeout(that.lookupTimeout);
             that.lookupTimeout = setTimeout(function() {
                 that.getNlPostcodeAddress(event);
@@ -185,7 +186,7 @@ define([
 
             var postcode = addressData[1];
             var houseNumber = addressData[2];
-            jQuery.get('/rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + houseNumber, function(response) {
+            jQuery.get(that.getSettings().base_url+'rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + houseNumber, function(response) {
 
                 response = response[0];
 
@@ -267,8 +268,8 @@ define([
                 if (!$(this).hasClass('postcodenl-autocomplete-address-input')) {
 
                     that.autocomplete = new PostcodeNl.AutocompleteAddress($(this).get(0), {
-                        autocompleteUrl: '/rest/V1/flekto/postcode-international/autocomplete',
-                        addressDetailsUrl: '/rest/V1/flekto/postcode-international/getdetails',
+                        autocompleteUrl: that.getSettings().base_url+'rest/V1/flekto/postcode-international/autocomplete',
+                        addressDetailsUrl: that.getSettings().base_url+'rest/V1/flekto/postcode-international/getdetails',
                         context: $(that.currentCountryElement).children('option:selected').val()
                     });
 
