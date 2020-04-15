@@ -48,7 +48,7 @@ class PostcodeApiClient extends AbstractHelper
         curl_setopt($this->_curlHandler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->_curlHandler, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($this->_curlHandler, CURLOPT_TIMEOUT, 5);
-        curl_setopt($this->_curlHandler, CURLOPT_USERAGENT, static::class . '/' . static::VERSION .' PHP/'. PHP_VERSION);
+        curl_setopt($this->_curlHandler, CURLOPT_USERAGENT, str_replace('\\', '_', static::class) . '/' . static::VERSION .' PHP/'. PHP_VERSION);
 
         if (isset($_SERVER['HTTP_REFERER']))
         {
