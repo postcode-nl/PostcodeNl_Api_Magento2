@@ -1,4 +1,3 @@
-
 define([
     'Magento_Ui/js/form/components/group',
     'jquery',
@@ -18,6 +17,8 @@ define([
         fieldsScope: null,
         internationalAutocompleteActive: false,
         lookupTimeout: 0,
+        enableDisableFieldsNl: ['[name^="street["][name$="]"]', "[name='city']", "[name='postcode']", "[name='region']"],
+        enableDisableFieldsInt: ['[name^="street["][name$="]"]:not([name="street[0]"])', "[name='city']", "[name='postcode']", "[name='region']"],
 
 
         initialize: function () {
@@ -42,6 +43,7 @@ define([
             var that = this;
 
             $(document).ready(function(e){
+
                 $(document).on('change', '[name="country_id"]', function() {
 
                     var dropdownEl = this;
@@ -62,10 +64,16 @@ define([
                         that.disableInternationalAutocomplete();
                         that.disableNlPostcodeWatcher();
 
+                        document.addEventListener('autocomplete-xhrerror', function (e) {
+                            that.logDebug('XHR Error!', e);
+                            that.enableDisableFields('show');
+                        });
+
                         if (that.getSettings().nl_input_behavior == 'zip_house' && $(dropdownEl).val() == 'NL') {
 
                             that.logDebug('zip_house init');
                             that.initNlPostcodeWatcher();
+                            that.enableDisableFields('hide');
 
                         } else {
 
@@ -75,6 +83,7 @@ define([
 
                                 that.enableInternationalAutocomplete();
                                 that.initFreeInputWatcher();
+                                that.enableDisableFields('hide');
 
                             }
                         }
@@ -129,6 +138,7 @@ define([
                     .attr('name', 'flekto_nl_zip_input')
                     .attr('placeholder', this.getTranslations().flekto_nl_zip_placeholder)
                     .removeAttr('data-bind')
+                    .prop('disabled', false)
                     .addClass('flekto_nl_zip_input')
                     .val('');
 
@@ -144,6 +154,8 @@ define([
         disableNlPostcodeWatcher: function() {
             this.fieldsScope.find('.flekto_nl_zip').remove();
             this.logDebug('disableNlPostcodeWatcher');
+
+            this.enableDisableFields('show');
         },
 
 
@@ -171,17 +183,17 @@ define([
             var query = input.val();
             var regex = /([1-9][0-9]{3}\s?[a-z]{2})\s?(\d+.*)/i;
             var addressData = query.match(regex);
-            if (!addressData || addressData.length < 3)
-            {
+
+            if (!addressData || addressData.length < 3) {
+
                 // No postcode and house number found
-                if (query.length > 7 || !input.is(':focus'))
-                {
+                if (query.length > 7 || !input.is(':focus')) {
                     $(addressContainer).find('.postcodenl-address-autocomplete-warning').remove();
                     input.after('<span class="postcodenl-address-autocomplete-warning">' + that.getTranslations().flekto_nl_zip_warning + '</span>');
                 }
-
                 return;
             }
+
             input.addClass('postcodenl-address-autocomplete-loading');
 
             var postcode = addressData[1];
@@ -190,7 +202,6 @@ define([
 
                 response = response[0];
 
-                input.removeClass('postcodenl-address-autocomplete-loading');
                 $('.postcodenl-address-autocomplete-warning').remove();
 
                 if (response.error && response.message_details) {
@@ -231,9 +242,15 @@ define([
                     $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').remove();
                 }
 
-            }).fail(function() {
+                that.enableDisableFields('show');
+
+            }).always(function() {
+
                 input.removeClass('postcodenl-address-autocomplete-loading');
+                that.enableDisableFields('show');
+
             });
+
         },
 
 
@@ -273,6 +290,7 @@ define([
                         context: $(that.currentCountryElement).children('option:selected').val()
                     });
 
+
                     $(this).get(0).addEventListener('autocomplete-select', function (e) {
 
                         if (e.detail.precision === 'Address') {
@@ -283,8 +301,16 @@ define([
                                 $(that.fieldsScope).find('[name="postcode"]').val(result.address['postcode']).change();
                                 $(that.currentStreetElement).val(result.address['street']+" "+result.address['building']).change();
                             });
+
+                            that.enableDisableFields('show');
                         }
                     });
+
+                } else {
+
+                    if (that.autocomplete.options.context != $(that.currentCountryElement).children('option:selected').val().toLowerCase()) {
+                        that.autocomplete.setCountry($(that.currentCountryElement).children('option:selected').val());
+                    }
                 }
             });
         },
@@ -313,6 +339,49 @@ define([
             this.currentStreetElement.addEventListener('autocomplete-menubeforeopen', this.preventDefaultFunc, false);
             this.currentStreetElement.addEventListener('autocomplete-search', this.preventDefaultFunc, false);
             $(this.fieldsScope).data('int-autocomplete', '0');
+        },
+
+
+        enableDisableFields: function(endis) {
+
+            if (this.getSettings().show_hide_address_fields != 'show') {
+
+                var fields = this.enableDisableFieldsInt;
+                if (this.fieldsScope.find('.flekto_nl_zip').length || endis == 'show') {
+                    fields = this.enableDisableFieldsNl;
+                }
+
+                if (endis == 'show') {
+                    this.logDebug('Show input fields', fields.toString());
+                } else {
+                    this.logDebug('Hide input fields', fields.toString());
+                }
+
+                var that = this;
+                jQuery.each(fields, function(index, selector) {
+
+                    if (that.getSettings().show_hide_address_fields == 'disable') {
+                        $(that.fieldsScope).find(selector).prop("disabled", ((endis == 'show') ? false : true));
+
+                    } else if (that.getSettings().show_hide_address_fields == 'hide') {
+
+                        if (endis == 'show') {
+                            $(that.fieldsScope).find(selector).closest("div.field").show();
+                            $(that.fieldsScope).find(selector).closest("fieldset.field").show();
+
+                        } else {
+
+                            $(that.fieldsScope).find(selector).closest("div.field").hide();
+                            if (that.fieldsScope.find('.flekto_nl_zip').length) {
+                                $(that.fieldsScope).find(selector).closest("fieldset.field").hide();
+                            }
+                        }
+                    }
+
+
+                });
+
+            }
         },
 
 
