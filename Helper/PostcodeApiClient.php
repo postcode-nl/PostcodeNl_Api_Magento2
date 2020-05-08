@@ -75,7 +75,7 @@ class PostcodeApiClient extends AbstractHelper
      */
     public function internationalAutocomplete(string $context, string $term, ?string $session = null, $language=""): array
     {
-        return $this->performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . $language, $session ?? $this->generateSessionString());
+        return $this->performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->generateSessionString());
     }
 
     /**

@@ -134,7 +134,10 @@ class ApiClientHelper extends AbstractHelper
         $client = $this->prepareApiClient();
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeLang = $objectManager->get('Magento\Framework\Locale\Resolver')->getLocale();
+        $locale = $objectManager->get('Magento\Framework\Locale\Resolver')->getLocale();
+
+        // API requires format 'nl-NL'
+        $locale = str_replace('_', '-', $locale);
 
         try {
 
@@ -143,7 +146,7 @@ class ApiClientHelper extends AbstractHelper
                 $sessionStr = $this->generateSessionString();
             }
 
-            $response = $client->internationalAutocomplete($context, $term, $sessionStr, $storeLang);
+            $response = $client->internationalAutocomplete($context, $term, $sessionStr, $locale);
             $response['session_id'] = $sessionStr;
 
             return $this->prepareResponse($response, $client);
