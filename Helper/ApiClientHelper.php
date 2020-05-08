@@ -65,6 +65,7 @@ class ApiClientHelper extends AbstractHelper
             "enabled" => $this->getStoreConfig('postcodenl_api/general/enabled'),
             "supported_countries" => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
             "nl_input_behavior" => (!empty($this->getStoreConfig('postcodenl_api/general/nl_input_behavior')) ? $this->getStoreConfig('postcodenl_api/general/nl_input_behavior') : 'zip_house'),
+            "show_hide_address_fields" => (!empty($this->getStoreConfig('postcodenl_api/general/show_hide_address_fields')) ? $this->getStoreConfig('postcodenl_api/general/show_hide_address_fields') : 'show'),
             "base_url" => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
             "debug" => $this->isDebugging(),
             "translations" => [

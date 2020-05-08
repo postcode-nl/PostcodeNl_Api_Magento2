@@ -37,6 +37,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     public function process($result)
     {
         $moduleEnabled = $this->scopeConfig->getValue('postcodenl_api/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+
         if ($moduleEnabled && isset($result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
 
             $result = $this->processShippingFields($result);
@@ -57,11 +58,6 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     public function processShippingFields($result)
     {
         $shippingFields = $result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
-
-        if (isset($shippingFields['street'])) {
-            unset($shippingFields['street']['children'][1]);
-            unset($shippingFields['street']['children'][2]);
-        }
 
         $shippingFields = $this->changeAddressFieldPosition($shippingFields);
 
@@ -100,11 +96,6 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 ['billing-step']['children']['payment']['children']
                 ['payments-list']['children'][$paymentMethodCode . '-form']['children']['form-fields']['children'];
 
-                if (isset($billingFields['street'])) {
-                    unset($billingFields['street']['children'][1]);
-                    unset($billingFields['street']['children'][2]);
-                }
-
                 $billingFields = $this->changeAddressFieldPosition($billingFields);
 
                 $result['components']['checkout']['children']['steps']['children']['billing-step']
@@ -126,6 +117,9 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     public function changeAddressFieldPosition($addressFields)
     {
+       if ($this->scopeConfig->getValue('postcodenl_api/advanced_config/change_fields_position') != 1) {
+           return $addressFields;
+       }
 
         if (isset($addressFields['street'])) {
             $addressFields['street']['sortOrder'] = '910';
