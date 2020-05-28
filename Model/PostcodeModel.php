@@ -3,15 +3,13 @@
 namespace Flekto\Postcode\Model;
 
 use Flekto\Postcode\Helper\ApiClientHelper;
+use Flekto\Postcode\Api\PostcodeModelInterface;
 
-class PostcodeModel
+class PostcodeModel implements PostcodeModelInterface
 {
 
     /**
-     * apiClientHelper
-     *
-     * @var mixed
-     * @access protected
+     * @var ApiClientHelper
      */
     protected $apiClientHelper;
 
@@ -20,7 +18,7 @@ class PostcodeModel
      * __construct function.
      *
      * @access public
-     * @param apiClientHelper $apiClientHelper
+     * @param ApiClientHelper $apiClientHelper
      * @return void
      */
     public function __construct(ApiClientHelper $apiClientHelper)
@@ -30,15 +28,9 @@ class PostcodeModel
 
 
     /**
-     * getAddressAutocomplete function.
-     *
-     * @access public
-     * @param $session $context
-     * @param $session $term
-     * @param $session $language
-     * @return Json
+     * @inheritdoc
      */
-    public function getAddressAutocomplete(String $context, String $term)
+    public function getAddressAutocomplete(string $context, string $term): array
     {
         $result = $this->apiClientHelper->getAddressAutocomplete($context, $term);
         return [$result];
@@ -46,13 +38,9 @@ class PostcodeModel
 
 
     /**
-     * getAddressDetails function.
-     *
-     * @access public
-     * @param String $context
-     * @return void
+     * @inheritdoc
      */
-    public function getAddressDetails(String $context)
+    public function getAddressDetails(string $context): array
     {
         $result = $this->apiClientHelper->getAddressDetails($context);
         return [$result];
@@ -60,14 +48,9 @@ class PostcodeModel
 
 
     /**
-     * getAddressDetailsCountry function.
-     *
-     * @access public
-     * @param String $context
-     * @param String $dispatchCountry
-     * @return void
+     * @inheritdoc
      */
-    public function getAddressDetailsCountry(String $context, String $dispatchCountry)
+    public function getAddressDetailsCountry(string $context, string $dispatchCountry): array
     {
         $result = $this->apiClientHelper->getAddressDetails($context, $dispatchCountry);
         return [$result];
@@ -75,14 +58,9 @@ class PostcodeModel
 
 
     /**
-     * getNlAddress function.
-     *
-     * @access public
-     * @param String $zipCode
-     * @param String $houseNumber
-     * @return void
+     * @inheritdoc
      */
-    public function getNlAddress(String $zipCode, String $houseNumber)
+    public function getNlAddress(string $zipCode, string $houseNumber): array
     {
         $result = $this->apiClientHelper->getNlAddress($zipCode, $houseNumber);
         return [$result];
