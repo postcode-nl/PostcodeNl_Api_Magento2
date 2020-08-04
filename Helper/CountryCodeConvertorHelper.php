@@ -13,13 +13,14 @@ class CountryCodeConvertorHelper extends AbstractHelper
      * @access public
      * @static
      * @param String $code
-     * @return void
+     * @return string Lowercase ISO3 country code if found, or otherwise the input $code
      */
     public static function alpha2ToAlpha3(String $code)
     {
         $codesArray = self::getTranslateArray();
+
         if (array_key_exists(strtoupper($code), $codesArray)) {
-            return $codesArray[strtoupper($code)];
+            return strtolower($codesArray[strtoupper($code)]);
         }
 
         return $code;
