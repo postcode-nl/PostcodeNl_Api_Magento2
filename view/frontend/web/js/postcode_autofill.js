@@ -5,20 +5,24 @@ define([
     'uiRegistry',
     'domReady!'
 ], function (Abstract, $, postcodenl, registry) {
-    'use strict';
 
     return Abstract.extend({
 
-        streetFieldSelector: "[name='street[0]']",
+        streetFieldSelector: "[name^='street[']",
+        primaryStreetFieldSelector: "[name^='street[']:first",
         countryFieldSelector: "[name='country_id']",
         autocomplete: null,
         currentStreetElement: null,
+        currentHouseNumElement: null,
+        currentHouseNumAdditionElement: null,
         currentCountryElement: null,
         fieldsScope: null,
         internationalAutocompleteActive: false,
         lookupTimeout: 0,
         enableDisableFieldsNl: ['[name^="street["][name$="]"]', "[name='city']", "[name='postcode']", "[name='region']"],
-        enableDisableFieldsInt: ['[name^="street["][name$="]"]:not([name="street[0]"])', "[name='city']", "[name='postcode']", "[name='region']"],
+        enableDisableFieldsInt: ['[name^="street["][name$="]"]:not(:first)', "[name='city']", "[name='postcode']", "[name='region']"],
+        nlPostcodeInputCloneFrom: 'div[name$=".postcode"]',
+        nlPostcodeInputCloneInsertAfter: 'div[name$=".country_id"]',
 
 
         initialize: function () {
@@ -29,6 +33,7 @@ define([
             if (that.getSettings().enabled == 1) {
 
                 registry.async(this.provider)(function () {
+                    that.initPostcodeConfig();
                     that.initModules();
                     that.initWatcher();
                 });
@@ -38,13 +43,29 @@ define([
         },
 
 
+        initPostcodeConfig: function () {
+
+            if (window.postcodenlConfig !== null && typeof window.postcodenlConfig === 'object') {
+
+                this.logDebug('window.postcodenlConfig found, applying override');
+
+                var that = this;
+
+                $.each(window.postcodenlConfig, function(key, value) {
+                    that.logDebug('Config override: ', key, value);
+                    that[key] = value;
+                });
+            }
+        },
+
+
         initWatcher: function () {
 
             var that = this;
 
             $(document).ready(function(e){
 
-                $(document).on('change', '[name="country_id"]', function() {
+                $(document).on('change', that.countryFieldSelector, function() {
 
                     var dropdownEl = this;
 
@@ -103,8 +124,10 @@ define([
 
             if (form) {
                 this.fieldsScope = form;
-                this.currentStreetElement = $(form).find("[name='street[0]']").get(0);
-                this.currentCountryElement = $(form).find("[name='country_id']").get(0);
+                this.currentStreetElement = $(form).find(this.streetFieldSelector).get(0);
+                this.currentHouseNumElement = $(form).find(this.streetFieldSelector).get(1);
+                this.currentHouseNumAdditionElement = $(form).find(this.streetFieldSelector).get(2);
+                this.currentCountryElement = $(form).find(this.countryFieldSelector).get(0);
             }
         },
 
@@ -119,14 +142,14 @@ define([
                 var that = this;
                 var lookupTimeout = 0;
 
-                this.fieldsScope.find('div[name$=".postcode"]')
+                this.fieldsScope.find(this.nlPostcodeInputCloneFrom)
                     .clone()
                     .removeAttr('data-bind')
                     .prop('id', 'flekto_nl_zip_'+currentTimestamp)
                     .prop('name', 'flekto_nl_zip_'+currentTimestamp)
                     .removeClass('_error')
                     .addClass('flekto_nl_zip')
-                    .insertAfter(this.fieldsScope.find('div[name$=".country_id"]'));
+                    .insertAfter(this.fieldsScope.find(this.nlPostcodeInputCloneInsertAfter));
 
                 this.fieldsScope.find('.flekto_nl_zip').find('.warning').remove();
                 this.fieldsScope.find('.flekto_nl_zip').find('.field-error').remove();
@@ -213,12 +236,16 @@ define([
                 var responseData = response.response;
                 that.logDebug(responseData);
 
-                $(addressContainer).find('[name="city"]').val(responseData.city).change();
-                $(addressContainer).find('[name="postcode"]').val(responseData.postcode).change();
-                $(addressContainer).find('[name="region"]').val(responseData.province).change();
-
                 var addressString = responseData.street + ' ' + responseData.houseNumber + (' ' + (responseData.houseNumberAddition ? responseData.houseNumberAddition : ''));
-                $(that.currentStreetElement).val(addressString).change();
+                that.setInputAddress(
+                        {'street': responseData.street,
+                         'houseNumber': responseData.houseNumber,
+                         'houseNumberAddition': responseData.houseNumberAddition,
+                         'city': responseData.city,
+                         'province': responseData.province,
+                         'postcode': responseData.postcode,
+                         }
+                    );
 
                 if (responseData.houseNumberAdditions.length > 1) {
 
@@ -235,7 +262,15 @@ define([
                     input.after(appendHouseNumberAdditions);
 
                     $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').on('change', function() {
-                        $(that.currentStreetElement).val(addressString+' '+this.value).change();
+                        that.setInputAddress(
+                            {'street': responseData.street,
+                             'houseNumber': responseData.houseNumber,
+                             'houseNumberAddition': this.value,
+                             'city': responseData.city,
+                             'province': responseData.province,
+                             'postcode': responseData.postcode,
+                             }
+                        );
                     });
 
                 } else {
@@ -259,7 +294,7 @@ define([
             this.logDebug('initFreeInputWatcher');
 
             var that = this;
-            $(this.fieldsScope).on('focus', "[name='street[0]']", function() {
+            $(this.fieldsScope).on('focus', this.primaryStreetFieldSelector, function() {
 
                 that.updateFocusForm(this);
 
@@ -280,7 +315,7 @@ define([
             var that = this;
             this.enableInternationalAutocomplete();
 
-            $(that.streetFieldSelector).each(function(i, obj) {
+            $(this.currentStreetElement).each(function(i, obj) {
 
                 if (!$(this).hasClass('postcodenl-autocomplete-address-input')) {
 
@@ -297,9 +332,14 @@ define([
 
                             that.autocomplete.getDetails(e.detail.context, function (result) {
                                 result = result[0].response;
-                                $(that.fieldsScope).find('[name="city"]').val(result.address['locality']).change();
-                                $(that.fieldsScope).find('[name="postcode"]').val(result.address['postcode']).change();
-                                $(that.currentStreetElement).val(result.address['street']+" "+result.address['building']).change();
+                                that.setInputAddress(
+                                    {'street': result.address['street'],
+                                     'houseNumber': result.address['buildingNumber'],
+                                     'houseNumberAddition': result.address['buildingNumberAddition'],
+                                     'city': result.address['locality'],
+                                     'postcode': result.address['postcode']
+                                     }
+                                );
                             });
 
                             that.enableDisableFields('show');
@@ -313,6 +353,41 @@ define([
                     }
                 }
             });
+        },
+
+
+        setInputAddress: function(response) {
+
+            var addressString = response.street + ' ' + response.houseNumber + (' ' + (response.houseNumberAddition ? response.houseNumberAddition : ''));
+
+            this.logDebug('AddressString: ' + addressString);
+
+            if (this.currentHouseNumElement != null) {
+                $(this.currentStreetElement).val(response.street).change();
+
+                if (this.currentHouseNumAdditionElement != null) {
+                    $(this.currentHouseNumElement).val(response.houseNumber).change();
+                    $(this.currentHouseNumAdditionElement).val(response.houseNumberAddition ? response.houseNumberAddition : '').change();
+
+                } else {
+                    $(this.currentHouseNumElement).val(response.houseNumber + ((response.houseNumberAddition ? ' ' + response.houseNumberAddition : ''))).change();
+                }
+
+            } else {
+                $(this.currentStreetElement).val(addressString).change();
+            }
+
+            if (response.city !== null) {
+                $(this.fieldsScope).find('[name="city"]').val(response.city).change();
+            }
+
+            if (response.postcode !== null) {
+                $(this.fieldsScope).find('[name="postcode"]').val(response.postcode).change();
+            }
+
+            if (response.province !== null) {
+                $(this.fieldsScope).find('[name="region"]').val(response.province).change();
+            }
         },
 
 

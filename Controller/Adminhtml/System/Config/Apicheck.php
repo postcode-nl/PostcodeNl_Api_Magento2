@@ -59,7 +59,7 @@ class Apicheck extends \Magento\Framework\App\Action\Action
 
             if ($access['hasAccess'] == 1) {
 
-                $result['message'] = __("Your account is active with name: " . $access['name']);
+                $result['message'] = __("Your account is active with name: ") . $access['name'];
                 $result['supported_countries'] = implode(', ', $access['countries']);
                 $result['account_name'] = $access['name'];
                 $result['key_is_valid'] = 'yes';

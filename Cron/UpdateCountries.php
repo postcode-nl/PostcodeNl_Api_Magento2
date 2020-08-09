@@ -61,12 +61,12 @@ class UpdateCountries
      */
     public function execute()
     {
-        $this->logger->info('Flekto Postcode.nl update countries start');
+        $this->logger->info(__('Flekto Postcode.nl update countries start'));
 
         try {
             $countries = $this->apiClientHelper->getSupportedCountries();
         } catch (\Exception $e) {
-            $this->logger->info('Flekto Postcode.nl update countries FAILED: '.json_encode($e->getMessage()));
+            $this->logger->info(__('Flekto Postcode.nl update countries FAILED: ').json_encode($e->getMessage()));
             return this;
         }
 
@@ -83,6 +83,6 @@ class UpdateCountries
             }
         }
 
-        $this->logger->info('Flekto Postcode.nl update countries executed: '.json_encode($newCountries));
+        $this->logger->info(__('Flekto Postcode.nl update countries executed: ').json_encode($newCountries));
     }
 }
