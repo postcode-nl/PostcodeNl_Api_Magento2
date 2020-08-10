@@ -239,17 +239,21 @@ class ApiClientHelper extends AbstractHelper
         // only in this case we actually pass error
         // to front-end without debug option needed
         if ($exception instanceof NotFoundException) {
-            $response['message_details'] = $exception->getMessage();
+            $response['message_details'] = __("Combination not found.");
         }
 
         if (!$this->isDebugging()) {
+            if (empty($response['message_details'])) {
+                $response['message_details'] = __("Something went wrong. Please try again.");
+            }
+
             return $response;
         }
 
         $exceptionClass = get_class($exception);
-        $response['message'] = sprintf(__('Exception %s occurred '), $exceptionClass).$exception->getTraceAsString();
+        $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass).$exception->getTraceAsString();
 
-        $response['message_details'] = $exception->getMessage();
+        $response['message_details'] = __($exception->getMessage());
         $response['debugInfo'] = $this->getDebugInfo();
 
         return $response;
