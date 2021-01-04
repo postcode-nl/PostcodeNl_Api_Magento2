@@ -22,6 +22,11 @@
                     <comment/>
                     <source_model>Flekto\Postcode\Model\Config\Source\ShowHideAddressFields</source_model>
                 </field>
+                <field id="change_fields_position" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label" type="select" canRestore="1">
+                    <label>Change address fields position</label>
+                    <comment/>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="text">
                     <label>Api key</label>
                     <comment/>
@@ -59,11 +64,6 @@
                 <label>Advanced Configuration</label>
                 <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="90" translate="label" type="select" canRestore="1">
                     <label>Debug</label>
-                    <comment/>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="change_fields_position" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="91" translate="label" type="select" canRestore="1">
-                    <label>Change fields position</label>
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
