@@ -8,7 +8,7 @@
  * https://tldrlegal.com/l/mit
  *
  * @author Postcode.nl
- * @version 1.0
+ * @version 1.1
  */
 
 var PostcodeNl = PostcodeNl || {};
@@ -22,10 +22,13 @@ var PostcodeNl = PostcodeNl || {};
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
+		KEY_ESC_LEGACY = 'Esc',
 		KEY_ENTER = 'Enter',
 		KEY_TAB = 'Tab',
 		KEY_UP = 'ArrowUp',
+		KEY_UP_LEGACY = 'Up',
 		KEY_DOWN = 'ArrowDown',
+		KEY_DOWN_LEGACY = 'Down',
 
 		/**
 		 * Default options.
@@ -124,15 +127,25 @@ var PostcodeNl = PostcodeNl || {};
 			},
 
 			/**
+			 * Automatically calculate menu width. Disable to define width in CSS.
+			 * @type {boolean}
+			 */
+			autoResize: {
+				value: true,
+				writable: true,
+			},
+
+			/**
 			 * Get screen reader text for a successful response with at least one match.
 			 * Override this function to translate the message.
 			 * @type {Function}
 			 *
 			 * @param {number} count - Number of matches. Will be at least one.
+			 * @param {string} languageTag - Language tag, if specified via language option or setLanguage().
 			 * @return {string} Screen reader message based on the number of matches.
 			 */
 			getResponseMessage: {
-				value: function (count)
+				value: function (count, languageTag)
 				{
 					let message;
 
@@ -149,6 +162,13 @@ var PostcodeNl = PostcodeNl || {};
 
 					return message;
 				},
+				writable: true,
+			},
+
+			/**
+			 * The language used for API calls.
+			 */
+			language: {
 				writable: true,
 			},
 		});
@@ -179,7 +199,11 @@ var PostcodeNl = PostcodeNl || {};
 				const rect = element.getBoundingClientRect();
 				wrapper.style.top = rect.bottom + (window.scrollY || window.pageYOffset) + 'px';
 				wrapper.style.left = rect.left + (window.scrollX || window.pageXOffset) + 'px';
-				wrapper.style.width = rect.width + 'px';
+
+				if (options.autoResize)
+				{
+					wrapper.style.width = rect.width + 'px';
+				}
 			},
 
 			/**
@@ -233,11 +257,11 @@ var PostcodeNl = PostcodeNl || {};
 					ul.scrollTop = (item.offsetHeight + item.offsetTop) - ul.clientHeight;
 				}
 
-				// Update the input element value unless the focus event was cancelled.
-				if (setValue && true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'focus', {cancelable: true})))
-				{
-					const data = elementData.get(item);
+				const data = elementData.get(item);
 
+				// Update the input element value unless the focus event was cancelled.
+				if (setValue && true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'focus', {detail: data, cancelable: true})))
+				{
 					inputElement.value = data.value;
 					elementData.get(inputElement).context = data.context;
 				}
@@ -251,6 +275,28 @@ var PostcodeNl = PostcodeNl || {};
 				if (item !== null)
 				{
 					item.classList.remove(classNames.itemFocus);
+				}
+			},
+
+			/**
+			 * Event handler to close the menu on outside click.
+			 */
+			closeOnClickOutside = function (e)
+			{
+				if (isOpen && e.target !== inputElement && !wrapper.contains(e.target))
+				{
+					self.close();
+				}
+			},
+
+			/**
+			 * Event handler to close the menu on window resize.
+			 */
+			closeOnWindowResize = function ()
+			{
+				if (isOpen)
+				{
+					self.close();
 				}
 			};
 
@@ -275,6 +321,16 @@ var PostcodeNl = PostcodeNl || {};
 			hasFocus: {
 				get: function () {
 					return item !== null;
+				},
+			},
+			wrapper: {
+				get: function () {
+					return wrapper;
+				},
+			},
+			ul: {
+				get: function () {
+					return ul;
 				},
 			},
 		});
@@ -319,7 +375,7 @@ var PostcodeNl = PostcodeNl || {};
 				self.select();
 			}
 
-			isMousedown = false;
+			window.setTimeout(function () { isMousedown = false }); // IEfix: Use setTimeout to assign after the event happens.
 		});
 
 		// Add the menu to the page.
@@ -359,11 +415,6 @@ var PostcodeNl = PostcodeNl || {};
 		 */
 		this.open = function (element)
 		{
-    		if (false === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'menubeforeopen', {cancelable: true})))
-			{
-    			return;
-            }
-
 			inputElement = element;
 			inputValue = inputElement.value;
 			inputContext = elementData.get(inputElement).context;
@@ -421,7 +472,19 @@ var PostcodeNl = PostcodeNl || {};
 		this.focusNext = moveItemFocus.bind(this, true);
 
 		/**
-		 * Select the active menu item, update and focus the associated input element, then close the menu.
+		 * Remove the item focus CSS class and clear the active item, if any.
+		 */
+		this.blur = function ()
+		{
+			if (item !== null)
+			{
+				item.classList.remove(classNames.itemFocus);
+				item = null;
+			}
+		}
+
+		/**
+		 * Select the active menu item, update and focus the associated input element.
 		 */
 		this.select = function ()
 		{
@@ -446,21 +509,26 @@ var PostcodeNl = PostcodeNl || {};
 			ul.innerHTML = '';
 		}
 
-		// Close on click outside.
-		document.addEventListener('click', function (e) {
-			if (isOpen && e.target !== inputElement && !wrapper.contains(e.target))
+		/**
+		 * Remove the menu from the DOM.
+		 *
+		 * @return {boolean} True if the menu is removed, false if already removed.
+		 */
+		this.destroy = function ()
+		{
+			if (wrapper.parentNode === null)
 			{
-				self.close();
+				return false;
 			}
-		});
 
-		// Close on window resize.
-		window.addEventListener('resize', function () {
-			if (isOpen)
-			{
-				self.close();
-			}
-		});
+			wrapper.parentNode.removeChild(wrapper);
+			document.removeEventListener('click', closeOnClickOutside);
+			window.removeEventListener('resize', closeOnWindowResize);
+			return true;
+		}
+
+		document.addEventListener('click', closeOnClickOutside);
+		window.addEventListener('resize', closeOnWindowResize);
 	}
 
 	/**
@@ -522,6 +590,21 @@ var PostcodeNl = PostcodeNl || {};
 		liveRegion.classList.add(options.cssPrefix + liveRegion.id);
 		document.body.appendChild(liveRegion);
 
+		window.addEventListener('beforeunload', function () {
+			window.clearTimeout(searchTimeoutId);
+		});
+
+		// Expose elements.
+		Object.defineProperty(this, 'elements', {
+			get: function () {
+				return {
+					menu: menu.wrapper,
+					menuItems: menu.ul,
+					liveRegion: liveRegion,
+				};
+			},
+		});
+
 		/**
 		 * Announce screen reader text via the live region.
 		 *
@@ -552,8 +635,6 @@ var PostcodeNl = PostcodeNl || {};
 				if (this.status === 200)
 				{
 					success.call(this, JSON.parse(xhr.response));
-				} else {
-                    document.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'xhrerror'));
 				}
 			});
 
@@ -568,21 +649,28 @@ var PostcodeNl = PostcodeNl || {};
 		 * Get autocomplete matches for the specified context and term.
 		 *
 		 * @see {@link https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete}
-		 * @param {string} context - A place identifier denoting the context to search in. e.g. â€œnldâ€.
-		 * @param {string} term - The search query to process. e.g. â€œ2012ESâ€, â€œHaarlemâ€, â€œJulianâ€.
+		 * @param {string} context - A place identifier denoting the context to search in. e.g. "nld".
+		 * @param {string} term - The search query to process. e.g. "2012ES", "Haarlem", "Julian".
 		 * @param {successCallback} response - Function that handles the response.
 		 * @return {XMLHttpRequest} @see PostcodeNl.AutocompleteAddress.xhrGet.
 		 */
 		this.getSuggestions = function (context, term, response)
 		{
-			return this.xhrGet(this.options.autocompleteUrl + '/' + encodeURIComponent(context) + '/' + encodeURIComponent(term), response);
+			let url = this.options.autocompleteUrl + '/' + encodeURIComponent(context) + '/' + encodeURIComponent(term);
+
+			if (typeof options.language !== 'undefined')
+			{
+				url += '/' + options.language;
+			}
+
+			return this.xhrGet(url, response);
 		}
 
 		/**
 		 * Get address details for the specified address identifier.
 		 *
 		 * @see {@link https://api.postcode.nl/documentation/international/v1/Autocomplete/getDetails}
-		 * @param {string} addressId - Address identifier returned by a match of precision â€œAddressâ€.
+		 * @param {string} addressId - Address identifier returned by a match of precision "Address".
 		 * @param {string} [dispatchCountry] - Dispatching country ISO3 code, used to determine country address line presence and language.
 		 * If not given, country is not added in mailLines.
 		 * @param {successCallback} response - Function that handles the response.
@@ -629,7 +717,7 @@ var PostcodeNl = PostcodeNl || {};
 
 			if (item.description)
 			{
-				let span = document.createElement('span');
+				const span = document.createElement('span');
 				span.textContent = item.description;
 				span.classList.add(this.options.cssPrefix + 'item-description');
 				li.appendChild(span);
@@ -639,7 +727,7 @@ var PostcodeNl = PostcodeNl || {};
 			{
 				for (let i = 0, tag; tag = item.tags[i++];)
 				{
-					let em = document.createElement('em');
+					const em = document.createElement('em');
 					em.textContent = this.options.tags[tag];
 					em.classList.add(this.options.cssPrefix + 'item-tag');
 					li.appendChild(em);
@@ -698,6 +786,16 @@ var PostcodeNl = PostcodeNl || {};
 		}
 
 		/**
+		 * Set the language used for API calls.
+		 *
+		 * @param {string} languageTag - Language tag, e.g. "nl", "nl_NL", "en-GB" or "de-DE".
+		 */
+		this.setLanguage = function (languageTag)
+		{
+			options.language = languageTag;
+		}
+
+		/**
 		 * Trigger a search on the specified input element. If invoked without a term, the current input's value is used.
 		 *
 		 * @param {HTMLElement} element - Input element associated with the autocomplete instance.
@@ -714,13 +812,82 @@ var PostcodeNl = PostcodeNl || {};
 			search(element);
 		}
 
+		/**
+		 * Reset to initial context, clear the menu, clear input values.
+		 */
+		this.reset = function ()
+		{
+			previousValue = null;
+			previousContext = null;
+			matches = [];
+
+			menu.clear();
+
+			for (let i = 0, element; element = inputElements[i++];)
+			{
+				const data = elementData.get(element);
+
+				data.context = options.context;
+				data.match = {};
+				element.value = '';
+				element.classList.add(inputBlankClassName);
+			}
+		}
+
+		/**
+		 * Remove autocomplete functionality and return the input element to its pre-init state.
+		 */
+		this.destroy = function ()
+		{
+			if (!menu.destroy())
+			{
+				return; // Menu is not part of the DOM, assume already destroyed.
+			}
+
+			document.body.removeChild(liveRegion);
+
+			for (let i = 0, element; element = inputElements[i++];)
+			{
+				const data = elementData.get(element);
+
+				for (var eventType in data.eventHandlers)
+				{
+					element.removeEventListener(eventType, data.eventHandlers[eventType]);
+				}
+
+				for (var attr in data.initialAttributeValues)
+				{
+					const value = data.initialAttributeValues[attr];
+
+					if (value === null)
+					{
+						element.removeAttribute(attr);
+					}
+					else
+					{
+						element.setAttribute(attr, value);
+					}
+				}
+
+				elementData.delete(element);
+				element.classList.remove(options.cssPrefix + 'address-input', options.cssPrefix + 'loading', inputBlankClassName);
+			}
+		}
+
 		Array.prototype.forEach.call(inputElements, function (element) {
+			const eventHandlers = Object.create(null);
 			let isKeyEvent = false;
 
 			// Map match and context to this element.
 			elementData.set(element, {
 				match: {},
 				context: options.context,
+				eventHandlers: eventHandlers,
+				initialAttributeValues: {
+					spellcheck: element.hasAttribute('spellcheck') ? element.getAttribute('spellcheck') : null,
+					autocomplete: element.hasAttribute('autocomplete') ? element.getAttribute('autocomplete') : null,
+					'aria-controls': element.hasAttribute('aria-controls') ? element.getAttribute('aria-controls') : null,
+				},
 			});
 
 			element.spellcheck = false;
@@ -729,12 +896,13 @@ var PostcodeNl = PostcodeNl || {};
 			element.classList.add(options.cssPrefix + 'address-input');
 			element.classList.toggle(inputBlankClassName, element.value === '');
 
-			element.addEventListener('keydown', function (e) {
+			element.addEventListener('keydown', eventHandlers.keydown = function (e) {
 				isKeyEvent = true;
 
 				switch (e.key)
 				{
 					case KEY_UP:
+					case KEY_UP_LEGACY:
 						if (menu.isOpen)
 						{
 							menu.focusPrevious();
@@ -748,6 +916,7 @@ var PostcodeNl = PostcodeNl || {};
 					break;
 
 					case KEY_DOWN:
+					case KEY_DOWN_LEGACY:
 						if (menu.isOpen)
 						{
 							menu.focusNext();
@@ -761,15 +930,27 @@ var PostcodeNl = PostcodeNl || {};
 					break;
 
 					case KEY_ESC:
+					case KEY_ESC_LEGACY:
 						menu.close(true);
 					break;
 
 					case KEY_TAB:
+						if (menu.hasFocus)
+						{
+							menu.select();
+							e.preventDefault();
+						}
+					break;
+
 					case KEY_ENTER:
 						if (menu.hasFocus)
 						{
 							menu.select();
 							e.preventDefault();
+						}
+						else
+						{
+							menu.close();
 						}
 					break;
 
@@ -778,8 +959,10 @@ var PostcodeNl = PostcodeNl || {};
 				}
 			});
 
-			element.addEventListener('input', function (e) {
+			element.addEventListener('input', eventHandlers.input = function (e) {
 				element.classList.remove(inputBlankClassName);
+				menu.blur(); // Prevent focus on old menu item when value has changed.
+				matches = []; // Prevent auto-selecting old menu item on blur.
 
 				// Skip key event to prevent searching twice.
 				if (isKeyEvent)
@@ -791,7 +974,7 @@ var PostcodeNl = PostcodeNl || {};
 				searchDebounced(element);
 			});
 
-			element.addEventListener('focus', function () {
+			element.addEventListener('focus', eventHandlers.focus = function () {
 				if (menu.isMousedown)
 				{
 					return;
@@ -808,9 +991,9 @@ var PostcodeNl = PostcodeNl || {};
 				}
 			});
 
-			element.addEventListener('click', menu.open.bind(menu, element));
+			element.addEventListener('click', eventHandlers.click = menu.open.bind(menu, element));
 
-			element.addEventListener(EVENT_NAMESPACE + 'select', function (e) {
+			element.addEventListener(EVENT_NAMESPACE + 'select', eventHandlers[EVENT_NAMESPACE + 'select'] = function (e) {
 				const data = elementData.get(element);
 
 				data.match = e.detail;
@@ -827,7 +1010,7 @@ var PostcodeNl = PostcodeNl || {};
 				}
 			});
 
-			element.addEventListener('blur', function () {
+			element.addEventListener('blur', eventHandlers.blur = function () {
 				if (menu.isMousedown)
 				{
 					return;
@@ -853,6 +1036,8 @@ var PostcodeNl = PostcodeNl || {};
 
 				element.classList.toggle(inputBlankClassName, element.value === '');
 			});
+
+			element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'create', {detail: self}));
 		});
 
 		/**
@@ -875,13 +1060,13 @@ var PostcodeNl = PostcodeNl || {};
 		{
 			menu.open(element);
 
-			if (element.value.length < options.minLength)
+			const data = elementData.get(element);
+
+			// Bug #51485 - this shouldn't happen, but it does in IE
+			if (typeof data.context === 'undefined')
 			{
-				menu.clear();
 				return;
 			}
-
-			const data = elementData.get(element);
 
 			if (element.value === previousValue && data.context === previousContext)
 			{
@@ -892,6 +1077,14 @@ var PostcodeNl = PostcodeNl || {};
 			previousValue = element.value;
 			previousContext = data.context;
 			data.match = {};
+
+			// Reset context if we are below minimum length and clear menu instead of searching.
+			if (element.value.length < options.minLength)
+			{
+				data.context = options.context;
+				menu.clear();
+				return;
+			}
 
 			// Trigger the search event. Cancel this event to prevent the request for address suggestions.
 			if (false === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'search', {cancelable: true})))
@@ -905,7 +1098,14 @@ var PostcodeNl = PostcodeNl || {};
 				// Trigger the response event. Cancel this event to prevent rendering address suggestions.
 				if (true === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'response', {detail: result, cancelable: true})))
 				{
-					matches = result[0].response.matches;
+					if (typeof result[0].response === 'undefined')
+					{
+						matches = [];
+					}
+					else
+					{
+						matches = result[0].response.matches || [];
+					}
 
 					if (hasSubstring && matches.length === 0)
 					{
@@ -913,7 +1113,7 @@ var PostcodeNl = PostcodeNl || {};
 					}
 
 					menu.setItems(matches, self.renderItem.bind(self));
-					self.announce(options.getResponseMessage(matches.length));
+					self.announce(options.getResponseMessage(matches.length, options.language));
 
 					if (options.autoFocus)
 					{
@@ -922,10 +1122,17 @@ var PostcodeNl = PostcodeNl || {};
 				}
 			});
 
-			xhr.addEventListener('error', function (e) {
-				// Trigger an error event for failed requests.
-				element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: e}));
-			});
+			const xhrErrorHandler = function (e)
+			{
+				if (this.status !== 200)
+				{
+					element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: {'event': e, request: this}}));
+				}
+			}
+
+			// Trigger an error event for failed requests.
+			xhr.addEventListener('error', xhrErrorHandler);
+			xhr.addEventListener('load', xhrErrorHandler);
 
 			xhr.addEventListener('loadend', function (e) { // All three load-ending conditions (abort, load, or error).
 				element.classList.remove(options.cssPrefix + 'loading');
@@ -1021,6 +1228,27 @@ var PostcodeNl = PostcodeNl || {};
 		}
 
 		window.CustomEvent = CustomEvent;
+	}
+
+	if (window.DOMTokenList.prototype.toggle.length === 0)
+	{
+		/**
+		 * Fix DOMTokenList.toggle in IE11.
+		 *
+		 * @param {string} value - Class value to toggle.
+		 * @param {boolean} [force] - Add class value if the argument evaluates to true, else remove it.
+		 * @return {boolean} True if the class value is added, false if removed.
+		 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/classList}
+		 */
+		window.DOMTokenList.prototype.toggle = function (value)
+		{
+			if (arguments.length > 1)
+			{
+				return (this[arguments[1]? 'add' : 'remove'](value), !!arguments[1]);
+			}
+
+			return (this[this.contains(value)? 'remove' : 'add'](value), this.contains(value));
+		}
 	}
 
 }).apply(PostcodeNl);

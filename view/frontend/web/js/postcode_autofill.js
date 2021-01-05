@@ -5,33 +5,38 @@ define([
     'uiRegistry',
     'domReady!'
 ], function (Abstract, $, postcodenl, registry) {
+    'use strict';
+
+    const settings = window.checkoutConfig.flekto_postcode.settings,
+        translations = settings.translations,
+        intlAutocompleteCountries = JSON.parse(settings.supported_countries),
+        selectors = {
+            street: '[name^="street["]',
+            country: '[name="country_id"]',
+            nlPostcodeField: 'div[name$=".postcode"]',
+            countryField: 'div[name$=".country_id"]',
+        },
+        elements = {
+            street: null,
+            houseNumber: null,
+            houseNumberAddition: null,
+            country: null,
+        },
+        eventHandlers = {},
+        nlPostcodeLookupDelay = 750;
+
+    let intlAutocompleteInstance = null,
+        fieldsScope;
 
     return Abstract.extend({
-
-        streetFieldSelector: "[name^='street[']",
-        primaryStreetFieldSelector: "[name^='street[']:first",
-        countryFieldSelector: "[name='country_id']",
-        autocomplete: null,
-        currentStreetElement: null,
-        currentHouseNumElement: null,
-        currentHouseNumAdditionElement: null,
-        currentCountryElement: null,
-        fieldsScope: null,
-        internationalAutocompleteActive: false,
-        lookupTimeout: 0,
-        enableDisableFieldsNl: ['[name^="street["][name$="]"]', "[name='city']", "[name='postcode']", "[name='region']"],
-        enableDisableFieldsInt: ['[name^="street["][name$="]"]:not(:first)', "[name='city']", "[name='postcode']", "[name='region']"],
-        nlPostcodeInputCloneFrom: 'div[name$=".postcode"]',
-        nlPostcodeInputCloneInsertAfter: 'div[name$=".country_id"]',
-
 
         initialize: function () {
 
             this._super();
-            var that = this;
 
-            if (that.getSettings().enabled == 1) {
+            const that = this;
 
+            if (settings.enabled) {
                 registry.async(this.provider)(function () {
                     that.initPostcodeConfig();
                     that.initModules();
@@ -42,440 +47,326 @@ define([
             return this;
         },
 
-
         initPostcodeConfig: function () {
 
             if (window.postcodenlConfig !== null && typeof window.postcodenlConfig === 'object') {
 
                 this.logDebug('window.postcodenlConfig found, applying override');
 
-                var that = this;
+                const that = this;
 
-                $.each(window.postcodenlConfig, function(key, value) {
+                $.each(window.postcodenlConfig, function (key, value) {
                     that.logDebug('Config override: ', key, value);
                     that[key] = value;
                 });
             }
         },
 
-
         initWatcher: function () {
 
-            var that = this;
+            const that = this;
 
-            $(document).ready(function(e){
+            $(document).on('change', selectors.country, function () {
 
-                $(document).on('change', that.countryFieldSelector, function() {
+                const countryElement = this;
 
-                    var dropdownEl = this;
+                // make sure field is set.
+                setTimeout(function () {
 
-                    // make sure field is set.
-                    setTimeout(function() {
+                    that.logDebug(countryElement);
+                    that.logDebug('country changed');
+                    that.logDebug('nl_input_behavior: ', settings.nl_input_behavior);
+                    that.logDebug('selected country: ', $("[name='country_id']:visible :selected ").text());
+                    that.logDebug(countryElement.value);
 
-                        that.logDebug(dropdownEl);
-                        that.logDebug('country changed');
-                        that.logDebug("nl_input_behavior: ", that.getSettings().nl_input_behavior);
-                        that.logDebug("selected country: ", $("[name='country_id']:visible :selected ").text());
-                        that.logDebug($(dropdownEl).val());
+                    that.updateFocusForm(countryElement);
 
-                        that.updateFocusForm(dropdownEl);
+                    if (settings.nl_input_behavior === 'zip_house' && countryElement.value === 'NL') {
 
-                        var countriesArr = JSON.parse(that.getSettings().supported_countries);
-                        that.internationalAutocompleteActive = false;
-                        that.disableInternationalAutocomplete();
-                        that.disableNlPostcodeWatcher();
+                        that.logDebug('zip_house init');
+                        that.hideIntlAutocomplete();
+                        that.initNlPostcodeWatcher();
+                        that.toggleFields(false);
 
-                        document.addEventListener('autocomplete-xhrerror', function (e) {
-                            that.logDebug('XHR Error!', e);
-                            that.enableDisableFields('show');
-                        });
+                    } else if (intlAutocompleteCountries.indexOf(countryElement.value) > -1) {
 
-                        if (that.getSettings().nl_input_behavior == 'zip_house' && $(dropdownEl).val() == 'NL') {
+                        that.logDebug('free input init');
+                        that.hideNlPostcodeWatcher();
+                        that.initIntlAutocomplete();
+                        that.toggleFields(false);
 
-                            that.logDebug('zip_house init');
-                            that.initNlPostcodeWatcher();
-                            that.enableDisableFields('hide');
+                    } else {
+                        that.hideIntlAutocomplete();
+                        that.hideNlPostcodeWatcher();
+                    }
 
-                        } else {
+                }, 200);
 
-                            if (jQuery.inArray($(dropdownEl).val(), countriesArr) !== -1) {
+            });
 
-                                that.logDebug('free input init');
-
-                                that.enableInternationalAutocomplete();
-                                that.initFreeInputWatcher();
-                                that.enableDisableFields('hide');
-
-                            }
-                        }
-
-                    }, 200);
-
-                });
+            document.addEventListener('autocomplete-xhrerror', function (e) {
+                that.logDebug('XHR Error!', e);
+                that.toggleFields(true);
             });
 
         },
 
+        updateFocusForm: function (el) {
 
-        updateFocusForm: function(el) {
+            const form = el.form;
 
-            var form = $(el).closest('form');
             this.logDebug('updateFocusForm', form);
 
             if (form) {
-                this.fieldsScope = form;
-                this.currentStreetElement = $(form).find(this.streetFieldSelector).get(0);
-                this.currentHouseNumElement = $(form).find(this.streetFieldSelector).get(1);
-                this.currentHouseNumAdditionElement = $(form).find(this.streetFieldSelector).get(2);
-                this.currentCountryElement = $(form).find(this.countryFieldSelector).get(0);
+                const streetParts = form.querySelectorAll(selectors.street);
+
+                fieldsScope = form;
+                elements.street = streetParts[0];
+                elements.houseNumber = streetParts[1];
+                elements.houseNumberAddition = streetParts[2];
+                elements.country = form.querySelector(selectors.country);
             }
         },
-
 
         initNlPostcodeWatcher: function() {
 
             this.logDebug('initNlPostcodeWatcher');
 
-            if (this.fieldsScope.find('.flekto_nl_zip').length == 0) {
+            const flektoNlZipPrefix = 'flekto_nl_zip';
 
-                var currentTimestamp = $.now();
-                var that = this;
-                var lookupTimeout = 0;
-
-                this.fieldsScope.find(this.nlPostcodeInputCloneFrom)
-                    .clone()
-                    .removeAttr('data-bind')
-                    .prop('id', 'flekto_nl_zip_'+currentTimestamp)
-                    .prop('name', 'flekto_nl_zip_'+currentTimestamp)
-                    .removeClass('_error')
-                    .addClass('flekto_nl_zip')
-                    .insertAfter(this.fieldsScope.find(this.nlPostcodeInputCloneInsertAfter));
-
-                this.fieldsScope.find('.flekto_nl_zip').find('.warning').remove();
-                this.fieldsScope.find('.flekto_nl_zip').find('.field-error').remove();
-                this.fieldsScope.find('.flekto_nl_zip').find('span').text(this.getTranslations().flekto_nl_zip_label);
-
-                var inputEl = this.fieldsScope.find('#flekto_nl_zip_'+currentTimestamp)
-                    .find('input')
-                    .attr('id', 'flekto_nl_zip_input_'+currentTimestamp)
-                    .attr('name', 'flekto_nl_zip_input')
-                    .attr('placeholder', this.getTranslations().flekto_nl_zip_placeholder)
-                    .removeAttr('data-bind')
-                    .prop('disabled', false)
-                    .addClass('flekto_nl_zip_input')
-                    .val('');
-
-                $(inputEl).on('keyup', {scope: this}, this.delayGetNlPostcodeAddress);
-                $(inputEl).on('blur', {scope: this}, this.getNlPostcodeAddress);
-                $(inputEl).on('focus', function() {
-                    that.updateFocusForm(inputEl);
-                });
+            if (fieldsScope.querySelector('.' + flektoNlZipPrefix) !== null) {
+                $(fieldsScope).find('.' + flektoNlZipPrefix).show();
+                return;
             }
+
+            const that = this,
+                currentTimestamp = Date.now(),
+                $nlPostcodeFieldClone = $(fieldsScope).find(selectors.nlPostcodeField).clone();
+
+            $nlPostcodeFieldClone
+                .removeAttr('data-bind')
+                .prop('id', flektoNlZipPrefix + '_' + currentTimestamp)
+                .prop('name', flektoNlZipPrefix + '_' + currentTimestamp)
+                .removeClass('_error')
+                .addClass(flektoNlZipPrefix)
+                .insertAfter(fieldsScope.querySelector(selectors.countryField));
+
+            $nlPostcodeFieldClone.find('.warning, .field-error').remove();
+            $nlPostcodeFieldClone.find('span').text(translations.flekto_nl_zip_label);
+
+            const $nlPostcodeInput = $nlPostcodeFieldClone.find('input');
+
+            $nlPostcodeInput
+                .attr('id', flektoNlZipPrefix + '_input_' + currentTimestamp)
+                .attr('name', flektoNlZipPrefix + '_input')
+                .attr('placeholder', translations.flekto_nl_zip_placeholder)
+                .removeAttr('data-bind')
+                .prop('disabled', false)
+                .addClass(flektoNlZipPrefix + '_input')
+                .val('');
+
+            $nlPostcodeInput
+                .on('keyup', this.getNlPostcodeAddressDebounced.bind(this))
+                .on('blur', this.getNlPostcodeAddress.bind(this))
+                .on('focus', this.updateFocusForm.bind(this, $nlPostcodeInput[0]));
         },
 
+        hideNlPostcodeWatcher: function() {
 
-        disableNlPostcodeWatcher: function() {
-            this.fieldsScope.find('.flekto_nl_zip').remove();
-            this.logDebug('disableNlPostcodeWatcher');
+            const $nlPostcodeField = $(fieldsScope).find('.flekto_nl_zip').hide();
 
-            this.enableDisableFields('show');
+            $nlPostcodeField.find('input').val('');
+            this.logDebug('hideNlPostcodeWatcher');
+            this.toggleFields(true);
         },
 
+        getNlPostcodeAddressDebounced: function (event) {
 
-        delayGetNlPostcodeAddress: function (event) {
+            this.logDebug('getNlPostcodeAddressDebounced');
 
-            var that = event.data.scope;
-
-            that.logDebug('delayGetNlPostcodeAddress');
-
-            clearTimeout(that.lookupTimeout);
-            that.lookupTimeout = setTimeout(function() {
-                that.getNlPostcodeAddress(event);
-            }, 750, event);
+            clearTimeout(this.lookupTimeout);
+            this.lookupTimeout = setTimeout(this.getNlPostcodeAddress.bind(this), nlPostcodeLookupDelay, event);
         },
 
+        getNlPostcodeAddress: function (event) {
 
-        getNlPostcodeAddress: function(event) {
-
-            var that = event.data.scope;
+            const that = this,
+                nlPostcodeInput = event.target,
+                regex = /([1-9][0-9]{3}\s?[a-z]{2})\s?(\d+.*)/i,
+                addressData = nlPostcodeInput.value.match(regex),
+                warningClassName = 'flekto_nl_zip_input-warning',
+                loadingClassName = 'flekto_nl_zip_input-loading';
 
             that.logDebug('getNlPostcodeAddress', event);
-
-            var input = jQuery(event.target);
-            var addressContainer = that.fieldsScope;
-            var query = input.val();
-            var regex = /([1-9][0-9]{3}\s?[a-z]{2})\s?(\d+.*)/i;
-            var addressData = query.match(regex);
 
             if (!addressData || addressData.length < 3) {
 
                 // No postcode and house number found
-                if (query.length > 7 || !input.is(':focus')) {
-                    $(addressContainer).find('.postcodenl-address-autocomplete-warning').remove();
-                    input.after('<span class="postcodenl-address-autocomplete-warning">' + that.getTranslations().flekto_nl_zip_warning + '</span>');
+                if (nlPostcodeInput.value.length > 7 || nlPostcodeInput !== document.activeElement) {
+                    $(fieldsScope).find('.' + warningClassName).remove();
+                    $('<span>', {class: warningClassName, text: translations.flekto_nl_zip_warning}).insertAfter(nlPostcodeInput);
                 }
+
                 return;
             }
 
-            input.addClass('postcodenl-address-autocomplete-loading');
+            nlPostcodeInput.classList.add(loadingClassName);
 
-            var postcode = addressData[1];
-            var houseNumber = addressData[2];
-            jQuery.get(that.getSettings().base_url+'rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + houseNumber, function(response) {
+            const url = settings.base_url + 'rest/V1/flekto/postcode-international/nlzipcode/' + addressData[1] + '/' + addressData[2];
 
-                response = response[0];
+            $.get(url, function (response) {
 
-                $('.postcodenl-address-autocomplete-warning').remove();
+                const result = response[0],
+                    houseNumberAdditionsClassName = 'flekto_nl_zip_houseNumberAdditions';
 
-                if (response.error && response.message_details) {
-                    $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').remove();
-                    input.after('<span class="postcodenl-address-autocomplete-warning">' + response.message_details + '</span>');
+                $(fieldsScope).find('.' + warningClassName).remove();
+
+                if (result.error && result.message_details) {
+                    $(fieldsScope).find('.' + houseNumberAdditionsClassName).remove();
+                    $('<span>', {class: warningClassName, text: result.message_details}).insertAfter(nlPostcodeInput);
                     return;
                 }
 
-                var responseData = response.response;
-                that.logDebug(responseData);
+                const responseData = result.response,
+                    additions = responseData.houseNumberAdditions;
 
-                var addressString = responseData.street + ' ' + responseData.houseNumber + (' ' + (responseData.houseNumberAddition ? responseData.houseNumberAddition : ''));
-                that.setInputAddress(
-                        {'street': responseData.street,
-                         'houseNumber': responseData.houseNumber,
-                         'houseNumberAddition': responseData.houseNumberAddition,
-                         'city': responseData.city,
-                         'province': responseData.province,
-                         'postcode': responseData.postcode,
-                         }
-                    );
+                that.logDebug('Response data: ', responseData);
 
-                if (responseData.houseNumberAdditions.length > 1) {
+                that.setInputAddress(responseData);
+                $(fieldsScope).find('.' + houseNumberAdditionsClassName).remove();
 
-                    that.logDebug(responseData.houseNumberAdditions);
+                if (additions.length > 1) {
 
-                    $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').remove();
-                    var appendHouseNumberAdditions = '<select name="flekt_nl_zip_houseNumberAdditions" class="flekt_nl_zip_houseNumberAdditions">';
+                    that.logDebug('Housenumber additions: ', additions);
 
-                    jQuery.each(responseData.houseNumberAdditions, function(i, obj) {
-                        appendHouseNumberAdditions += '<option value="' + obj + '">' + obj + '</option>';
-                    });
+                    const selectElement = $('<select>', {name: houseNumberAdditionsClassName, class: houseNumberAdditionsClassName});
 
-                    appendHouseNumberAdditions += '</select>';
-                    input.after(appendHouseNumberAdditions);
-
-                    $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').on('change', function() {
-                        that.setInputAddress(
-                            {'street': responseData.street,
-                             'houseNumber': responseData.houseNumber,
-                             'houseNumberAddition': this.value,
-                             'city': responseData.city,
-                             'province': responseData.province,
-                             'postcode': responseData.postcode,
-                             }
-                        );
-                    });
-
-                } else {
-                    $(that.fieldsScope).find('.flekt_nl_zip_houseNumberAdditions').remove();
-                }
-
-                that.enableDisableFields('show');
-
-            }).always(function() {
-
-                input.removeClass('postcodenl-address-autocomplete-loading');
-                that.enableDisableFields('show');
-
-            });
-
-        },
-
-
-        initFreeInputWatcher: function() {
-
-            this.logDebug('initFreeInputWatcher');
-
-            var that = this;
-            $(this.fieldsScope).on('focus', this.primaryStreetFieldSelector, function() {
-
-                that.updateFocusForm(this);
-
-                if ($(that.fieldsScope).data('int-autocomplete') != '1') {
-                    that.disableInternationalAutocomplete();
-                    return;
-                }
-
-                that.initPostcodeAutocompleteLibrary();
-            });
-        },
-
-
-        initPostcodeAutocompleteLibrary: function () {
-
-            this.logDebug('initPostcodeAutocompleteLibrary');
-
-            var that = this;
-            this.enableInternationalAutocomplete();
-
-            $(this.currentStreetElement).each(function(i, obj) {
-
-                if (!$(this).hasClass('postcodenl-autocomplete-address-input')) {
-
-                    that.autocomplete = new PostcodeNl.AutocompleteAddress($(this).get(0), {
-                        autocompleteUrl: that.getSettings().base_url+'rest/V1/flekto/postcode-international/autocomplete',
-                        addressDetailsUrl: that.getSettings().base_url+'rest/V1/flekto/postcode-international/getdetails',
-                        context: $(that.currentCountryElement).children('option:selected').val()
-                    });
-
-
-                    $(this).get(0).addEventListener('autocomplete-select', function (e) {
-
-                        if (e.detail.precision === 'Address') {
-
-                            that.autocomplete.getDetails(e.detail.context, function (result) {
-                                result = result[0].response;
-                                that.setInputAddress(
-                                    {'street': result.address['street'],
-                                     'houseNumber': result.address['buildingNumber'],
-                                     'houseNumberAddition': result.address['buildingNumberAddition'],
-                                     'city': result.address['locality'],
-                                     'postcode': result.address['postcode']
-                                     }
-                                );
-                            });
-
-                            that.enableDisableFields('show');
-                        }
-                    });
-
-                } else {
-
-                    if (that.autocomplete.options.context != $(that.currentCountryElement).children('option:selected').val().toLowerCase()) {
-                        that.autocomplete.setCountry($(that.currentCountryElement).children('option:selected').val());
+                    for (let i = 0, len = additions.length; i < len; i++)
+                    {
+                        selectElement.append($('<option>', {value: additions[i], text: additions[i]}));
                     }
+
+                    selectElement.on('change', function () {
+                        that.setInputAddress(Object.create(responseData, {houseNumberAddition: {value: this.value}}));
+                    });
+
+                    selectElement.insertAfter(nlPostcodeInput);
+                }
+            }).always(function () {
+
+                nlPostcodeInput.classList.remove(loadingClassName);
+                that.toggleFields(true);
+
+            });
+
+        },
+
+        initIntlAutocomplete: function () {
+
+            this.logDebug('initIntlAutocomplete');
+
+            if (intlAutocompleteInstance !== null)
+            {
+                return intlAutocompleteInstance.setCountry(elements.country.value);
+            }
+
+            const that = this;
+
+            intlAutocompleteInstance = new PostcodeNl.AutocompleteAddress(elements.street, {
+                autocompleteUrl: settings.base_url + 'rest/V1/flekto/postcode-international/autocomplete',
+                addressDetailsUrl: settings.base_url + 'rest/V1/flekto/postcode-international/getdetails',
+                context: elements.country.value,
+            });
+
+            elements.street.addEventListener('autocomplete-select', eventHandlers.autocompleteSelect = function (e) {
+
+                if (e.detail.precision === 'Address') {
+
+                    intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
+                        const address = result[0].response.address;
+
+                        that.setInputAddress({
+                            street: address.street,
+                            houseNumber: address.buildingNumber,
+                            houseNumberAddition: address.buildingNumberAddition,
+                            city: address.locality,
+                            postcode: address.postcode,
+                        });
+                    });
+
+                    that.toggleFields(true);
                 }
             });
         },
 
+        hideIntlAutocomplete: function () {
+            if (intlAutocompleteInstance === null)
+            {
+                return;
+            }
 
-        setInputAddress: function(response) {
+            elements.street.removeEventListener('autocomplete-select', eventHandlers.autocompleteSelect);
+            intlAutocompleteInstance.destroy();
+            intlAutocompleteInstance = null;
+        },
 
-            var addressString = response.street + ' ' + response.houseNumber + (' ' + (response.houseNumberAddition ? response.houseNumberAddition : ''));
+        setInputAddress: function (response) {
+
+            const addressString = response.street + ' ' + response.houseNumber + (' ' + (response.houseNumberAddition ? response.houseNumberAddition : ''));
 
             this.logDebug('AddressString: ' + addressString);
 
-            if (this.currentHouseNumElement != null) {
-                $(this.currentStreetElement).val(response.street).change();
+            if (elements.houseNumber !== null) {
+                $(elements.street).val(response.street).change();
 
-                if (this.currentHouseNumAdditionElement != null) {
-                    $(this.currentHouseNumElement).val(response.houseNumber).change();
-                    $(this.currentHouseNumAdditionElement).val(response.houseNumberAddition ? response.houseNumberAddition : '').change();
+                if (elements.houseNumberAddition !== null) {
+                    $(elements.houseNumber).val(response.houseNumber).change();
+                    $(elements.houseNumberAddition).val(response.houseNumberAddition ? response.houseNumberAddition : '').change();
 
                 } else {
-                    $(this.currentHouseNumElement).val(response.houseNumber + ((response.houseNumberAddition ? ' ' + response.houseNumberAddition : ''))).change();
+                    $(elements.houseNumber).val(response.houseNumber + ((response.houseNumberAddition ? ' ' + response.houseNumberAddition : ''))).change();
                 }
 
             } else {
-                $(this.currentStreetElement).val(addressString).change();
+                $(elements.street).val(addressString).change();
             }
 
             if (response.city !== null) {
-                $(this.fieldsScope).find('[name="city"]').val(response.city).change();
+                $(fieldsScope).find('[name="city"]').val(response.city).change();
             }
 
             if (response.postcode !== null) {
-                $(this.fieldsScope).find('[name="postcode"]').val(response.postcode).change();
+                $(fieldsScope).find('[name="postcode"]').val(response.postcode).change();
             }
 
             if (response.province !== null) {
-                $(this.fieldsScope).find('[name="region"]').val(response.province).change();
+                $(fieldsScope).find('[name="region"]').val(response.province).change();
             }
         },
 
+        toggleFields: function (state) {
 
-        preventDefaultFunc: function (event) {
-            event = event || null;
-            if (event !== null) {
-                event.preventDefault();
+            if (settings.show_hide_address_fields === 'show') {
+                return;
+            }
+
+            const $fields = $(fieldsScope).find('[name^="street["][name$="]"]:not(.postcodenl-autocomplete-address-input), [name="city"], [name="postcode"], [name="region"]');
+
+            this.logDebug('Toggle address fields: ', state, 'fields: ', $fields);
+
+            if (settings.show_hide_address_fields === 'disable') {
+                $fields.prop('disabled', !state);
+            } else if (settings.show_hide_address_fields === 'hide') {
+                $fields.closest('div.field').toggle(state);
+                $fields.closest('fieldset.field').toggle(state);
             }
         },
 
-
-        enableInternationalAutocomplete: function () {
-
-            this.logDebug('enableInternationalAutocomplete');
-            this.currentStreetElement.removeEventListener('autocomplete-menubeforeopen', this.preventDefaultFunc);
-            this.currentStreetElement.removeEventListener('autocomplete-search', this.preventDefaultFunc);
-            $(this.fieldsScope).data('int-autocomplete', '1');
-        },
-
-
-        disableInternationalAutocomplete: function () {
-
-            this.logDebug('disableInternationalAutocomplete');
-            this.currentStreetElement.addEventListener('autocomplete-menubeforeopen', this.preventDefaultFunc, false);
-            this.currentStreetElement.addEventListener('autocomplete-search', this.preventDefaultFunc, false);
-            $(this.fieldsScope).data('int-autocomplete', '0');
-        },
-
-
-        enableDisableFields: function(endis) {
-
-            if (this.getSettings().show_hide_address_fields != 'show') {
-
-                var fields = this.enableDisableFieldsInt;
-                if (this.fieldsScope.find('.flekto_nl_zip').length || endis == 'show') {
-                    fields = this.enableDisableFieldsNl;
-                }
-
-                if (endis == 'show') {
-                    this.logDebug('Show input fields', fields.toString());
-                } else {
-                    this.logDebug('Hide input fields', fields.toString());
-                }
-
-                var that = this;
-                jQuery.each(fields, function(index, selector) {
-
-                    if (that.getSettings().show_hide_address_fields == 'disable') {
-                        $(that.fieldsScope).find(selector).prop("disabled", ((endis == 'show') ? false : true));
-
-                    } else if (that.getSettings().show_hide_address_fields == 'hide') {
-
-                        if (endis == 'show') {
-                            $(that.fieldsScope).find(selector).closest("div.field").show();
-                            $(that.fieldsScope).find(selector).closest("fieldset.field").show();
-
-                        } else {
-
-                            $(that.fieldsScope).find(selector).closest("div.field").hide();
-                            if (that.fieldsScope.find('.flekto_nl_zip').length) {
-                                $(that.fieldsScope).find(selector).closest("fieldset.field").hide();
-                            }
-                        }
-                    }
-
-
-                });
-
+        logDebug: function () {
+            if (settings.debug) {
+                console.log.apply(null, arguments);
             }
         },
-
-
-        getSettings: function () {
-            var settings = window.checkoutConfig.flekto_postcode.settings;
-            return settings;
-        },
-
-
-        getTranslations: function () {
-            return this.getSettings().translations;
-        },
-
-
-        logDebug: function(...params) {
-            if (this.getSettings().debug) {
-                console.log(...params);
-            }
-        }
 
     });
 
