@@ -26,6 +26,7 @@ define([
         nlPostcodeLookupDelay = 750;
 
     let intlAutocompleteInstance = null,
+        nlPostcodeLookupValue = null,
         fieldsScope;
 
     return Abstract.extend({
@@ -190,6 +191,13 @@ define([
 
         getNlPostcodeAddress: function (event) {
 
+            this.logDebug('getNlPostcodeAddress', event);
+
+            if (event.target.value.trim().toLowerCase() === nlPostcodeLookupValue)
+            {
+                return; // Lookup value unchanged, abort.
+            }
+
             const that = this,
                 nlPostcodeInput = event.target,
                 regex = /([1-9][0-9]{3}\s?[a-z]{2})\s?(\d+.*)/i,
@@ -197,7 +205,7 @@ define([
                 warningClassName = 'flekto_nl_zip_input-warning',
                 loadingClassName = 'flekto_nl_zip_input-loading';
 
-            that.logDebug('getNlPostcodeAddress', event);
+            nlPostcodeLookupValue = nlPostcodeInput.value.trim().toLowerCase();
 
             if (!addressData || addressData.length < 3) {
 
