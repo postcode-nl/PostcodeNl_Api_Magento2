@@ -12,14 +12,21 @@ define([
         intlAutocompleteCountries = JSON.parse(settings.supported_countries),
         selectors = {
             street: '[name^="street["]',
+            postcode: '[name="postcode"]',
+            city: '[name="city"]',
+            province: '[name="region"]',
             country: '[name="country_id"]',
             nlPostcodeField: 'div[name$=".postcode"]',
             countryField: 'div[name$=".country_id"]',
+            intlAutcomplete: '.postcodenl-autocomplete-address-input',
         },
         elements = {
             street: null,
             houseNumber: null,
             houseNumberAddition: null,
+            postcode: null,
+            city: null,
+            province: null,
             country: null,
         },
         eventHandlers = {},
@@ -125,6 +132,9 @@ define([
                 elements.street = streetParts[0];
                 elements.houseNumber = streetParts[1];
                 elements.houseNumberAddition = streetParts[2];
+                elements.postcode = form.querySelector(selectors.postcode);
+                elements.city = form.querySelector(selectors.city);
+                elements.province = form.querySelector(selectors.province);
                 elements.country = form.querySelector(selectors.country);
             }
         },
@@ -206,6 +216,8 @@ define([
                 loadingClassName = 'flekto_nl_zip_input-loading';
 
             nlPostcodeLookupValue = nlPostcodeInput.value.trim().toLowerCase();
+
+            this.resetInputAddress();
 
             if (!addressData || addressData.length < 3) {
 
@@ -305,6 +317,8 @@ define([
                     that.toggleFields(true);
                 }
             });
+
+            elements.street.addEventListener('autocomplete-search', eventHandlers.autocompleteSearch = this.resetInputAddress);
         },
 
         hideIntlAutocomplete: function () {
@@ -314,6 +328,7 @@ define([
             }
 
             elements.street.removeEventListener('autocomplete-select', eventHandlers.autocompleteSelect);
+            elements.street.removeEventListener('autocomplete-search', eventHandlers.autocompleteSearch);
             intlAutocompleteInstance.destroy();
             intlAutocompleteInstance = null;
         },
@@ -340,16 +355,26 @@ define([
             }
 
             if (response.city !== null) {
-                $(fieldsScope).find('[name="city"]').val(response.city).change();
+                $(elements.city).val(response.city).change();
             }
 
             if (response.postcode !== null) {
-                $(fieldsScope).find('[name="postcode"]').val(response.postcode).change();
+                $(elements.postcode).val(response.postcode).change();
             }
 
             if (response.province !== null) {
-                $(fieldsScope).find('[name="region"]').val(response.province).change();
+                $(elements.province).val(response.province).change();
             }
+        },
+
+        resetInputAddress: function () {
+
+            $(elements.street).not(selectors.intlAutcomplete).val('');
+            elements.houseNumber.value = '';
+            elements.houseNumberAddition.value = '';
+            elements.postcode.value = '';
+            elements.city.value = '';
+            elements.province.value = '';
         },
 
         toggleFields: function (state) {
@@ -358,7 +383,7 @@ define([
                 return;
             }
 
-            const $fields = $(fieldsScope).find('[name^="street["][name$="]"]:not(.postcodenl-autocomplete-address-input), [name="city"], [name="postcode"], [name="region"]');
+            const $fields = $(fieldsScope).find('[name^="street["][name$="]"], [name="city"], [name="postcode"], [name="region"]').not(selectors.intlAutcomplete);
 
             this.logDebug('Toggle address fields: ', state, 'fields: ', $fields);
 
