@@ -55,7 +55,7 @@ class LicenceCheck implements MessageInterface
      */
     public function getText()
     {
-        return __('Your Postcode.nl API licence is invalid');
+        return __('Your Postcode.nl API licence is invalid.');
     }
 
 
