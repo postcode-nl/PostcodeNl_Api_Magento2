@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="checkout" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Flekto_Postcode::css/lib/postcode-eu-autocomplete-address.css"/>
+    </head>
     <body>
         <referenceBlock name="checkout.root">
             <arguments>
@@ -8,9 +11,73 @@
                     <item name="components" xsi:type="array">
                         <item name="checkout" xsi:type="array">
                             <item name="children" xsi:type="array">
-                                <item name="autocomplete" xsi:type="array">
-                                    <item name="sortOrder" xsi:type="string">0</item>
-                                    <item name="component" xsi:type="string">Flekto_Postcode/js/postcode_autofill</item>
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="shipping-step" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="shippingAddress" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="shipping-address-fieldset" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="address_autofill_nl" xsi:type="array">
+																	<item name="component" xsi:type="string">Flekto_Postcode/js/form/element/address-autofill-nl</item>
+																	<item name="config" xsi:type="array">
+																		<item name="template" xsi:type="string">ui/collection</item>
+																	</item>
+																	<item name="provider" xsi:type="string">checkoutProvider</item>
+																	<item name="sortOrder" xsi:type="number">65</item>
+																	<item name="children" xsi:type="array">
+																		<item name="postcode" xsi:type="array">
+																			<item name="component" xsi:type="string">Magento_Ui/js/form/element/abstract</item>
+                                                                            <item name="label" translate="true" xsi:type="string">Zip/Postal Code</item>
+																			<item name="config" xsi:type="array">
+																				<item name="template" xsi:type="string">ui/form/field</item>
+																				<item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
+																				<item name="visible" xsi:type="boolean">true</item>
+																				<item name="placeholder" xsi:type="string">1234 AB</item>
+																			</item>
+                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-postcode</item>
+																		</item>
+																		<item name="house_number" xsi:type="array">
+																			<item name="component" xsi:type="string">Magento_Ui/js/form/element/abstract</item>
+																			<item name="label" translate="true" xsi:type="string">House number and addition</item>
+																			<item name="config" xsi:type="array">
+																				<item name="template" xsi:type="string">ui/form/field</item>
+																				<item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
+																				<item name="visible" xsi:type="boolean">true</item>
+																			</item>
+                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number</item>
+																		</item>
+																		<item name="house_number_select" xsi:type="array">
+																			<item name="component" xsi:type="string">Magento_Ui/js/form/element/select</item>
+																			<item name="label" translate="true" xsi:type="string">Which house number do you mean?</item>
+																			<item name="config" xsi:type="array">
+																				<item name="template" xsi:type="string">ui/form/field</item>
+																				<item name="elementTmpl" xsi:type="string">ui/form/element/select</item>
+																				<item name="visible" xsi:type="boolean">true</item>
+																				<item name="caption" xsi:type="string" translate="true">- Select house number -</item>
+																			</item>
+                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number-select</item>
+																		</item>
+																	</item>
+																</item>
+                                                                <item name="address_autofill_intl" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/address-autofill-intl</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="template" xsi:type="string">ui/form/field</item>
+                                                                        <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
+                                                                    </item>
+                                                                    <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
+                                                                    <item name="sortOrder" xsi:type="string">66</item>
+                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-intl-input</item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
                                 </item>
                             </item>
                         </item>

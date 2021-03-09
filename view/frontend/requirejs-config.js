@@ -1,9 +1,5 @@
 var config = {
-    map: {
-        '*': {
-	        flekto_postcode: 'Flekto_Postcode/js/postcode_autofill'
-
-        }
-    }
-    
+    paths: {
+        'ui/template/group/group': 'Flekto_Postcode/template/group/group'
+    },
 };

@@ -4,6 +4,8 @@ namespace Flekto\Postcode\Model;
 
 use Flekto\Postcode\Helper\ApiClientHelper;
 use Flekto\Postcode\Api\PostcodeModelInterface;
+use Flekto\Postcode\Api\Data\Autocomplete as AutocompleteData;
+use Flekto\Postcode\Api\Data\AutocompleteInterface as AutocompleteDataInterface;
 
 class PostcodeModel implements PostcodeModelInterface
 {
@@ -30,10 +32,10 @@ class PostcodeModel implements PostcodeModelInterface
     /**
      * @inheritdoc
      */
-    public function getAddressAutocomplete(string $context, string $term): array
+    public function getAddressAutocomplete(string $context, string $term): AutocompleteDataInterface
     {
         $result = $this->apiClientHelper->getAddressAutocomplete($context, $term);
-        return [$result];
+        return new AutocompleteData($result);
     }
 
 
