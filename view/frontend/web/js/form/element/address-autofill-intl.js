@@ -50,6 +50,10 @@ define([
 
             if (isSupported && this.intlAutocompleteInstance !== null) {
                 this.intlAutocompleteInstance.setCountry(countryCode);
+
+                // Reset address fields on country change.
+                this.resetInputAddress();
+                this.value('');
             }
         },
 
