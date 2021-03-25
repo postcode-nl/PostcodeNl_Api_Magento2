@@ -32,7 +32,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function process($result)
     {
@@ -57,7 +57,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function processShippingFields($result)
     {
@@ -78,7 +78,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function processBillingFields($result)
     {
@@ -100,6 +100,10 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 ['billing-step']['children']['payment']['children']
                 ['payments-list']['children'][$paymentMethodCode . '-form']['children']['form-fields']['children'];
 
+                $shippingFields = $result['components']['checkout']['children']['steps']['children']
+                    ['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
+
+                $billingFields = array_merge($billingFields, array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1]));
                 $billingFields = $this->changeAddressFieldPosition($billingFields);
 
                 $result['components']['checkout']['children']['steps']['children']['billing-step']
@@ -117,7 +121,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $addressFields
-     * @return void
+     * @return array
      */
     public function changeAddressFieldPosition($addressFields)
     {

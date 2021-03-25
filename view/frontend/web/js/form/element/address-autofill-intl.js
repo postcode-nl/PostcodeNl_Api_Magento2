@@ -50,6 +50,10 @@ define([
 
             if (isSupported && this.intlAutocompleteInstance !== null) {
                 this.intlAutocompleteInstance.setCountry(countryCode);
+
+                // Reset address fields on country change.
+                this.resetInputAddress();
+                this.value('');
             }
         },
 
@@ -68,37 +72,37 @@ define([
         bindKoHandler: function () {
             ko.bindingHandlers.initIntlAutocomplete = {
                 update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-                    if (this.intlAutocompleteInstance !== null || !ko.unwrap(valueAccessor())) {
+                    if (viewModel.intlAutocompleteInstance !== null || !ko.unwrap(valueAccessor())) {
                         return; // Autocomplete instance already created or element not visible.
                     }
 
-                    this.intlAutocompleteInstance = new AutocompleteAddress(element, {
-                        autocompleteUrl: this.settings.base_url + 'rest/V1/flekto/postcode-international/autocomplete',
-                        addressDetailsUrl: this.settings.base_url + 'rest/V1/flekto/postcode-international/getdetails',
-                        context: this.countryCode,
+                    viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
+                        autocompleteUrl: viewModel.settings.base_url + 'rest/V1/flekto/postcode-international/autocomplete',
+                        addressDetailsUrl: viewModel.settings.base_url + 'rest/V1/flekto/postcode-international/getdetails',
+                        context: viewModel.countryCode,
                     });
 
                     element.addEventListener('autocomplete-select', function (e) {
                         if (e.detail.precision === 'Address') {
-                            this.loading(true);
+                            viewModel.loading(true);
 
-                            this.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                                this.setInputAddress(result[0].address);
-                                this.toggleFields(true);
-                                this.loading(false);
-                            }.bind(this));
+                            viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
+                                viewModel.setInputAddress(result[0].address);
+                                viewModel.toggleFields(true);
+                                viewModel.loading(false);
+                            });
                         }
-                    }.bind(this));
+                    });
 
                     document.addEventListener('autocomplete-xhrerror', function (e) {
                         console.error('Autocomplete XHR error', e);
-                        this.toggleFields(true);
-                        this.loading(false);
-                    }.bind(this));
+                        viewModel.toggleFields(true);
+                        viewModel.loading(false);
+                    });
 
                     // Clear the previous values when searching for a new address.
-                    element.addEventListener('autocomplete-search', this.resetInputAddress.bind(this));
-                }.bind(this)
+                    element.addEventListener('autocomplete-search', viewModel.resetInputAddress.bind(viewModel));
+                }
             };
         },
 

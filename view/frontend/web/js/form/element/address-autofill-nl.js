@@ -11,11 +11,11 @@ define([
             imports: {
                 countryCode: '${$.parentName}.country_id:value',
                 postcodeValue: '${$.name}.postcode:value',
-                housenumberValue: '${$.name}.house_number:value',
+                houseNumberValue: '${$.name}.house_number:value',
                 onChangeCountry: '${$.parentName}.country_id:value',
                 onInputPostcode: '${$.name}.postcode:value',
-                onInputHousenumber: '${$.name}.house_number:value',
-                onChangeHousenumberAddition: '${$.name}.house_number_select:value',
+                onInputHouseNumber: '${$.name}.house_number:value',
+                onChangeHouseNumberAddition: '${$.name}.house_number_select:value',
             },
             modules: {
                 street: '${$.parentName}.street',
@@ -23,12 +23,12 @@ define([
                 postcode: '${$.parentName}.postcode',
                 regionIdInput: '${$.parentName}.region_id_input',
                 childPostcode: '${$.name}.postcode',
-                childHousenumber: '${$.name}.house_number',
+                childHouseNumber: '${$.name}.house_number',
                 childHouseNumberSelect: '${$.name}.house_number_select',
             },
             lookupDelay: 750,
-            postcodeRegex: /^[1-9][0-9]{3}\s?[a-z]{2}$/i,
-            housenumberRegex: /^[1-9]\d{0,4}(?:\D.*)?$/i,
+            postcodeRegex: /[1-9][0-9]{3}\s*[a-z]{2}/i,
+            houseNumberRegex: /[1-9]\d{0,4}(?:\D.*)?$/i,
         },
 
         settings: window.checkoutConfig.flekto_postcode.settings,
@@ -50,7 +50,7 @@ define([
 
                 // The "loading" class will be added to the house number element based on loading's observable value.
                 // I.e. when looking up an address.
-                this.childHousenumber(function (component) {
+                this.childHouseNumber(function (component) {
                     component.additionalClasses['loading'] = this.loading;
                 }.bind(this));
             }
@@ -76,7 +76,7 @@ define([
             const isNl = this.isNl();
 
             this.childPostcode().visible(isNl);
-            this.childHousenumber().visible(isNl);
+            this.childHouseNumber().visible(isNl);
             this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
             this.toggleFields(!isNl);
         },
@@ -94,7 +94,7 @@ define([
 
             this.lookupTimeout = setTimeout(function () {
                 if (this.postcodeRegex.test(value)) {
-                    if (this.housenumberRegex.test(this.childHousenumber().value())) {
+                    if (this.houseNumberRegex.test(this.childHouseNumber().value())) {
                         this.getAddress();
                     }
 
@@ -106,16 +106,16 @@ define([
             }.bind(this), this.lookupDelay);
         },
 
-        onInputHousenumber: function (value) {
+        onInputHouseNumber: function (value) {
             clearTimeout(this.lookupTimeout);
 
             if (value === '') {
                 this.resetHouseNumberSelect();
-                return this.childHousenumber().error(false);
+                return this.childHouseNumber().error(false);
             }
 
             this.lookupTimeout = setTimeout(function () {
-                if (this.housenumberRegex.test(value)) {
+                if (this.houseNumberRegex.test(value)) {
                     if (this.postcodeRegex.test(this.childPostcode().value())) {
                         this.getAddress();
                     }
@@ -123,28 +123,28 @@ define([
                     return;
                 }
 
-                this.childHousenumber().error($t('Please enter a valid house number.'));
+                this.childHouseNumber().error($t('Please enter a valid house number.'));
                 this.resetHouseNumberSelect();
             }.bind(this), this.lookupDelay);
         },
 
         getAddress: function () {
-            const postcode = this.childPostcode().value(),
-                housenumber = this.childHousenumber().value();
+            const postcode = this.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, ''),
+                houseNumber = this.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim();
 
             this.resetHouseNumberSelect();
             this.resetInputAddress();
             this.loading(true);
 
-            const url = this.settings.base_url + 'rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + housenumber;
+            const url = this.settings.base_url + 'rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + houseNumber;
 
             $.get(url, function (response) {
                 if (response[0].error) {
-                    return this.childHousenumber().error(response[0].message_details);
+                    return this.childHouseNumber().error(response[0].message_details);
                 }
 
                 if (response[0].status === 'notFound') {
-                    return this.childHousenumber().error($t('Address not found.'));
+                    return this.childHouseNumber().error($t('Address not found.'));
                 }
 
                 this.address = response[0].address;
@@ -183,7 +183,7 @@ define([
             this.regionIdInput().value(address.province);
         },
 
-        onChangeHousenumberAddition: function (value) {
+        onChangeHouseNumberAddition: function (value) {
             if (typeof value === 'undefined') {
                 return this.resetInputAddress();
             }
