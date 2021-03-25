@@ -53,7 +53,7 @@ define([
 
                 // Reset address fields on country change.
                 this.resetInputAddress();
-                this.value('');
+                this.intlAutocompleteInstance.reset();
             }
         },
 
