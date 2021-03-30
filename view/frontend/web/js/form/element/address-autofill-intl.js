@@ -77,8 +77,8 @@ define([
                     }
 
                     viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
-                        autocompleteUrl: viewModel.settings.base_url + 'rest/V1/flekto/postcode-international/autocomplete',
-                        addressDetailsUrl: viewModel.settings.base_url + 'rest/V1/flekto/postcode-international/getdetails',
+                        autocompleteUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/autocomplete',
+                        addressDetailsUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/address',
                         context: viewModel.countryCode,
                     });
 
