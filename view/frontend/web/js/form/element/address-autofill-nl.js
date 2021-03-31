@@ -136,7 +136,7 @@ define([
             this.resetInputAddress();
             this.loading(true);
 
-            const url = this.settings.base_url + 'rest/V1/flekto/postcode-international/nlzipcode/' + postcode + '/' + houseNumber;
+            const url = this.settings.base_url + 'postcode-eu/V1/nl/address/' + postcode + '/' + houseNumber;
 
             $.get(url, function (response) {
                 if (response[0].error) {

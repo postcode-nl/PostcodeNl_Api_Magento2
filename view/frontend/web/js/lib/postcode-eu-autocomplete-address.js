@@ -8,21 +8,23 @@
  * https://tldrlegal.com/l/mit
  *
  * @author Postcode.nl
- * @version 1.2
+ * @version 1.2.2
  */
 
 (function (global, factory) {
 	'use strict';
 
-    if (typeof define === 'function' && define.amd)
+	// eslint-disable-next-line no-undef
+	if (typeof define === 'function' && define.amd)
 	{
-        define([], factory);
-    }
+		// eslint-disable-next-line no-undef
+		define([], factory);
+	}
 	else
 	{
-        global.PostcodeNl = global.PostcodeNl || {};
-        global.PostcodeNl.AutocompleteAddress = factory(global);
-    }
+		global.PostcodeNl = global.PostcodeNl || {};
+		global.PostcodeNl.AutocompleteAddress = factory(global);
+	}
 }(typeof self !== 'undefined' ? self : this, function () {
 	'use strict';
 
@@ -38,7 +40,141 @@
 		KEY_UP = 'ArrowUp',
 		KEY_UP_LEGACY = 'Up',
 		KEY_DOWN = 'ArrowDown',
-		KEY_DOWN_LEGACY = 'Down';
+		KEY_DOWN_LEGACY = 'Down',
+
+		/**
+		 * Default options.
+		 * @type {Object}
+		 */
+		defaults = Object.create(null, {
+			/**
+			 * Initial autocomplete context. E.g. a country code "nld", "bel" or "deu" to start searching in that country.
+			 * @type {string}
+			 */
+			context: {
+				value: 'nld',
+				writable: true,
+			},
+
+			/**
+			 * URL that will return autocomplete JSON data.
+			 * @type {string}
+			 */
+			autocompleteUrl: {
+				writable: true,
+			},
+
+			/**
+			 * URL that will return address details JSON data.
+			 * @type {string}
+			 */
+			addressDetailsUrl: {
+				writable: true,
+			},
+
+			/**
+			 * Text to use with tags.
+			 * @type {Object}
+			 */
+			tags: {
+				value: {
+					'unvalidated-housenumber': '(unknown house number)',
+					'unvalidated-housenumber-addition': '(unknown house number addition)',
+				},
+				writable: true,
+			},
+
+			/**
+			 * CSS prefix
+			 * @type {string}
+			 */
+			cssPrefix: {
+				value: 'postcodenl-autocomplete-',
+				writable: true,
+			},
+
+			/**
+			 * Minimum number of characters typed before a search is performed.
+			 * @type {number}
+			 */
+			minLength: {
+				value: 1,
+				writable: true,
+			},
+
+			/**
+			 * Delay in milliseconds between when a keystroke occurs and when a search is performed.
+			 * @type {number}
+			 */
+			delay: {
+				value: 300,
+				writable: true,
+			},
+
+			/**
+			 * Which element the menu should be appended to.
+			 * @type {string|HTMLElement}
+			 */
+			appendTo: {
+				value: document.body,
+				writable: true,
+			},
+
+			/**
+			 * Focus the first item when the menu is shown.
+			 * @type {boolean}
+			 */
+			autoFocus: {
+				value: false,
+				writable: true,
+			},
+
+			/**
+			 * Automatically calculate menu width. Disable to define width in CSS.
+			 * @type {boolean}
+			 */
+			autoResize: {
+				value: true,
+				writable: true,
+			},
+
+			/**
+			 * Get screen reader text for a successful response with at least one match.
+			 * Override this function to translate the message.
+			 * @type {Function}
+			 *
+			 * @param {number} count - Number of matches. Will be at least one.
+			 * @param {string} languageTag - Language tag, if specified via language option or setLanguage().
+			 * @return {string} Screen reader message based on the number of matches.
+			 */
+			getResponseMessage: {
+				value: function (count)
+				{
+					let message;
+
+					if (count > 1)
+					{
+						message = count + ' address suggestions available. ';
+					}
+					else
+					{
+						message = 'One address suggestion available. ';
+					}
+
+					message += 'Use up and down arrow keys to navigate.';
+
+					return message;
+				},
+				writable: true,
+			},
+
+			/**
+			 * The language used for API calls.
+			 */
+			language: {
+				writable: true,
+			},
+		});
 
 	/**
 	 * The autocomplete menu.
@@ -206,8 +342,8 @@
 		ul.classList.add(options.cssPrefix + 'menu-items');
 		wrapper.appendChild(ul);
 
-		ul.addEventListener('mouseover', function (e) {
-			if (e.target === ul)
+		ul.addEventListener('mousemove', function (e) {
+			if (e.target === item || e.target === ul)
 			{
 				return;
 			}
@@ -266,7 +402,7 @@
 			ul.innerHTML = '';
 			ul.scrollTop = 0;
 
-			for (let i = 0, li, match; match = matches[i++];)
+			for (let i = 0, li, match; (match = matches[i++]);)
 			{
 				li = renderItem(ul, match);
 				elementData.set(li, match);
@@ -507,7 +643,7 @@
 	 * @param {HTMLElement|NodeList|string} elementsOrSelector - Element(s) or CSS selector string for element(s) to be used as autocomplete input.
 	 * @param {Object} options - Options to override the defaults. @see PostcodeNl~defaults.
 	 */
-	return function (elementsOrSelector, options)
+	const autocomplete = function (elementsOrSelector, options)
 	{
 		let inputElements;
 
@@ -533,156 +669,6 @@
 			return;
 		}
 
-		/**
-		 * Default options.
-		 * @type {Object}
-		 */
-		const defaults = Object.create(null, {
-			/**
-			 * Initial autocomplete context. E.g. a country code "nld", "bel" or "deu" to start searching in that country.
-			 * @type {string}
-			 */
-			context: {
-				value: 'nld',
-				writable: true,
-			},
-
-			/**
-			 * URL that will return autocomplete JSON data.
-			 * @type {string}
-			 */
-			autocompleteUrl: {
-				writable: true,
-			},
-
-			/**
-			 * URL that will return address details JSON data.
-			 * @type {string}
-			 */
-			addressDetailsUrl: {
-				writable: true,
-			},
-
-			/**
-			 * Text to use with tags.
-			 * @type {Object}
-			 */
-			tags: {
-				value: {
-					'unvalidated-housenumber': '(unknown house number)',
-					'unvalidated-housenumber-addition': '(unknown house number addition)',
-				},
-				writable: true,
-			},
-
-			/**
-			 * CSS prefix
-			 * @type {string}
-			 */
-			cssPrefix: {
-				value: 'postcodenl-autocomplete-',
-				writable: true,
-			},
-
-			/**
-			 * Minimum number of characters typed before a search is performed.
-			 * @type {number}
-			 */
-			minLength: {
-				value: 1,
-				writable: true,
-			},
-
-			/**
-			 * Delay in milliseconds between when a keystroke occurs and when a search is performed.
-			 * @type {number}
-			 */
-			delay: {
-				value: 300,
-				writable: true,
-			},
-
-			/**
-			 * Which element the menu should be appended to.
-			 * @type {string|HTMLElement}
-			 */
-			appendTo: {
-				value: document.body,
-				writable: true,
-			},
-
-			/**
-			 * Focus the first item when the menu is shown.
-			 * @type {boolean}
-			 */
-			autoFocus: {
-				value: false,
-				writable: true,
-			},
-
-			/**
-			 * Select the first full address suggestion on blur (if any, and no menu item was selected).
-			 * @type {boolean}
-			 */
-			autoSelect: {
-				value: false,
-				writable: true,
-			},
-
-			/**
-			 * Automatically calculate menu width. Disable to define width in CSS.
-			 * @type {boolean}
-			 */
-			autoResize: {
-				value: true,
-				writable: true,
-			},
-
-			/**
-			 * Get screen reader text for a successful response with at least one match.
-			 * Override this function to translate the message.
-			 * @type {Function}
-			 *
-			 * @param {number} count - Number of matches. Will be at least one.
-			 * @param {string} languageTag - Language tag, if specified via language option or setLanguage().
-			 * @return {string} Screen reader message based on the number of matches.
-			 */
-			getResponseMessage: {
-				value: function (count, languageTag)
-				{
-					let message;
-
-					if (count > 1)
-					{
-						message = count + ' address suggestions available. ';
-					}
-					else
-					{
-						message = 'One address suggestion available. ';
-					}
-
-					message += 'Use up and down arrow keys to navigate.';
-
-					return message;
-				},
-				writable: true,
-			},
-
-			/**
-			 * The language used for API calls.
-			 */
-			language: {
-				writable: true,
-			},
-		});
-
-		// Expose plugin defaults.
-		Object.defineProperty(this, 'defaults', {
-			get: function () {
-				return defaults;
-			},
-		});
-
 		// Create options object that inherits from defaults.
 		options = extend(Object.create(defaults), options);
 
@@ -696,6 +682,8 @@
 		let searchTimeoutId = null,
 			previousValue = null,
 			previousContext = null,
+			xhr = null,
+			activeElement = null,
 			matches = [];
 
 		const self = this,
@@ -750,7 +738,12 @@
 		 */
 		this.xhrGet = function (url, success)
 		{
-			const xhr = new XMLHttpRequest();
+			if (xhr !== null && xhr.readyState < 4)
+			{
+				xhr.abort();
+			}
+
+			xhr = new XMLHttpRequest();
 
 			xhr.addEventListener('load', function () {
 				if (this.status === 200)
@@ -758,6 +751,28 @@
 					success.call(this, JSON.parse(xhr.response));
 				}
 			});
+
+			if (activeElement !== null)
+			{
+				const element = activeElement,
+					xhrErrorHandler = function (e)
+					{
+						if (this.status !== 200)
+						{
+							element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: {'event': e, request: this}}));
+						}
+					};
+
+				// Trigger an error event for failed requests.
+				xhr.addEventListener('error', xhrErrorHandler);
+				xhr.addEventListener('load', xhrErrorHandler);
+
+				element.classList.add(options.cssPrefix + 'loading');
+
+				xhr.addEventListener('loadend', function () { // All three load-ending conditions (abort, load, or error).
+					element.classList.remove(options.cssPrefix + 'loading');
+				});
+			}
 
 			xhr.open('GET', url);
 			xhr.setRequestHeader('X-Autocomplete-Session', getSessionId());
@@ -846,7 +861,7 @@
 
 			if (item.tags)
 			{
-				for (let i = 0, tag; tag = item.tags[i++];)
+				for (let i = 0, tag; (tag = item.tags[i++]);)
 				{
 					const em = document.createElement('em');
 					em.textContent = this.options.tags[tag];
@@ -879,7 +894,7 @@
 				result = [],
 				pair;
 
-			while (pair = indices[i++])
+			while ((pair = indices[i++]))
 			{
 				result.push(str.slice(end, pair[0]));
 				start = pair[0];
@@ -900,7 +915,7 @@
 		{
 			options.context = iso3Code.toLowerCase();
 
-			for (let i = 0, element; element = inputElements[i++];)
+			for (let i = 0, element; (element = inputElements[i++]);)
 			{
 				elementData.get(element).context = options.context;
 			}
@@ -929,6 +944,7 @@
 				element.value = term;
 			}
 
+			activeElement = element;
 			element.classList.toggle(inputBlankClassName, element.value === '');
 			search(element);
 		}
@@ -944,7 +960,7 @@
 
 			menu.clear();
 
-			for (let i = 0, element; element = inputElements[i++];)
+			for (let i = 0, element; (element = inputElements[i++]);)
 			{
 				const data = elementData.get(element);
 
@@ -967,7 +983,7 @@
 
 			document.body.removeChild(liveRegion);
 
-			for (let i = 0, element; element = inputElements[i++];)
+			for (let i = 0, element; (element = inputElements[i++]);)
 			{
 				const data = elementData.get(element);
 
@@ -1080,7 +1096,7 @@
 				}
 			});
 
-			element.addEventListener('input', eventHandlers.input = function (e) {
+			element.addEventListener('input', eventHandlers.input = function () {
 				element.classList.remove(inputBlankClassName);
 				menu.blur(); // Prevent focus on old menu item when value has changed.
 				matches = []; // Prevent auto-selecting old menu item on blur.
@@ -1137,24 +1153,8 @@
 					return;
 				}
 
-				const data = elementData.get(element);
 				window.clearTimeout(searchTimeoutId);
 				menu.close();
-
-				if (options.autoSelect && typeof data.match.context === 'undefined')
-				{
-					// Get first full address from matches, if any.
-					for (let i = 0, m; m = matches[i++];)
-					{
-						if (m.precision === PRECISION_ADDRESS)
-						{
-							element.value = m.value;
-							element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'select', {detail: m}));
-							break;
-						}
-					}
-				}
-
 				element.classList.toggle(inputBlankClassName, element.value === '');
 			});
 
@@ -1182,6 +1182,7 @@
 			menu.open(element);
 
 			const data = elementData.get(element);
+			activeElement = element;
 
 			// Bug #51485 - this shouldn't happen, but it does in IE
 			/*
@@ -1215,9 +1216,7 @@
 				return;
 			}
 
-			element.classList.add(options.cssPrefix + 'loading');
-
-			const xhr = self.getSuggestions.call(self, data.context, element.value, function (result) {
+			self.getSuggestions.call(self, data.context, element.value, function (result) {
 				// Trigger the response event. Cancel this event to prevent rendering address suggestions.
 				if (true === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'response', {detail: result, cancelable: true})))
 				{
@@ -1237,23 +1236,15 @@
 					}
 				}
 			});
-
-			const xhrErrorHandler = function (e)
-			{
-				if (this.status !== 200)
-				{
-					element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: {'event': e, request: this}}));
-				}
-			}
-
-			// Trigger an error event for failed requests.
-			xhr.addEventListener('error', xhrErrorHandler);
-			xhr.addEventListener('load', xhrErrorHandler);
-
-			xhr.addEventListener('loadend', function (e) { // All three load-ending conditions (abort, load, or error).
-				element.classList.remove(options.cssPrefix + 'loading');
-			});
 		}
 	}
 
+	// Expose plugin defaults.
+	Object.defineProperty(autocomplete, 'defaults', {
+		get: function () {
+			return defaults;
+		},
+	});
+
+	return autocomplete;
 }));
