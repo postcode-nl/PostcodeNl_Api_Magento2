@@ -11,9 +11,9 @@ interface PostcodeModelInterface
      * @access public
      * @param string $context
      * @param string $term
-     * @return string[][]
+     * @return Data\AutocompleteInterface
      */
-    public function getAddressAutocomplete(string $context, string $term): array;
+    public function getAddressAutocomplete(string $context, string $term): Data\AutocompleteInterface;
 
 
     /**

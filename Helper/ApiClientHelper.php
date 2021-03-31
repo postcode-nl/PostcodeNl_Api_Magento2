@@ -53,26 +53,21 @@ class ApiClientHelper extends AbstractHelper
      * getJsinit function.
      *
      * @access public
-     * @return void
+     * @return array
      */
-    public function getJsinit()
+    public function getJsinit(): array
     {
         if (!$this->getStoreConfig('postcodenl_api/general/enabled')) {
-            return [];
+            return ['enabled' => false];
         }
 
         $settings = [
-            "enabled" => $this->getStoreConfig('postcodenl_api/general/enabled'),
-            "supported_countries" => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
-            "nl_input_behavior" => (!empty($this->getStoreConfig('postcodenl_api/general/nl_input_behavior')) ? $this->getStoreConfig('postcodenl_api/general/nl_input_behavior') : 'zip_house'),
-            "show_hide_address_fields" => (!empty($this->getStoreConfig('postcodenl_api/general/show_hide_address_fields')) ? $this->getStoreConfig('postcodenl_api/general/show_hide_address_fields') : 'show'),
-            "base_url" => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
-            "debug" => $this->isDebugging(),
-            "translations" => [
-                'flekto_nl_zip_label' => __('Postcode and house number'),
-                'flekto_nl_zip_placeholder' => __('1234AB 1'),
-                'flekto_nl_zip_warning' => __('Enter a postcode and house number.'),
-            ]
+            'enabled' => (bool)$this->getStoreConfig('postcodenl_api/general/enabled'),
+            'supported_countries' => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
+            'nl_input_behavior' => (!empty($this->getStoreConfig('postcodenl_api/general/nl_input_behavior')) ? $this->getStoreConfig('postcodenl_api/general/nl_input_behavior') : 'zip_house'),
+            'show_hide_address_fields' => (!empty($this->getStoreConfig('postcodenl_api/general/show_hide_address_fields')) ? $this->getStoreConfig('postcodenl_api/general/show_hide_address_fields') : 'show'),
+            'base_url' => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
+            'debug' => $this->isDebugging(),
         ];
 
         return $settings;
@@ -90,7 +85,7 @@ class ApiClientHelper extends AbstractHelper
     {
         if (empty($countries)) return [];
 
-        $countries = explode(", ", $countries);
+        $countries = explode(', ', $countries);
         $countriesReturn = [];
         if (!empty($countries)) {
             foreach ($countries as $country) {
@@ -108,7 +103,7 @@ class ApiClientHelper extends AbstractHelper
      * @access private
      * @return PostcodeApiClient
      */
-    private function prepareApiClient()
+    private function prepareApiClient(): PostcodeApiClient
     {
         $isApiReady = $this->isPostCodeApiReady();
         if ($isApiReady !== true) {
@@ -124,11 +119,11 @@ class ApiClientHelper extends AbstractHelper
      * getAddressAutocomplete function.
      *
      * @access public
-     * @param String $context
-     * @param String $term
-     * @return Array
+     * @param string $context
+     * @param string $term
+     * @return array
      */
-    public function getAddressAutocomplete(String $context, String $term)
+    public function getAddressAutocomplete(string $context, string $term): array
     {
         $context = CountryCodeConvertorHelper::alpha2ToAlpha3($context);
         $client = $this->prepareApiClient();
@@ -147,7 +142,6 @@ class ApiClientHelper extends AbstractHelper
             }
 
             $response = $client->internationalAutocomplete($context, $term, $sessionStr, $locale);
-            $response['session_id'] = $sessionStr;
 
             return $this->prepareResponse($response, $client);
 
@@ -161,11 +155,11 @@ class ApiClientHelper extends AbstractHelper
      * getAddressDetails function.
      *
      * @access public
-     * @param String $context
-     * @param String $dispatchCountry
-     * @return void
+     * @param string $context
+     * @param string $dispatchCountry
+     * @return array
      */
-    public function getAddressDetails(String $context, String $dispatchCountry="")
+    public function getAddressDetails(string $context, string $dispatchCountry = ''): array
     {
         if (strlen($dispatchCountry) > 2) {
             $dispatchCountry = CountryCodeConvertorHelper::alpha2ToAlpha3($dispatchCountry);
@@ -193,23 +187,61 @@ class ApiClientHelper extends AbstractHelper
      * getNlAddress function.
      *
      * @access public
-     * @param String $zipCode
-     * @param String $houseNumber
-     * @return void
+     * @param string $zipCode
+     * @param string $houseNumber
+     * @return array
      */
-    public function getNlAddress(String $zipCode, String $houseNumber)
+    public function getNlAddress(string $zipCode, string $houseNumber): array
     {
         $client = $this->prepareApiClient();
+        $address = null;
 
-        $houseNumber = (int) preg_replace('/[^0-9]/', '', $houseNumber);
+        preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
+        $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
+        $houseNumberAddition = isset($matches[2]) ? trim($matches[2]) : null;
+
+        if (is_null($houseNumber)) {
+            return ['error' => true, 'message_details' => __('Invalid house number.')];
+        }
 
         try {
-            $response = $client->dutchAddressByPostcode($zipCode, $houseNumber/*  , ?string $houseNumberAddition = null */);
-            return $this->prepareResponse($response, $client);
+            $address = $client->dutchAddressByPostcode($zipCode, $houseNumber, $houseNumberAddition);
+            $address = $this->prepareResponse($address, $client);
+            $status = 'valid';
 
+            if (!is_null($houseNumberAddition) && (is_null($address['houseNumberAddition']) || strcasecmp($houseNumberAddition, $address['houseNumberAddition']) != 0)
+            ) {
+                $status = 'houseNumberAdditionIncorrect';
+            }
+        } catch (NotFoundException $e) {
+            $status = 'notFound';
         } catch (\Exception $e) {
             return $this->handleClientException($e);
         }
+
+        $formattedHouseNumberAdditions = [];
+
+        foreach ($address['houseNumberAdditions'] ?? [] as $addition) {
+            $houseNumberWithAddition = rtrim($address['houseNumber'] . ' ' . $addition);
+            $formattedHouseNumberAdditions[] = [
+                'label' => $houseNumberWithAddition,
+                'value' => $houseNumberWithAddition,
+                'houseNumberAddition' => $addition,
+            ];
+        }
+
+        $address['houseNumberAdditions'] = $formattedHouseNumberAdditions;
+
+        $out = ['address' => $address, 'status' => $status];
+
+        if ($this->isDebugging()) {
+            $out['debug'] = [
+                'parsedHouseNumber' => $houseNumber,
+                'parsedHouseNumberAddition' => $houseNumberAddition,
+            ];
+        }
+
+        return $out;
     }
 
 
@@ -217,9 +249,9 @@ class ApiClientHelper extends AbstractHelper
      * generateSessionString function.
      *
      * @access private
-     * @return void
+     * @return string
      */
-    private function generateSessionString()
+    private function generateSessionString(): string
     {
         return bin2hex(random_bytes(8));
     }
@@ -230,9 +262,9 @@ class ApiClientHelper extends AbstractHelper
      *
      * @access private
      * @param mixed $exception
-     * @return void
+     * @return array
      */
-    private function handleClientException($exception)
+    private function handleClientException(\Exception $exception): array
     {
         $response['error'] = true;
 
@@ -254,7 +286,7 @@ class ApiClientHelper extends AbstractHelper
         $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass).$exception->getTraceAsString();
 
         $response['message_details'] = __($exception->getMessage());
-        $response['debugInfo'] = $this->getDebugInfo();
+        $response['magentoDebugInfo'] = $this->getDebugInfo();
 
         return $response;
     }
@@ -265,10 +297,10 @@ class ApiClientHelper extends AbstractHelper
      *
      * @access private
      * @param mixed $apiResult
-     * @param mixed $client
-     * @return void
+     * @param PostcodeApiClient $client
+     * @return array
      */
-    private function prepareResponse($apiResult, $client)
+    private function prepareResponse(array $apiResult, PostcodeApiClient $client): array
     {
         // set Cache-Control header from API response
         $clientResponseHeaders = $client->getApiCallResponseHeaders();
@@ -284,12 +316,11 @@ class ApiClientHelper extends AbstractHelper
             }
         }
 
-        $response['response'] = $apiResult;
         if ($this->isDebugging()) {
-            $response['debugInfo'] = $this->getDebugInfo();
+            $apiResult['magentoDebugInfo'] = $this->getDebugInfo();
         }
 
-        return $response;
+        return $apiResult;
     }
 
 
@@ -297,9 +328,9 @@ class ApiClientHelper extends AbstractHelper
      * getSupportedCountries function.
      *
      * @access public
-     * @return void
+     * @return array
      */
-    public function getSupportedCountries()
+    public function getSupportedCountries(): array
     {
         $client = $this->prepareApiClient();
 
@@ -316,9 +347,9 @@ class ApiClientHelper extends AbstractHelper
      * isDebugging function.
      *
      * @access public
-     * @return void
+     * @return bool
      */
-    public function isDebugging()
+    public function isDebugging(): bool
     {
         return (bool) $this->getStoreConfig('postcodenl_api/advanced_config/api_debug') && $this->developerHelper->isDevAllowed();
     }
@@ -329,9 +360,9 @@ class ApiClientHelper extends AbstractHelper
      *
      * @access private
      * @param mixed $path
-     * @return void
+     * @return string|null
      */
-    public function getStoreConfig($path)
+    public function getStoreConfig($path): ?string
     {
         return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
     }
@@ -341,9 +372,9 @@ class ApiClientHelper extends AbstractHelper
      * getKey function.
      *
      * @access private
-     * @return void
+     * @return string
      */
-    private function getKey()
+    private function getKey(): string
     {
         return trim($this->getStoreConfig('postcodenl_api/general/api_key'));
     }
@@ -353,9 +384,9 @@ class ApiClientHelper extends AbstractHelper
      * getSecret function.
      *
      * @access private
-     * @return void
+     * @return string
      */
-    private function getSecret()
+    private function getSecret(): string
     {
         return trim($this->getStoreConfig('postcodenl_api/general/api_secret'));
     }
@@ -365,7 +396,7 @@ class ApiClientHelper extends AbstractHelper
      * isPostCodeApiReady function.
      *
      * @access private
-     * @return void
+     * @return bool|array
      */
     private function isPostCodeApiReady()
     {
@@ -402,9 +433,9 @@ class ApiClientHelper extends AbstractHelper
      *
      * @access protected
      * @param mixed $moduleName
-     * @return void
+     * @return array|null
      */
-    protected function getModuleInfo($moduleName)
+    protected function getModuleInfo($moduleName): ?array
     {
         $modules = $this->getMagentoModules();
 
@@ -420,9 +451,9 @@ class ApiClientHelper extends AbstractHelper
      * getMagentoModules function.
      *
      * @access private
-     * @return void
+     * @return array
      */
-    private function getMagentoModules()
+    private function getMagentoModules(): array
     {
         if ($this->modules !== null) {
             return $this->modules;
@@ -447,9 +478,9 @@ class ApiClientHelper extends AbstractHelper
      * getDebugInfo function.
      *
      * @access private
-     * @return void
+     * @return array
      */
-    private function getDebugInfo()
+    private function getDebugInfo(): array
     {
         $debug = [
             'configuration' => [

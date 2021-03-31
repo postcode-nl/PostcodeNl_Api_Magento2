@@ -32,16 +32,20 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function process($result)
     {
         $moduleEnabled = $this->scopeConfig->getValue('postcodenl_api/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
-        if ($moduleEnabled && isset($result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
-
-            $result = $this->processShippingFields($result);
-            $result = $this->processBillingFields($result);
+        if (isset($result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
+            if ($moduleEnabled) {
+                $result = $this->processShippingFields($result);
+                $result = $this->processBillingFields($result);
+            }
+            else {
+                $shippingFields = $result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
+            }
         }
 
         return $result;
@@ -53,7 +57,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function processShippingFields($result)
     {
@@ -74,7 +78,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $result
-     * @return void
+     * @return array
      */
     public function processBillingFields($result)
     {
@@ -96,6 +100,10 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 ['billing-step']['children']['payment']['children']
                 ['payments-list']['children'][$paymentMethodCode . '-form']['children']['form-fields']['children'];
 
+                $shippingFields = $result['components']['checkout']['children']['steps']['children']
+                    ['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
+
+                $billingFields = array_merge($billingFields, array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1]));
                 $billingFields = $this->changeAddressFieldPosition($billingFields);
 
                 $result['components']['checkout']['children']['steps']['children']['billing-step']
@@ -113,39 +121,46 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      *
      * @access public
      * @param mixed $addressFields
-     * @return void
+     * @return array
      */
     public function changeAddressFieldPosition($addressFields)
     {
-       if ($this->scopeConfig->getValue('postcodenl_api/advanced_config/change_fields_position') != 1) {
-           return $addressFields;
-       }
-
-        if (isset($addressFields['street'])) {
-            $addressFields['street']['sortOrder'] = '910';
-        }
-
-        if (isset($addressFields['postcode'])) {
-            $addressFields['postcode']['sortOrder'] = '930';
-        }
-
-        if (isset($addressFields['city'])) {
-            $addressFields['city']['sortOrder'] = '920';
-        }
-
-        if (isset($addressFields['region'])) {
-            $addressFields['region']['sortOrder'] = '940';
-        }
-
-        if (isset($addressFields['region_id'])) {
-            $addressFields['region_id']['sortOrder'] = '945';
+        if ($this->scopeConfig->getValue('postcodenl_api/general/change_fields_position') != '1') {
+            return $addressFields;
         }
 
         if (isset($addressFields['country_id'])) {
             $addressFields['country_id']['sortOrder'] = '900';
         }
 
+        if (isset($addressFields['address_autofill_intl'])) {
+            $addressFields['address_autofill_intl']['sortOrder'] = '910';
+        }
+
+        if (isset($addressFields['address_autofill_nl'])) {
+            $addressFields['address_autofill_nl']['sortOrder'] = '920';
+        }
+
+        if (isset($addressFields['street'])) {
+            $addressFields['street']['sortOrder'] = '930';
+        }
+
+        if (isset($addressFields['postcode'])) {
+            $addressFields['postcode']['sortOrder'] = '940';
+        }
+
+        if (isset($addressFields['city'])) {
+            $addressFields['city']['sortOrder'] = '950';
+        }
+
+        if (isset($addressFields['region'])) {
+            $addressFields['region']['sortOrder'] = '960';
+        }
+
+        if (isset($addressFields['region_id'])) {
+            $addressFields['region_id']['sortOrder'] = '965';
+        }
+
         return $addressFields;
     }
-
 }

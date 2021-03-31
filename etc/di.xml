@@ -1,4 +1,14 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Flekto\Postcode\Api\PostcodeModelInterface" type="Flekto\Postcode\Model\PostcodeModel" />
+
+    <type name="Magento\Framework\App\AreaList">
+        <arguments>
+            <argument name="areas" xsi:type="array">
+                <item name="postcode_eu" xsi:type="array">
+                     <item name="frontName" xsi:type="string">postcode-eu</item>
+                 </item>
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -55,9 +55,10 @@ class CustomConfigProvider implements ConfigProviderInterface
     {
         $config = [
             'flekto_postcode' => [
-                'settings' => $this->apiClientHelper->getJsinit(false)
+                'settings' => $this->apiClientHelper->getJsinit(),
             ]
         ];
+
         return $config;
     }
 }

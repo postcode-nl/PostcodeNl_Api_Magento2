@@ -3,7 +3,7 @@
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
-                <item name="Flekto_Postcode_Custom_Config_Provider" xsi:type="object">Flekto\Postcode\Model\CustomConfigProvider</item>
+                <item name="flekto_postcode_custom_config_provider" xsi:type="object">Flekto\Postcode\Model\CustomConfigProvider</item>
             </argument>
         </arguments>
     </type>
