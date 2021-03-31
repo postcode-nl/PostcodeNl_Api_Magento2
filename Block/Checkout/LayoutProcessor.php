@@ -38,14 +38,9 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     {
         $moduleEnabled = $this->scopeConfig->getValue('postcodenl_api/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
-        if (isset($result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
-            if ($moduleEnabled) {
-                $result = $this->processShippingFields($result);
-                $result = $this->processBillingFields($result);
-            }
-            else {
-                $shippingFields = $result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
-            }
+        if ($moduleEnabled && isset($result['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
+            $result = $this->processShippingFields($result);
+            $result = $this->processBillingFields($result);
         }
 
         return $result;
