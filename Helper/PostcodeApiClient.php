@@ -21,7 +21,7 @@ class PostcodeApiClient extends AbstractHelper
     public const SESSION_HEADER_KEY = 'X-Autocomplete-Session';
 
     protected const SERVER_URL = 'https://api.postcode.eu/';
-    protected const VERSION = 0.2;
+    protected const VERSION = 1.0;
 
     /** @var string The Postcode.nl API key, required for all requests. Provided when registering an account. */
     protected $_key;
