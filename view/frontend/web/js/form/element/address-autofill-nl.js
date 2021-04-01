@@ -138,27 +138,32 @@ define([
 
             const url = this.settings.base_url + 'postcode-eu/V1/nl/address/' + postcode + '/' + houseNumber;
 
-            $.get(url, function (response) {
-                if (response[0].error) {
-                    return this.childHouseNumber().error(response[0].message_details);
-                }
+            $.get({
+                url: url,
+                cache: true,
+                dataType: 'json',
+                success: function (response) {
+                    if (response[0].error) {
+                        return this.childHouseNumber().error(response[0].message_details);
+                    }
 
-                if (response[0].status === 'notFound') {
-                    return this.childHouseNumber().error($t('Address not found.'));
-                }
+                    if (response[0].status === 'notFound') {
+                        return this.childHouseNumber().error($t('Address not found.'));
+                    }
 
-                this.address = response[0].address;
+                    this.address = response[0].address;
 
-                if (response[0].status === 'houseNumberAdditionIncorrect') {
-                    this.childHouseNumberSelect()
-                        .setOptions(this.address.houseNumberAdditions)
-                        .show();
-                }
-                else {
-                    this.setInputAddress(this.address);
-                    this.toggleFields(true);
-                }
-            }.bind(this)).always(this.loading.bind(null, false));
+                    if (response[0].status === 'houseNumberAdditionIncorrect') {
+                        this.childHouseNumberSelect()
+                            .setOptions(this.address.houseNumberAdditions)
+                            .show();
+                    }
+                    else {
+                        this.setInputAddress(this.address);
+                        this.toggleFields(true);
+                    }
+                }.bind(this)
+            }).always(this.loading.bind(null, false));
         },
 
         setInputAddress: function (address) {
