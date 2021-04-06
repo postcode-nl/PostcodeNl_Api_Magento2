@@ -2,9 +2,9 @@
     "name": "postcode-nl/api-magento2-module",
     "description": "Postcode.nl International Address API module for Magento 2. Adds autocompletion for addresses in multiple countries using official postal data.",
     "require": {
-      "php": "7.*|~7.0.6",
-      "magento/module-checkout": "100.2.*",
-      "magento/module-ui": "101.0.*"
+      "php": "7.*",
+      "magento/module-checkout": "100.*",
+      "magento/module-ui": "101.*"
     },
     "type": "magento2-module",
     "license": "BSD-2-Clause",
