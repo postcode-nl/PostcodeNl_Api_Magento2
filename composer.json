@@ -15,7 +15,5 @@
             "Flekto\\Postcode\\": "",
             "PostcodeNl\\InternationalAutocomplete\\": "app/code/Flekto/Postcode/lib/InternationalAutocomplete/"
         }
-    },
-    "version": "3.0.0"
-
+    }
 }
