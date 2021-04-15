@@ -31,6 +31,7 @@
 "Show fields (default)","Show fields (default)"
 "Disable fields before autocomplete finished","Disable fields before autocomplete finished"
 "Hide fields before autocomplete finished","Hide fields before autocomplete finished"
+"Hide fields and show a formatted address instead","Hide fields and show a formatted address instead"
 "Your Postcode.nl API licence is invalid.","Your Postcode.nl API licence is invalid."
 "Start typing your address or zip/postal code","Start typing your address or zip/postal code"
 "Which house number do you mean?","Which house number do you mean?"
@@ -40,3 +41,4 @@
 "Address not found.","Address not found."
 "Please enter a valid zip/postal code.","Please enter a valid zip/postal code."
 "Please enter a valid house number.","Please enter a valid house number."
+"Bewerk adres","Edit address"

@@ -22,27 +22,19 @@ define([
         intlAutocompleteInstance: null,
         intlAutocompleteCountries: null,
         loading: ko.observable(false),
+        address: ko.observable(),
 
         initialize: function () {
             this._super();
 
-            if (this.settings.enabled) {
-                this.bindKoHandler();
-                this.additionalClasses['loading'] = this.loading;
-            }
-            else {
-                this.hide();
-                this.destroy();
-            }
+            this.bindKoHandler();
+            this.additionalClasses['loading'] = this.loading;
+            this.address.subscribe(this.setInputAddress.bind(this));
 
             return this;
         },
 
         onChangeCountry: function (countryCode) {
-            if (!this.settings.enabled) {
-                return;
-            }
-
             const isSupported = this.isSupportedCountry(countryCode);
 
             this.visible(isSupported);
@@ -87,7 +79,7 @@ define([
                             viewModel.loading(true);
 
                             viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                                viewModel.setInputAddress(result[0].address);
+                                viewModel.address(result[0]);
                                 viewModel.toggleFields(true);
                                 viewModel.loading(false);
                             });
@@ -106,8 +98,9 @@ define([
             };
         },
 
-        setInputAddress: function (address) {
-            const streetInputs = this.street().elems(),
+        setInputAddress: function (result) {
+            const address = result.address,
+                streetInputs = this.street().elems(),
                 addition = address.buildingNumberAddition === null ? '' : ' ' + address.buildingNumberAddition;
 
             if (streetInputs.length > 2) {
@@ -134,21 +127,31 @@ define([
         },
 
         toggleFields: function (state) {
-            if (this.settings.show_hide_address_fields === 'disable') {
-                this.street(function (component) {
-                    component.elems.each(function (streetInput) { streetInput.disabled(!state); });
-                });
-                this.city(function (component) { component.disabled(!state) });
-                this.postcode(function (component) { component.disabled(!state) });
-            }
-            else if (this.settings.show_hide_address_fields === 'hide') {
-                const fields = ['street', 'city', 'postcode'];
-
-                for (let i in fields) {
-                    this[fields[i]](function (component) {
-                        component.visible(state)
+            switch (this.settings.show_hide_address_fields)
+            {
+                case 'disable':
+                    this.street(function (component) {
+                        component.elems.each(function (streetInput) { streetInput.disabled(!state); });
                     });
-                }
+                    this.city(function (component) { component.disabled(!state) });
+                    this.postcode(function (component) { component.disabled(!state) });
+                break;
+                case 'format':
+                    if (!this.street().visible()) {
+                        return;
+                    }
+
+                    state = false;
+                // Fallthrough
+                case 'hide':
+                    const fields = ['street', 'city', 'postcode'];
+
+                    for (let i in fields) {
+                        this[fields[i]](function (component) {
+                            component.visible(state)
+                        });
+                    }
+                break;
             }
         },
 

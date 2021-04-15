@@ -32,47 +32,32 @@ define([
         },
 
         settings: window.checkoutConfig.flekto_postcode.settings,
-        isComponentEnabled: false,
         lookupTimeout: null,
-        address: null,
+        address: ko.observable(),
         loading: ko.observable(false),
 
 		initialize: function () {
 			this._super();
 
-            if (this.settings.enabled) {
-                this.isComponentEnabled = this.settings.nl_input_behavior === 'zip_house';
-            }
+            // Toggle fields after street component is loaded.
+            this.street(this.toggleFields.bind(this, false));
 
-            if (this.isComponentEnabled) {
-                // Toggle fields after street component is loaded.
-                this.street(this.toggleFields.bind(this, false));
+            // The "loading" class will be added to the house number element based on loading's observable value.
+            // I.e. when looking up an address.
+            this.childHouseNumber(function (component) {
+                component.additionalClasses['loading'] = this.loading;
+            }.bind(this));
 
-                // The "loading" class will be added to the house number element based on loading's observable value.
-                // I.e. when looking up an address.
-                this.childHouseNumber(function (component) {
-                    component.additionalClasses['loading'] = this.loading;
-                }.bind(this));
-            }
+            this.address.subscribe(this.setInputAddress.bind(this));
 
 			return this;
 		},
 
         initElement: function (childInstance) {
-            if (!this.isComponentEnabled) {
-                childInstance.hide();
-                childInstance.destroy();
-                return;
-            }
-
             childInstance.visible(this.isNl() && childInstance.index !== 'house_number_select');
         },
 
         onChangeCountry: function () {
-            if (!this.isComponentEnabled) {
-                return;
-            }
-
             const isNl = this.isNl();
 
             this.childPostcode().visible(isNl);
@@ -151,15 +136,14 @@ define([
                         return this.childHouseNumber().error($t('Address not found.'));
                     }
 
-                    this.address = response[0].address;
+                    this.address(response[0].address);
 
                     if (response[0].status === 'houseNumberAdditionIncorrect') {
                         this.childHouseNumberSelect()
-                            .setOptions(this.address.houseNumberAdditions)
+                            .setOptions(response[0].address.houseNumberAdditions)
                             .show();
                     }
                     else {
-                        this.setInputAddress(this.address);
                         this.toggleFields(true);
                     }
                 }.bind(this)
@@ -190,14 +174,16 @@ define([
 
         onChangeHouseNumberAddition: function (value) {
             if (typeof value === 'undefined') {
-                return this.resetInputAddress();
+                this.toggleFields(false);
+                this.resetInputAddress();
+                return;
             }
 
             const option = this.childHouseNumberSelect().getOption(value);
 
             if (typeof option.houseNumberAddition !== 'undefined') {
-                this.address.houseNumberAddition = option.houseNumberAddition;
-                this.setInputAddress(this.address);
+                this.address().houseNumberAddition = option.houseNumberAddition;
+                this.address.valueHasMutated();
                 this.toggleFields(true);
             }
         },
@@ -220,25 +206,39 @@ define([
                 return;
             }
 
-            if (this.settings.show_hide_address_fields === 'disable') {
-                const fields = ['city', 'postcode', 'regionIdInput'];
+            switch (this.settings.show_hide_address_fields)
+            {
+                case 'disable':
+                    {
+                        const fields = ['city', 'postcode', 'regionIdInput'];
 
-                for (let i in fields) {
-                    this[fields[i]](function (component) { component.disabled(!state) });
-                }
+                        for (let i in fields) {
+                            this[fields[i]](function (component) { component.disabled(!state) });
+                        }
 
-                this.street(function (component) {
-                    component.elems.each(function (streetInput) { streetInput.disabled(!state) });
-                });
-            }
-            else if (this.settings.show_hide_address_fields === 'hide') {
-                const fields = ['street', 'city', 'postcode'];
+                        this.street(function (component) {
+                            component.elems.each(function (streetInput) { streetInput.disabled(!state) });
+                        });
+                    }
+                break;
+                case 'format':
+                    if (!this.street().visible()) {
+                        return;
+                    }
 
-                for (let i in fields) {
-                    this[fields[i]](function (component) { component.visible(state) });
-                }
+                    state = false;
+                // Fallthrough
+                case 'hide':
+                    {
+                        const fields = ['street', 'city', 'postcode'];
 
-                this.regionIdInput(function (component) { component.visible(state) });
+                        for (let i in fields) {
+                            this[fields[i]](function (component) { component.visible(state) });
+                        }
+
+                        this.regionIdInput(function (component) { component.visible(state) });
+                    }
+                break;
             }
         },
     });
