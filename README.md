@@ -37,10 +37,13 @@ Screenshots
 =============
 
 International autocomplete:
-![][address-autofill-intl.png]
+
+![](address-autofill-intl.png)
 
 Dutch address by postcode and house number:
-![][address-autofill-nl-house-number-addition.png]
+
+![](address-autofill-nl-house-number-addition.png)
 
 Option to show formatted output:
-![][address-autofill-nl-formatted-output.png]
+
+![](address-autofill-nl-formatted-output.png)
