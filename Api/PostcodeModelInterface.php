@@ -11,9 +11,9 @@ interface PostcodeModelInterface
      * @access public
      * @param string $context
      * @param string $term
-     * @return Data\AutocompleteInterface
+     * @return \Flekto\Postcode\Api\Data\AutocompleteInterface
      */
-    public function getAddressAutocomplete(string $context, string $term): Data\AutocompleteInterface;
+    public function getAddressAutocomplete(string $context, string $term): \Flekto\Postcode\Api\Data\AutocompleteInterface;
 
 
     /**
