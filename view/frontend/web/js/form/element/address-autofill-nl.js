@@ -35,6 +35,7 @@ define([
         lookupTimeout: null,
         address: ko.observable(),
         loading: ko.observable(false),
+        status: ko.observable(null),
 
 		initialize: function () {
 			this._super();
@@ -132,13 +133,15 @@ define([
                         return this.childHouseNumber().error(response[0].message_details);
                     }
 
-                    if (response[0].status === 'notFound') {
+                    this.status(response[0].status);
+
+                    if (this.status() === 'notFound') {
                         return this.childHouseNumber().error($t('Address not found.'));
                     }
 
                     this.address(response[0].address);
 
-                    if (response[0].status === 'houseNumberAdditionIncorrect') {
+                    if (this.status() === 'houseNumberAdditionIncorrect') {
                         this.childHouseNumberSelect()
                             .setOptions(response[0].address.houseNumberAdditions)
                             .show();
@@ -183,6 +186,7 @@ define([
 
             if (typeof option.houseNumberAddition !== 'undefined') {
                 this.address().houseNumberAddition = option.houseNumberAddition;
+                this.status('valid');
                 this.address.valueHasMutated();
                 this.toggleFields(true);
             }
@@ -193,6 +197,7 @@ define([
             this.city().reset();
             this.postcode().reset();
             this.regionIdInput().reset();
+            this.status(null);
         },
 
         resetHouseNumberSelect: function () {

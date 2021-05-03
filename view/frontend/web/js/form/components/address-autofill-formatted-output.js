@@ -14,6 +14,7 @@ define([
             },
             imports: {
                 renderNlAddress: '${$.parentName}.address_autofill_nl:address',
+                nlAddressStatus: '${$.parentName}.address_autofill_nl:status',
                 renderIntlAddress: '${$.parentName}.address_autofill_intl:address',
                 onChangeCountry: '${$.parentName}.country_id:value',
             }
@@ -41,7 +42,8 @@ define([
         },
 
         renderNlAddress: function (address) {
-            if (typeof this.houseNumberSelect().value() === 'undefined') {
+            if (this.nlAddressStatus !== 'valid') {
+                this.visible(false);
                 return; // Waiting for house number addition to be selected.
             }
 
