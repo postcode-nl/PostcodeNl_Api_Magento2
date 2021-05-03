@@ -12,10 +12,10 @@ class ShowHideAddressFields implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value' => static::SHOW, 'label' => __('Show fields (default)')],
+            ['value' => static::FORMAT, 'label' => __('Hide fields and show a formatted address instead (default)')],
             ['value' => static::DISABLE, 'label' => __('Disable fields before autocomplete finished')],
             ['value' => static::HIDE, 'label' => __('Hide fields before autocomplete finished')],
-            ['value' => static::FORMAT, 'label' => __('Hide fields and show a formatted address instead')],
+            ['value' => static::SHOW, 'label' => __('Show fields')],
         ];
     }
 }
