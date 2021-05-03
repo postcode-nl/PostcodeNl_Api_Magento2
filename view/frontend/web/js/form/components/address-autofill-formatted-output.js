@@ -58,15 +58,5 @@ define([
             this.content(address.mailLines[0] +'<br>' + address.mailLines[1]);
             this.visible(true);
         },
-
-        editAddress: function () {
-            const fields = ['street', 'city', 'postcode', 'regionIdInput'];
-
-            for (let i in fields) {
-                this[fields[i]]().visible(true);
-            }
-
-            this.visible(false);
-        },
     });
 });
