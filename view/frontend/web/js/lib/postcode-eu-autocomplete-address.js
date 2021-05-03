@@ -8,7 +8,7 @@
  * https://tldrlegal.com/l/mit
  *
  * @author Postcode.nl
- * @version 1.2.2
+ * @version 1.2.3
  */
 
 (function (global, factory) {
@@ -692,11 +692,12 @@
 
 		// Create an ARIA live region for screen readers.
 		// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
-		const liveRegion = document.createElement('div');
-		liveRegion.id = getUniqueId('aria-live-region');
+		const liveRegion = document.createElement('div'),
+			liveRegionId = 'aria-live-region';
+		liveRegion.id = getUniqueId(liveRegionId);
 		liveRegion.setAttribute('aria-role', 'status');
 		liveRegion.setAttribute('aria-live', 'assertive');
-		liveRegion.classList.add(options.cssPrefix + liveRegion.id);
+		liveRegion.classList.add(options.cssPrefix + liveRegionId);
 		document.body.appendChild(liveRegion);
 
 		window.addEventListener('beforeunload', function () {
