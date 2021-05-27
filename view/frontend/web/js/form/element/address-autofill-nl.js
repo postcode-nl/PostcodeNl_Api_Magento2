@@ -64,7 +64,7 @@ define([
             this.childPostcode().visible(isNl);
             this.childHouseNumber().visible(isNl);
             this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
-            this.toggleFields(!isNl);
+            this.toggleFields(!isNl, true);
         },
 
         isNl: function () {
@@ -204,7 +204,7 @@ define([
             this.childHouseNumberSelect().setOptions([]).hide();
         },
 
-        toggleFields: function (state) {
+        toggleFields: function (state, force) {
             if (!this.isNl()) {
                 // Always re-enable region. This is not needed for .visible() because the region field has its own logic for that.
                 this.regionIdInput(function (component) { component.enable() });
@@ -227,11 +227,14 @@ define([
                     }
                 break;
                 case 'format':
-                    if (!this.street().visible()) {
-                        return;
-                    }
+                    if (!force)
+                    {
+                        if (!this.street().visible()) {
+                            return;
+                        }
 
-                    state = false;
+                        state = false;
+                    }
                 // Fallthrough
                 case 'hide':
                     {

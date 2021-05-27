@@ -38,7 +38,7 @@ define([
             const isSupported = this.isSupportedCountry(countryCode);
 
             this.visible(isSupported);
-            this.toggleFields(!isSupported);
+            this.toggleFields(!isSupported, true);
 
             if (isSupported && this.intlAutocompleteInstance !== null) {
                 // Reset address fields on country change.
@@ -125,7 +125,7 @@ define([
             this.postcode().reset();
         },
 
-        toggleFields: function (state) {
+        toggleFields: function (state, force) {
             switch (this.settings.show_hide_address_fields)
             {
                 case 'disable':
@@ -136,11 +136,14 @@ define([
                     this.postcode(function (component) { component.disabled(!state) });
                 break;
                 case 'format':
-                    if (!this.street().visible()) {
-                        return;
-                    }
+                    if (!force)
+                    {
+                        if (!this.street().visible()) {
+                            return;
+                        }
 
-                    state = false;
+                        state = false;
+                    }
                 // Fallthrough
                 case 'hide':
                     const fields = ['street', 'city', 'postcode'];
