@@ -1,9 +1,10 @@
 define([
     'uiCollection',
+    'uiRegistry',
     'ko',
     'jquery',
     'mage/translate',
-], function (Collection, ko, $, $t) {
+], function (Collection, Registry, ko, $, $t) {
     'use strict';
 
     return Collection.extend({
@@ -39,9 +40,6 @@ define([
 
 		initialize: function () {
 			this._super();
-
-            // Toggle fields after street component is loaded.
-            this.street(this.toggleFields.bind(this, false));
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
@@ -221,9 +219,14 @@ define([
                             this[fields[i]](function (component) { component.disabled(!state) });
                         }
 
-                        this.street(function (component) {
-                            component.elems.each(function (streetInput) { streetInput.disabled(!state) });
-                        });
+                        let j = 4;
+
+                        while (j--)
+                        {
+                            Registry.get(this.street().name + '.' + j, function (element) {
+                                element.disabled(!state);
+                            });
+                        }
                     }
                 break;
                 case 'format':

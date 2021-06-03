@@ -1,8 +1,9 @@
 define([
     'Magento_Ui/js/form/element/abstract',
+    'uiRegistry',
     'ko',
     'Flekto_Postcode/js/lib/postcode-eu-autocomplete-address',
-], function (Abstract, ko, AutocompleteAddress) {
+], function (Abstract, Registry, ko, AutocompleteAddress) {
     'use strict';
 
     return Abstract.extend({
@@ -35,6 +36,11 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
+            if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
+                this.visible(false);
+                return;
+            }
+
             const isSupported = this.isSupportedCountry(countryCode);
 
             this.visible(isSupported);
@@ -49,10 +55,6 @@ define([
         },
 
         isSupportedCountry: function (countryCode) {
-            if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
-                return false;
-            }
-
             if (this.intlAutocompleteCountries === null) {
                 this.intlAutocompleteCountries = JSON.parse(this.settings.supported_countries);
             }
@@ -129,9 +131,15 @@ define([
             switch (this.settings.show_hide_address_fields)
             {
                 case 'disable':
-                    this.street(function (component) {
-                        component.elems.each(function (streetInput) { streetInput.disabled(!state); });
-                    });
+                    let j = 4;
+
+                    while (j--)
+                    {
+                        Registry.get(this.street().name + '.' + j, function (element) {
+                            element.disabled(!state);
+                        });
+                    }
+
                     this.city(function (component) { component.disabled(!state) });
                     this.postcode(function (component) { component.disabled(!state) });
                 break;
