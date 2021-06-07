@@ -23,6 +23,7 @@
 																	<item name="component" xsi:type="string">Flekto_Postcode/js/form/element/address-autofill-nl</item>
 																	<item name="config" xsi:type="array">
 																		<item name="template" xsi:type="string">ui/collection</item>
+                                                                        <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
 																	</item>
 																	<item name="provider" xsi:type="string">checkoutProvider</item>
 																	<item name="sortOrder" xsi:type="number">65</item>
@@ -66,10 +67,20 @@
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="template" xsi:type="string">ui/form/field</item>
                                                                         <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
+                                                                        <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
                                                                     </item>
                                                                     <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
                                                                     <item name="sortOrder" xsi:type="string">66</item>
                                                                     <item name="additionalClasses" xsi:type="string">address-autofill-intl-input</item>
+                                                                </item>
+                                                                <item name="address_autofill_formatted_output" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/address-autofill-formatted-output</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isFormattedOutputDisabled"/>
+                                                                        <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-formatted-output</item>
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">67</item>
+                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-formatted-output</item>
                                                                 </item>
                                                             </item>
                                                         </item>
