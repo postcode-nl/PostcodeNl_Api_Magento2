@@ -1,8 +1,9 @@
 define([
     'Magento_Ui/js/form/element/abstract',
+    'uiRegistry',
     'ko',
     'Flekto_Postcode/js/lib/postcode-eu-autocomplete-address',
-], function (Abstract, ko, AutocompleteAddress) {
+], function (Abstract, Registry, ko, AutocompleteAddress) {
     'use strict';
 
     return Abstract.extend({
@@ -22,46 +23,38 @@ define([
         intlAutocompleteInstance: null,
         intlAutocompleteCountries: null,
         loading: ko.observable(false),
+        address: ko.observable(),
 
         initialize: function () {
             this._super();
 
-            if (this.settings.enabled) {
-                this.bindKoHandler();
-                this.additionalClasses['loading'] = this.loading;
-            }
-            else {
-                this.hide();
-                this.destroy();
-            }
+            this.bindKoHandler();
+            this.additionalClasses['loading'] = this.loading;
+            this.address.subscribe(this.setInputAddress.bind(this));
 
             return this;
         },
 
         onChangeCountry: function (countryCode) {
-            if (!this.settings.enabled) {
+            if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
+                this.visible(false);
                 return;
             }
 
             const isSupported = this.isSupportedCountry(countryCode);
 
             this.visible(isSupported);
-            this.toggleFields(!isSupported);
+            this.toggleFields(!isSupported, true);
 
             if (isSupported && this.intlAutocompleteInstance !== null) {
-                this.intlAutocompleteInstance.setCountry(countryCode);
-
                 // Reset address fields on country change.
                 this.resetInputAddress();
                 this.intlAutocompleteInstance.reset();
+                this.intlAutocompleteInstance.setCountry(countryCode);
             }
         },
 
         isSupportedCountry: function (countryCode) {
-            if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
-                return false;
-            }
-
             if (this.intlAutocompleteCountries === null) {
                 this.intlAutocompleteCountries = JSON.parse(this.settings.supported_countries);
             }
@@ -87,7 +80,7 @@ define([
                             viewModel.loading(true);
 
                             viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                                viewModel.setInputAddress(result[0].address);
+                                viewModel.address(result[0]);
                                 viewModel.toggleFields(true);
                                 viewModel.loading(false);
                             });
@@ -106,8 +99,9 @@ define([
             };
         },
 
-        setInputAddress: function (address) {
-            const streetInputs = this.street().elems(),
+        setInputAddress: function (result) {
+            const address = result.address,
+                streetInputs = this.street().elems(),
                 addition = address.buildingNumberAddition === null ? '' : ' ' + address.buildingNumberAddition;
 
             if (streetInputs.length > 2) {
@@ -133,22 +127,41 @@ define([
             this.postcode().reset();
         },
 
-        toggleFields: function (state) {
-            if (this.settings.show_hide_address_fields === 'disable') {
-                this.street(function (component) {
-                    component.elems.each(function (streetInput) { streetInput.disabled(!state); });
-                });
-                this.city(function (component) { component.disabled(!state) });
-                this.postcode(function (component) { component.disabled(!state) });
-            }
-            else if (this.settings.show_hide_address_fields === 'hide') {
-                const fields = ['street', 'city', 'postcode'];
+        toggleFields: function (state, force) {
+            switch (this.settings.show_hide_address_fields)
+            {
+                case 'disable':
+                    let j = 4;
 
-                for (let i in fields) {
-                    this[fields[i]](function (component) {
-                        component.visible(state)
-                    });
-                }
+                    while (j--)
+                    {
+                        Registry.get(this.street().name + '.' + j, function (element) {
+                            element.disabled(!state);
+                        });
+                    }
+
+                    this.city(function (component) { component.disabled(!state) });
+                    this.postcode(function (component) { component.disabled(!state) });
+                break;
+                case 'format':
+                    if (!force)
+                    {
+                        if (!this.street().visible()) {
+                            return;
+                        }
+
+                        state = false;
+                    }
+                // Fallthrough
+                case 'hide':
+                    const fields = ['street', 'city', 'postcode'];
+
+                    for (let i in fields) {
+                        this[fields[i]](function (component) {
+                            component.visible(state)
+                        });
+                    }
+                break;
             }
         },
 

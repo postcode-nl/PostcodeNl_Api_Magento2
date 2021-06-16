@@ -98,7 +98,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 $shippingFields = $result['components']['checkout']['children']['steps']['children']
                     ['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
 
-                $billingFields = array_merge($billingFields, array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1]));
+                $billingFields = array_merge($billingFields, array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1, 'address_autofill_formatted_output' => 1]));
                 $billingFields = $this->changeAddressFieldPosition($billingFields);
 
                 $result['components']['checkout']['children']['steps']['children']['billing-step']
@@ -136,24 +136,28 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             $addressFields['address_autofill_nl']['sortOrder'] = '920';
         }
 
+        if (isset($addressFields['address_autofill_formatted_output'])) {
+            $addressFields['address_autofill_formatted_output']['sortOrder'] = '930';
+        }
+
         if (isset($addressFields['street'])) {
-            $addressFields['street']['sortOrder'] = '930';
+            $addressFields['street']['sortOrder'] = '940';
         }
 
         if (isset($addressFields['postcode'])) {
-            $addressFields['postcode']['sortOrder'] = '940';
+            $addressFields['postcode']['sortOrder'] = '950';
         }
 
         if (isset($addressFields['city'])) {
-            $addressFields['city']['sortOrder'] = '950';
+            $addressFields['city']['sortOrder'] = '960';
         }
 
         if (isset($addressFields['region'])) {
-            $addressFields['region']['sortOrder'] = '960';
+            $addressFields['region']['sortOrder'] = '970';
         }
 
         if (isset($addressFields['region_id'])) {
-            $addressFields['region_id']['sortOrder'] = '965';
+            $addressFields['region_id']['sortOrder'] = '975';
         }
 
         return $addressFields;
