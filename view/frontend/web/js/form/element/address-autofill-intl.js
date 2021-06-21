@@ -156,8 +156,8 @@ define([
                 case 'hide':
                     const fields = ['street', 'city', 'postcode'];
 
-                    for (let i in fields) {
-                        this[fields[i]](function (component) {
+                    for (let i = 0, field; field = fields[i++];) {
+                        this[field](function (component) {
                             component.visible(state)
                         });
                     }
