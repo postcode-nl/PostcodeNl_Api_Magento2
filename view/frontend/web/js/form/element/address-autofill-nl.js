@@ -215,8 +215,8 @@ define([
                     {
                         const fields = ['city', 'postcode', 'regionIdInput'];
 
-                        for (let i in fields) {
-                            this[fields[i]](function (component) { component.disabled(!state) });
+                        for (let i = 0, field; field = fields[i++];) {
+                            this[field](function (component) { component.disabled(!state) });
                         }
 
                         let j = 4;
@@ -243,8 +243,8 @@ define([
                     {
                         const fields = ['street', 'city', 'postcode'];
 
-                        for (let i in fields) {
-                            this[fields[i]](function (component) { component.visible(state) });
+                        for (let i = 0, field; field = fields[i++];) {
+                            this[field](function (component) { component.visible(state) });
                         }
 
                         this.regionIdInput(function (component) { component.visible(state) });
