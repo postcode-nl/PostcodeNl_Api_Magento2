@@ -7,7 +7,7 @@ define([
     'use strict';
 
     return Abstract.extend({
-		defaults: {
+        defaults: {
             imports: {
                 onChangeCountry: '${$.parentName}.country_id:value',
                 countryCode: '${$.parentName}.country_id:value',
@@ -17,7 +17,7 @@ define([
                 city: '${$.parentName}.city',
                 postcode: '${$.parentName}.postcode',
             },
-		},
+        },
 
         settings: window.checkoutConfig.flekto_postcode.settings,
         intlAutocompleteInstance: null,
@@ -152,7 +152,7 @@ define([
 
                         state = false;
                     }
-                // Fallthrough
+                    /* falls through */
                 case 'hide':
                     const fields = ['street', 'city', 'postcode'];
 
