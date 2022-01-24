@@ -8,7 +8,7 @@
  * https://tldrlegal.com/l/mit
  *
  * @author Postcode.nl
- * @version 1.2.3
+ * @version 1.3.0
  */
 
 (function (global, factory) {
@@ -31,6 +31,7 @@
 	const document = window.document,
 		$ = function (selector) { return document.querySelectorAll(selector); },
 		elementData = new WeakMap(),
+		VERSION = '1.3.0',
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
@@ -174,6 +175,7 @@
 			language: {
 				writable: true,
 			},
+
 		});
 
 	/**
@@ -672,6 +674,9 @@
 		// Create options object that inherits from defaults.
 		options = extend(Object.create(defaults), options);
 
+		// Make context lowercase as required by API.
+		options.context = options.context.toLowerCase();
+
 		// Expose options.
 		Object.defineProperty(this, 'options', {
 			get: function () {
@@ -889,7 +894,7 @@
 				return str;
 			}
 
-			var i = 0,
+			let i = 0,
 				start = 0,
 				end = 0,
 				result = [],
@@ -1028,8 +1033,12 @@
 				},
 			});
 
+			if (false === element.hasAttribute('autocomplete'))
+			{
+				element.autocomplete = 'off';
+			}
+
 			element.spellcheck = false;
-			element.autocomplete = 'off';
 			element.setAttribute('aria-controls', liveRegion.id);
 			element.classList.add(options.cssPrefix + 'address-input');
 			element.classList.toggle(inputBlankClassName, element.value === '');
@@ -1164,13 +1173,22 @@
 
 		/**
 		 * Search after input has stopped arriving for the amount of milliseconds specified by options.delay.
+		 * Values of up to three characters have practically no delay because most of these queries will be served from cache.
 		 *
 		 * @param {HTMLElement} element - Associated input element.
 		 */
 		const searchDebounced = function (element)
 		{
 			window.clearTimeout(searchTimeoutId);
-			searchTimeoutId = window.setTimeout(search, options.delay, element);
+
+			let delay = 10;
+
+			if (element.value.length > 3)
+			{
+				delay = options.delay;
+			}
+
+			searchTimeoutId = window.setTimeout(search, delay, element);
 		}
 
 		/**
@@ -1246,6 +1264,13 @@
 			return defaults;
 		},
 	});
+
+	// Expose readonly version number.
+	Object.defineProperty(autocomplete, 'version', {
+		value: VERSION,
+	});
+
+    console.info('a');
 
 	return autocomplete;
 }));
