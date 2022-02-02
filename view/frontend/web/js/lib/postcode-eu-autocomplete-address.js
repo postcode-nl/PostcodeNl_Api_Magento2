@@ -1270,7 +1270,5 @@
 		value: VERSION,
 	});
 
-    console.info('a');
-
 	return autocomplete;
 }));
