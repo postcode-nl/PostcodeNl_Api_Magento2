@@ -17,13 +17,12 @@ define([
                 city: '${$.parentName}.city',
                 postcode: '${$.parentName}.postcode',
             },
+            settings: window.checkoutConfig.flekto_postcode.settings,
+            loading: false,
+            address: null,
+            intlAutocompleteInstance: null,
+            intlAutocompleteCountries: null,
         },
-
-        settings: window.checkoutConfig.flekto_postcode.settings,
-        intlAutocompleteInstance: null,
-        intlAutocompleteCountries: null,
-        loading: ko.observable(false),
-        address: ko.observable(),
 
         initialize: function () {
             this._super();
@@ -32,6 +31,12 @@ define([
             this.additionalClasses['loading'] = this.loading;
             this.address.subscribe(this.setInputAddress.bind(this));
 
+            return this;
+        },
+
+        initObservable: function () {
+            this._super();
+            this.observe('address loading');
             return this;
         },
 

@@ -27,16 +27,15 @@ define([
                 childHouseNumber: '${$.name}.house_number',
                 childHouseNumberSelect: '${$.name}.house_number_select',
             },
+            settings: window.checkoutConfig.flekto_postcode.settings,
             lookupDelay: 750,
             postcodeRegex: /[1-9][0-9]{3}\s*[a-z]{2}/i,
             houseNumberRegex: /[1-9]\d{0,4}(?:\D.*)?$/i,
+            address: null,
+            lookupTimeout: null,
+            loading: false,
+            status: null,
         },
-
-        settings: window.checkoutConfig.flekto_postcode.settings,
-        lookupTimeout: null,
-        address: ko.observable(),
-        loading: ko.observable(false),
-        status: ko.observable(null),
 
 		initialize: function () {
 			this._super();
@@ -54,6 +53,12 @@ define([
 
         initElement: function (childInstance) {
             childInstance.visible(this.isNl() && childInstance.index !== 'house_number_select');
+        },
+
+        initObservable: function () {
+            this._super();
+            this.observe('address loading status');
+            return this;
         },
 
         onChangeCountry: function () {
@@ -238,7 +243,7 @@ define([
 
                         state = false;
                     }
-                // Fallthrough
+                    /* falls through */
                 case 'hide':
                     {
                         const fields = ['street', 'city', 'postcode'];
