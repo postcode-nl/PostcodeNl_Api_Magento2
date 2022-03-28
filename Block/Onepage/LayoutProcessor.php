@@ -62,7 +62,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     private function _getFormFields(&$jsLayout, &$result = [])
     {
         foreach ($jsLayout as $name => &$value) {
-            if (in_array($name, ['form-fields', 'shipping-address-fieldset'], true)) {
+            if (in_array($name, ['form-fields', 'shipping-address-fieldset', 'billing-address-fieldset'], true)) {
                 $result[] = &$value['children'];
             }
             else if (is_array($value)) {
