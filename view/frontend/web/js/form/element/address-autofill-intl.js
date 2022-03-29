@@ -27,6 +27,10 @@ define([
         initialize: function () {
             this._super();
 
+            if (typeof this.countryCode === 'undefined') {
+                this.visible(false);
+            }
+
             this.bindKoHandler();
             this.additionalClasses['loading'] = this.loading;
             this.address.subscribe(this.setInputAddress.bind(this));
@@ -77,7 +81,7 @@ define([
                     viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
                         autocompleteUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/autocomplete',
                         addressDetailsUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/address',
-                        context: viewModel.countryCode,
+                        context: viewModel.countryCode || 'NL',
                     });
 
                     element.addEventListener('autocomplete-select', function (e) {

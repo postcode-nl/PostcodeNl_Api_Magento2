@@ -8,7 +8,7 @@ define([
     'use strict';
 
     return Collection.extend({
-		defaults: {
+        defaults: {
             imports: {
                 countryCode: '${$.parentName}.country_id:value',
                 postcodeValue: '${$.name}.postcode:value',
@@ -37,8 +37,8 @@ define([
             status: null,
         },
 
-		initialize: function () {
-			this._super();
+        initialize: function () {
+            this._super();
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
@@ -48,8 +48,8 @@ define([
 
             this.address.subscribe(this.setInputAddress.bind(this));
 
-			return this;
-		},
+            return this;
+        },
 
         initElement: function (childInstance) {
             childInstance.visible(this.isNl() && childInstance.index !== 'house_number_select');
