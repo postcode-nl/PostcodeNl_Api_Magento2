@@ -33,6 +33,7 @@
 "Hide fields before autocomplete finished","Hide fields before autocomplete finished"
 "Hide fields and show a formatted address instead (default)","Hide fields and show a formatted address instead (default)"
 "Your Postcode.nl API licence is invalid.","Your Postcode.nl API licence is invalid."
+"Check your API credentials.","Check your API credentials."
 "Start typing your address or zip/postal code","Start typing your address or zip/postal code"
 "Which house number do you mean?","Which house number do you mean?"
 "Zip/Postal Code","Zip/Postal Code"
