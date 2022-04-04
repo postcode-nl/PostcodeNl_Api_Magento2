@@ -48,6 +48,20 @@ define([
 
             this.address.subscribe(this.setInputAddress.bind(this));
 
+            if (this.settings.fixedCountry !== null) {
+                this.countryCode = this.settings.fixedCountry;
+
+                const fields = [
+                    this.parentName + '.street',
+                    this.parentName + '.city',
+                    this.parentName + '.postcode',
+                    this.parentName + '.region_id_input',
+                ];
+
+                // Run country change handler when fields are available.
+                Registry.get(fields, this.onChangeCountry.bind(this, this.countryCode));
+            }
+
             return this;
         },
 
