@@ -41,7 +41,7 @@ define([
                 ];
 
                 // Run country change handler when fields are available.
-                Registry.get(fields, this.onChangeCountry.bind(this, this.countryCode));
+                Registry.async(fields)(this.onChangeCountry.bind(this, this.countryCode));
             }
 
             this.bindKoHandler();
@@ -150,16 +150,12 @@ define([
         },
 
         toggleFields: function (state, force) {
-            switch (this.settings.show_hide_address_fields)
-            {
+            switch (this.settings.show_hide_address_fields) {
                 case 'disable':
                     let j = 4;
 
-                    while (j--)
-                    {
-                        Registry.get(this.street().name + '.' + j, function (element) {
-                            element.disabled(!state);
-                        });
+                    while (j--) {
+                        Registry.async(this.street().name + '.' + j)('disabled', !state);
                     }
 
                     this.city(function (component) { component.disabled(!state) });

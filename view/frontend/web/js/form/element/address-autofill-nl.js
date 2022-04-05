@@ -35,10 +35,18 @@ define([
             lookupTimeout: null,
             loading: false,
             status: null,
+            addressFields: null,
         },
 
         initialize: function () {
             this._super();
+
+            this.addressFields = Registry.async([
+                this.parentName + '.street',
+                this.parentName + '.city',
+                this.parentName + '.postcode',
+                this.parentName + '.region_id_input',
+            ]),
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
@@ -50,16 +58,7 @@ define([
 
             if (this.settings.fixedCountry !== null) {
                 this.countryCode = this.settings.fixedCountry;
-
-                const fields = [
-                    this.parentName + '.street',
-                    this.parentName + '.city',
-                    this.parentName + '.postcode',
-                    this.parentName + '.region_id_input',
-                ];
-
-                // Run country change handler when fields are available.
-                Registry.get(fields, this.onChangeCountry.bind(this, this.countryCode));
+                this.onChangeCountry();
             }
 
             return this;
@@ -76,12 +75,18 @@ define([
         },
 
         onChangeCountry: function () {
-            const isNl = this.isNl();
+            this.addressFields(function () { // Wait for address fields to be available.
+                const isNl = this.isNl();
 
-            this.childPostcode().visible(isNl);
-            this.childHouseNumber().visible(isNl);
-            this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
-            this.toggleFields(!isNl, true);
+                this.childPostcode().visible(isNl);
+                this.childHouseNumber().visible(isNl);
+                this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
+                this.toggleFields(!isNl, true);
+
+                if (isNl) {
+                    this.resetInputAddress();
+                }
+            }.bind(this));
         },
 
         isNl: function () {
@@ -228,8 +233,7 @@ define([
                 return;
             }
 
-            switch (this.settings.show_hide_address_fields)
-            {
+            switch (this.settings.show_hide_address_fields) {
                 case 'disable':
                     {
                         const fields = ['city', 'postcode', 'regionIdInput'];
@@ -240,11 +244,8 @@ define([
 
                         let j = 4;
 
-                        while (j--)
-                        {
-                            Registry.get(this.street().name + '.' + j, function (element) {
-                                element.disabled(!state);
-                            });
+                        while (j--) {
+                            Registry.async(this.street().name + '.' + j)('disabled', !state);
                         }
                     }
                 break;
