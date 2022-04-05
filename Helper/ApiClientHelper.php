@@ -402,26 +402,26 @@ class ApiClientHelper extends AbstractHelper
     private function isPostCodeApiReady()
     {
         if (empty($this->getStoreConfig('postcodenl_api/general/enabled'))) {
-            return ['message' => __('Postcode.nl API not enabled.')];
+            return ['message' => __('Postcode.eu API not enabled.')];
         }
 
         if (empty($this->_getKey()) || empty($this->_getSecret())) {
             return [
-                'message' => __('Postcode.nl API not configured.'),
+                'message' => __('Postcode.eu API not configured.'),
                 'info' => [__('Configure your `API key` and `API secret`.')]
             ];
         }
 
         if (!extension_loaded('curl')) {
             return [
-                'message' => __('Cannot connect to Postcode.nl API: Server is missing support for CURL.')
+                'message' => __('Cannot connect to Postcode.eu API: Server is missing support for CURL.')
             ];
         }
 
         $curlInfo = curl_version();
         if (!($curlInfo['features'] & CURL_VERSION_SSL)) {
             return [
-                'message' => __('Cannot connect to Postcode.nl API: Server is missing SSL (https) support for CURL.')
+                'message' => __('Cannot connect to Postcode.eu API: Server is missing SSL (https) support for CURL.')
             ];
         }
 

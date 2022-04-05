@@ -68,7 +68,7 @@ class LicenceCheck implements MessageInterface
      */
     public function getText()
     {
-        $msg = __('Your Postcode.nl API licence is invalid.');
+        $msg = __('Your Postcode.eu API licence is invalid.');
         $msg .= ' <a href="' . $this->urlBuilder->getUrl('adminhtml/system_config/edit', ['section' => 'postcodenl_api']) . '">' . __('Check your API credentials.') . '</a>';
 
         return $msg;
