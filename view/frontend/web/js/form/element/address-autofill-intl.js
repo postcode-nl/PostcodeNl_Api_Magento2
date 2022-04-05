@@ -124,19 +124,20 @@ define([
         setInputAddress: function (result) {
             const address = result.address,
                 streetInputs = this.street().elems(),
-                addition = address.buildingNumberAddition === null ? '' : ' ' + address.buildingNumberAddition;
+                number = String(address.buildingNumber || ''),
+                addition = String(address.buildingNumberAddition || '');
 
             if (streetInputs.length > 2) {
                 streetInputs[0].value(address.street);
-                streetInputs[1].value(String(address.buildingNumber));
-                streetInputs[2].value(addition.trim());
+                streetInputs[1].value(number);
+                streetInputs[2].value(addition);
             }
             else if (streetInputs.length > 1) {
                 streetInputs[0].value(address.street);
-                streetInputs[1].value(address.buildingNumber + addition);
+                streetInputs[1].value((number + ' ' + addition).trim());
             }
             else {
-                streetInputs[0].value(address.street + ' ' + address.buildingNumber + addition);
+                streetInputs[0].value(address.street + ' ' + (number + ' ' + addition).trim());
             }
 
             this.city().value(address.locality);
