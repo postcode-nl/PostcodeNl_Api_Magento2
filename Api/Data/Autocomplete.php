@@ -20,7 +20,7 @@ class Autocomplete implements AutocompleteInterface
 	{
         foreach ($response['matches'] as $match)
         {
-            $this->matches[] = new Autocomplete\Match($match);
+            $this->matches[] = new Autocomplete\AutocompleteMatch($match);
         }
 	}
 

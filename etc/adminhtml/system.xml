@@ -37,17 +37,17 @@
                 </field>
                 <field id="api_key_is_valid" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
                     <label>Account is valid</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="supported_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
                     <label>Supported Countries</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="account_name" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="text">
                     <label>Account Name</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="api_key_checker" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="button">

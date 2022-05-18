@@ -2,7 +2,7 @@
 
 namespace Flekto\Postcode\Api\Data\Autocomplete;
 
-class Match implements MatchInterface
+class AutocompleteMatch implements MatchInterface
 {
     /** @var string */
     public $value;
