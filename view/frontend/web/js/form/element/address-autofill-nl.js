@@ -8,7 +8,7 @@ define([
     'use strict';
 
     return Collection.extend({
-		defaults: {
+        defaults: {
             imports: {
                 countryCode: '${$.parentName}.country_id:value',
                 postcodeValue: '${$.name}.postcode:value',
@@ -27,19 +27,26 @@ define([
                 childHouseNumber: '${$.name}.house_number',
                 childHouseNumberSelect: '${$.name}.house_number_select',
             },
+            settings: window.checkoutConfig.flekto_postcode.settings,
             lookupDelay: 750,
             postcodeRegex: /[1-9][0-9]{3}\s*[a-z]{2}/i,
             houseNumberRegex: /[1-9]\d{0,4}(?:\D.*)?$/i,
+            address: null,
+            lookupTimeout: null,
+            loading: false,
+            status: null,
+            addressFields: null,
         },
 
-        settings: window.checkoutConfig.flekto_postcode.settings,
-        lookupTimeout: null,
-        address: ko.observable(),
-        loading: ko.observable(false),
-        status: ko.observable(null),
+        initialize: function () {
+            this._super();
 
-		initialize: function () {
-			this._super();
+            this.addressFields = Registry.async([
+                this.parentName + '.street',
+                this.parentName + '.city',
+                this.parentName + '.postcode',
+                this.parentName + '.region_id_input',
+            ]),
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
@@ -49,20 +56,37 @@ define([
 
             this.address.subscribe(this.setInputAddress.bind(this));
 
-			return this;
-		},
+            if (this.settings.fixedCountry !== null) {
+                this.countryCode = this.settings.fixedCountry;
+                this.onChangeCountry();
+            }
+
+            return this;
+        },
 
         initElement: function (childInstance) {
             childInstance.visible(this.isNl() && childInstance.index !== 'house_number_select');
         },
 
-        onChangeCountry: function () {
-            const isNl = this.isNl();
+        initObservable: function () {
+            this._super();
+            this.observe('address loading status');
+            return this;
+        },
 
-            this.childPostcode().visible(isNl);
-            this.childHouseNumber().visible(isNl);
-            this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
-            this.toggleFields(!isNl, true);
+        onChangeCountry: function () {
+            this.addressFields(function () { // Wait for address fields to be available.
+                const isNl = this.isNl();
+
+                this.childPostcode().visible(isNl);
+                this.childHouseNumber().visible(isNl);
+                this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
+                this.toggleFields(!isNl, true);
+
+                if (isNl) {
+                    this.resetInputAddress();
+                }
+            }.bind(this));
         },
 
         isNl: function () {
@@ -209,8 +233,7 @@ define([
                 return;
             }
 
-            switch (this.settings.show_hide_address_fields)
-            {
+            switch (this.settings.show_hide_address_fields) {
                 case 'disable':
                     {
                         const fields = ['city', 'postcode', 'regionIdInput'];
@@ -221,11 +244,8 @@ define([
 
                         let j = 4;
 
-                        while (j--)
-                        {
-                            Registry.get(this.street().name + '.' + j, function (element) {
-                                element.disabled(!state);
-                            });
+                        while (j--) {
+                            Registry.async(this.street().name + '.' + j)('disabled', !state);
                         }
                     }
                 break;
@@ -238,7 +258,7 @@ define([
 
                         state = false;
                     }
-                // Fallthrough
+                    /* falls through */
                 case 'hide':
                     {
                         const fields = ['street', 'city', 'postcode'];

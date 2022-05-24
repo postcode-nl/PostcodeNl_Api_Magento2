@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data\Autocomplete\Match;
+namespace Flekto\Postcode\Api\Data\Autocomplete\AutocompleteMatch;
 
 interface HighlightInterface
 {

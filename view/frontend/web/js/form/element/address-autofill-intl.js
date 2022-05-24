@@ -17,21 +17,43 @@ define([
                 city: '${$.parentName}.city',
                 postcode: '${$.parentName}.postcode',
             },
+            settings: window.checkoutConfig.flekto_postcode.settings,
+            loading: false,
+            address: null,
+            intlAutocompleteInstance: null,
+            intlAutocompleteCountries: null,
         },
-
-        settings: window.checkoutConfig.flekto_postcode.settings,
-        intlAutocompleteInstance: null,
-        intlAutocompleteCountries: null,
-        loading: ko.observable(false),
-        address: ko.observable(),
 
         initialize: function () {
             this._super();
+
+            if (typeof this.countryCode === 'undefined') {
+                this.visible(false);
+            }
+
+            if (this.settings.fixedCountry !== null) {
+                this.countryCode = this.settings.fixedCountry;
+
+                const fields = [
+                    this.parentName + '.street',
+                    this.parentName + '.city',
+                    this.parentName + '.postcode',
+                ];
+
+                // Run country change handler when fields are available.
+                Registry.async(fields)(this.onChangeCountry.bind(this, this.countryCode));
+            }
 
             this.bindKoHandler();
             this.additionalClasses['loading'] = this.loading;
             this.address.subscribe(this.setInputAddress.bind(this));
 
+            return this;
+        },
+
+        initObservable: function () {
+            this._super();
+            this.observe('address loading');
             return this;
         },
 
@@ -72,7 +94,7 @@ define([
                     viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
                         autocompleteUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/autocomplete',
                         addressDetailsUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/address',
-                        context: viewModel.countryCode,
+                        context: viewModel.countryCode || 'NL',
                     });
 
                     element.addEventListener('autocomplete-select', function (e) {
@@ -102,19 +124,20 @@ define([
         setInputAddress: function (result) {
             const address = result.address,
                 streetInputs = this.street().elems(),
-                addition = address.buildingNumberAddition === null ? '' : ' ' + address.buildingNumberAddition;
+                number = String(address.buildingNumber || ''),
+                addition = String(address.buildingNumberAddition || '');
 
             if (streetInputs.length > 2) {
                 streetInputs[0].value(address.street);
-                streetInputs[1].value(String(address.buildingNumber));
-                streetInputs[2].value(addition.trim());
+                streetInputs[1].value(number);
+                streetInputs[2].value(addition);
             }
             else if (streetInputs.length > 1) {
                 streetInputs[0].value(address.street);
-                streetInputs[1].value(address.buildingNumber + addition);
+                streetInputs[1].value((number + ' ' + addition).trim());
             }
             else {
-                streetInputs[0].value(address.street + ' ' + address.buildingNumber + addition);
+                streetInputs[0].value(address.street + ' ' + (number + ' ' + addition).trim());
             }
 
             this.city().value(address.locality);
@@ -128,16 +151,12 @@ define([
         },
 
         toggleFields: function (state, force) {
-            switch (this.settings.show_hide_address_fields)
-            {
+            switch (this.settings.show_hide_address_fields) {
                 case 'disable':
                     let j = 4;
 
-                    while (j--)
-                    {
-                        Registry.get(this.street().name + '.' + j, function (element) {
-                            element.disabled(!state);
-                        });
+                    while (j--) {
+                        Registry.async(this.street().name + '.' + j)('disabled', !state);
                     }
 
                     this.city(function (component) { component.disabled(!state) });

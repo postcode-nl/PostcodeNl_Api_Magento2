@@ -30,7 +30,7 @@ interface MatchInterface
     public function getContext(): string;
 
     /**
-     * @return Flekto\Postcode\Api\Data\Autocomplete\Match\HighlightInterface[]
+     * @return Flekto\Postcode\Api\Data\Autocomplete\AutocompleteMatch\HighlightInterface[]
      */
     public function getHighlights(): array;
 }

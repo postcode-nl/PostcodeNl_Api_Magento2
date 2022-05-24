@@ -4,21 +4,34 @@ namespace Flekto\Postcode\Model\System\Message;
 
 use Magento\Framework\Notification\MessageInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\UrlInterface;
 
 class LicenceCheck implements MessageInterface
 {
     const MESSAGE_IDENTITY = 'flekto_system_message';
 
     /**
+     * @var scopeConfig
+     */
+    private $scopeConfig;
+
+    /**
+     * @var UrlInterface
+     */
+    private $urlBuilder;
+
+    /**
      * __construct function.
      *
      * @access public
      * @param ScopeConfigInterface $scopeConfig
+     * @param UrlInterface $urlBuilder
      * @return void
      */
-    public function __construct(ScopeConfigInterface $scopeConfig)
+    public function __construct(ScopeConfigInterface $scopeConfig, UrlInterface $urlBuilder)
     {
         $this->scopeConfig = $scopeConfig;
+        $this->urlBuilder = $urlBuilder;
     }
 
 
@@ -55,7 +68,10 @@ class LicenceCheck implements MessageInterface
      */
     public function getText()
     {
-        return __('Your Postcode.nl API licence is invalid.');
+        $msg = __('Your Postcode.eu API licence is invalid.');
+        $msg .= ' <a href="' . $this->urlBuilder->getUrl('adminhtml/system_config/edit', ['section' => 'postcodenl_api']) . '">' . __('Check your API credentials.') . '</a>';
+
+        return $msg;
     }
 
 

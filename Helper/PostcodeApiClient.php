@@ -23,9 +23,9 @@ class PostcodeApiClient extends AbstractHelper
     protected const SERVER_URL = 'https://api.postcode.eu/';
     protected const VERSION = 1.0;
 
-    /** @var string The Postcode.nl API key, required for all requests. Provided when registering an account. */
+    /** @var string The Postcode.eu API key, required for all requests. Provided when registering an account. */
     protected $_key;
-    /** @var string The Postcode.nl API secret, required for all requests */
+    /** @var string The Postcode.eu API secret, required for all requests */
     protected $_secret;
     /** @var resource */
     protected $_curlHandler;
@@ -40,7 +40,7 @@ class PostcodeApiClient extends AbstractHelper
 
         if (!extension_loaded('curl'))
         {
-            throw new CurlNotLoadedException('Cannot use Postcode.nl International Autocomplete client, the server needs to have the PHP `cURL` extension installed.');
+            throw new CurlNotLoadedException('Cannot use Postcode.eu International Autocomplete client, the server needs to have the PHP `cURL` extension installed.');
         }
 
         $this->_curlHandler = curl_init();

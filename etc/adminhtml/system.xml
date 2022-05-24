@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="postcodenl_api" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="999" translate="label">
-            <label>Postcode.nl API Autocomplete</label>
+            <label>Postcode.eu API Autocomplete</label>
             <tab>sales</tab>
             <resource>Flekto_Postcode::config_flekto_postcode</resource>
             <group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
@@ -37,17 +37,17 @@
                 </field>
                 <field id="api_key_is_valid" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
                     <label>Account is valid</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="supported_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
                     <label>Supported Countries</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="account_name" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="text">
                     <label>Account Name</label>
-                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnly</frontend_model>
+                    <frontend_model>Flekto\Postcode\Block\System\Config\Form\Field\ReadOnlyField</frontend_model>
                 </field>
 
                 <field id="api_key_checker" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="button">
