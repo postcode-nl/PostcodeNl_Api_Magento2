@@ -1,9 +1,9 @@
 define([
     'Magento_Ui/js/form/element/abstract',
     'uiRegistry',
-    'ko',
-    'Flekto_Postcode/js/lib/postcode-eu-autocomplete-address',
-], function (Abstract, Registry, ko, AutocompleteAddress) {
+    'mage/translate',
+    'Flekto_Postcode/js/ko/bindings/init-intl-autocomplete',
+], function (Abstract, Registry, $t) {
     'use strict';
 
     return Abstract.extend({
@@ -44,9 +44,16 @@ define([
                 Registry.async(fields)(this.onChangeCountry.bind(this, this.countryCode));
             }
 
-            this.bindKoHandler();
             this.additionalClasses['loading'] = this.loading;
             this.address.subscribe(this.setInputAddress.bind(this));
+
+            if (this.settings.show_hide_address_fields !== 'show') {
+                this.validation['validate-callback'] = {
+                    message: $t('Please enter an address and select it.'),
+                    isValid: this.isValid.bind(this),
+                };
+                this.additionalClasses['required'] = true;
+            }
 
             return this;
         },
@@ -84,44 +91,11 @@ define([
             return this.intlAutocompleteCountries.indexOf(countryCode) > -1;
         },
 
-        bindKoHandler: function () {
-            ko.bindingHandlers.initIntlAutocomplete = {
-                update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-                    if (viewModel.intlAutocompleteInstance !== null || !ko.unwrap(valueAccessor())) {
-                        return; // Autocomplete instance already created or element not visible.
-                    }
-
-                    viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
-                        autocompleteUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/autocomplete',
-                        addressDetailsUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/address',
-                        context: viewModel.countryCode || 'NL',
-                    });
-
-                    element.addEventListener('autocomplete-select', function (e) {
-                        if (e.detail.precision === 'Address') {
-                            viewModel.loading(true);
-
-                            viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                                viewModel.address(result[0]);
-                                viewModel.toggleFields(true);
-                                viewModel.loading(false);
-                            });
-                        }
-                    });
-
-                    document.addEventListener('autocomplete-xhrerror', function (e) {
-                        console.error('Autocomplete XHR error', e);
-                        viewModel.toggleFields(true);
-                        viewModel.loading(false);
-                    });
-
-                    // Clear the previous values when searching for a new address.
-                    element.addEventListener('autocomplete-search', viewModel.resetInputAddress.bind(viewModel));
-                }
-            };
-        },
-
         setInputAddress: function (result) {
+            if (result === null) {
+                return;
+            }
+
             const address = result.address,
                 streetInputs = this.street().elems(),
                 number = String(address.buildingNumber || ''),
@@ -148,6 +122,7 @@ define([
             this.street().elems.each(function (streetInput) { streetInput.reset(); });
             this.city().reset();
             this.postcode().reset();
+            this.address(null);
         },
 
         toggleFields: function (state, force) {
@@ -182,6 +157,10 @@ define([
                     }
                 break;
             }
+        },
+
+        isValid: function () {
+            return this.visible() === false || this.address() !== null;
         },
 
     });

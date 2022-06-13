@@ -55,8 +55,13 @@ define([
         },
 
         renderIntlAddress: function (address) {
-            this.content(address.mailLines[0] +'<br>' + address.mailLines[1]);
-            this.visible(true);
+            if (address === null) {
+                this.visible(false);
+            }
+            else {
+                this.content(address.mailLines[0] +'<br>' + address.mailLines[1]);
+                this.visible(true);
+            }
         },
     });
 });

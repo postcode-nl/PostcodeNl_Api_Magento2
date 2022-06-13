@@ -10,7 +10,6 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {
     protected $scopeConfig;
 
-
     /**
      * __construct function.
      *
@@ -26,7 +25,6 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
         parent::__construct($context, $data);
     }
 
-
     /**
      * process function.
      *
@@ -38,103 +36,126 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     {
         $moduleEnabled = $this->scopeConfig->getValue('postcodenl_api/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
-        if ($moduleEnabled && isset($jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])) {
-            $formFields = $this->_getFormFields($jsLayout['components']['checkout']['children']['steps']['children']);
+        if (!$moduleEnabled) {
+            return $jsLayout;
+        }
 
-            foreach ($formFields as &$fields) {
-                $fields = array_merge($fields, $this->_getAutofillFields($jsLayout));
-                $fields = $this->changeAddressFieldPosition($fields);
+        // Shipping fields
+        $shippingFields = &$jsLayout['components']
+            ['checkout']['children']
+            ['steps']['children']
+            ['shipping-step']['children']
+            ['shippingAddress']['children']
+            ['shipping-address-fieldset']['children'];
+
+        $shippingFields = $this->_changeAddressFieldsPosition($shippingFields);
+
+        // Autofill fields copy
+        $autofillFields = array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1, 'address_autofill_formatted_output' => 1]);
+
+        // Billing step
+        $billingConfiguration = &$jsLayout['components']
+            ['checkout']['children']
+            ['steps']['children']
+            ['billing-step']['children']
+            ['payment']['children']
+            ['payments-list']['children'];
+
+        if (isset($billingConfiguration)) {
+            foreach($billingConfiguration as $key => &$billingForm) {
+                if (!strpos($key, '-form')) {
+                    continue;
+                }
+
+                // Billing fields
+                $billingForm['children']['form-fields']['children'] += $this->_updateCustomScope($autofillFields, $billingForm['dataScopePrefix']);
+                $billingForm['children']['form-fields']['children'] = $this->_changeAddressFieldsPosition($billingForm['children']['form-fields']['children']);
             }
+        }
 
+        // Billing address on payment page
+        $billingFields = &$jsLayout['components']
+            ['checkout']['children']
+            ['steps']['children']
+            ['billing-step']['children']
+            ['payment']['children']
+            ['afterMethods']['children']
+            ['billing-address-form']['children']
+            ['form-fields']['children'];
+
+        if (isset($billingFields)) {
+            $billingFields += $this->_updateCustomScope($autofillFields, 'billingAddressshared');
+            $billingFields = $this->_changeAddressFieldsPosition($billingFields);
+        }
+
+        // Compatibility
+        $magePlazaBillingFields = &$jsLayout['components']
+            ['checkout']['children']
+            ['steps']['children']
+            ['shipping-step']['children']
+            ['billingAddress']['children']
+            ['billing-address-fieldset']['children'];
+
+        if (isset($magePlazaBillingFields)) {
+            $magePlazaBillingFields += $this->_updateCustomScope($autofillFields, 'billingAddress');
+            $magePlazaBillingFields = $this->_changeAddressFieldsPosition($magePlazaBillingFields);
         }
 
         return $jsLayout;
     }
 
     /**
-     * Get references to $jsLayout form fields.
+     * Find and update customScope
      *
      * @access private
-     * @param mixed $jsLayout
-     * @param array $result - Accumulates form fields.
-     * @return array - Array of form fields by reference.
+     * @param array $fields
+     * @param string $dataScope
+     * @return array - Fields with modified customScope.
      */
-    private function _getFormFields(&$jsLayout, &$result = [])
+    private function _updateCustomScope($fields, $dataScope)
     {
-        foreach ($jsLayout as $name => &$value) {
-            if (in_array($name, ['form-fields', 'shipping-address-fieldset', 'billing-address-fieldset'], true)) {
-                $result[] = &$value['children'];
+        foreach ($fields as $name => $items) {
+            if (isset($items['config'], $items['config']['customScope'])) {
+                $fields[$name]['config']['customScope'] = $dataScope;
             }
-            else if (is_array($value)) {
-                $this->_getFormFields($value, $result);
+
+            if (isset($items['children'])) {
+                $fields[$name]['children'] = $this->_updateCustomScope($items['children'], $dataScope);
             }
         }
 
-        return $result;
+        return $fields;
     }
 
     /**
-     * Get autofill fields from shipping fieldset.
+     * Change sort order of address fields.
      *
      * @access private
-     * @param mixed $jsLayout
+     * @param array $addressFields
      * @return array
      */
-    private function _getAutofillFields($jsLayout)
-    {
-        $shippingFields = $jsLayout['components']['checkout']['children']['steps']['children']
-            ['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
-
-        return array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1, 'address_autofill_formatted_output' => 1]);
-    }
-
-    /**
-     * changeAddressFieldPosition function.
-     *
-     * @access public
-     * @param mixed $addressFields
-     * @return array
-     */
-    public function changeAddressFieldPosition($addressFields)
+    private function _changeAddressFieldsPosition($addressFields)
     {
         if ($this->scopeConfig->getValue('postcodenl_api/general/change_fields_position') != '1') {
             return $addressFields;
         }
 
-        if (isset($addressFields['country_id'])) {
-            $addressFields['country_id']['sortOrder'] = '900';
-        }
+        $fieldToSortOrder = [
+            'country_id' => '900',
+            'address_autofill_intl' => '910',
+            'address_autofill_nl' => '920',
+            'address_autofill_formatted_output' => '930',
+            'street' => '940',
+            'postcode' => '950',
+            'city' => '960',
+            'region' => '970',
+            'region_id' => '975',
+        ];
 
-        if (isset($addressFields['address_autofill_intl'])) {
-            $addressFields['address_autofill_intl']['sortOrder'] = '910';
-        }
-
-        if (isset($addressFields['address_autofill_nl'])) {
-            $addressFields['address_autofill_nl']['sortOrder'] = '920';
-        }
-
-        if (isset($addressFields['address_autofill_formatted_output'])) {
-            $addressFields['address_autofill_formatted_output']['sortOrder'] = '930';
-        }
-
-        if (isset($addressFields['street'])) {
-            $addressFields['street']['sortOrder'] = '940';
-        }
-
-        if (isset($addressFields['postcode'])) {
-            $addressFields['postcode']['sortOrder'] = '950';
-        }
-
-        if (isset($addressFields['city'])) {
-            $addressFields['city']['sortOrder'] = '960';
-        }
-
-        if (isset($addressFields['region'])) {
-            $addressFields['region']['sortOrder'] = '970';
-        }
-
-        if (isset($addressFields['region_id'])) {
-            $addressFields['region_id']['sortOrder'] = '975';
+        foreach ($fieldToSortOrder as $name => $sortOrder) {
+            if (isset($addressFields[$name])) {
+                $addressFields[$name]['sortOrder'] = $sortOrder;
+            }
         }
 
         return $addressFields;
