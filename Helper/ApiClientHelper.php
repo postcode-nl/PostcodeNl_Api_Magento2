@@ -210,7 +210,10 @@ class ApiClientHelper extends AbstractHelper
             $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
-            if (!is_null($houseNumberAddition) && (is_null($address['houseNumberAddition']) || strcasecmp($houseNumberAddition, $address['houseNumberAddition']) != 0)
+            if (
+                (strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
+                ||
+                (!empty($address['houseNumberAdditions']) && is_null($address['houseNumberAddition']))
             ) {
                 $status = 'houseNumberAdditionIncorrect';
             }

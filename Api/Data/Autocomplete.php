@@ -7,7 +7,7 @@ class Autocomplete implements AutocompleteInterface
     /**
      * @var Autocomplete\MatchInterface[]
      */
-	public $matches = [];
+    public $matches = [];
 
     /**
      * __construct function.
@@ -16,13 +16,13 @@ class Autocomplete implements AutocompleteInterface
      * @param array $response
      * @return void
      */
-	public function __construct(array $response)
-	{
-        foreach ($response['matches'] as $match)
+    public function __construct(array $response)
+    {
+        foreach ($response['matches'] ?? [] as $match)
         {
             $this->matches[] = new Autocomplete\AutocompleteMatch($match);
         }
-	}
+    }
 
     /**
      * @inheritdoc

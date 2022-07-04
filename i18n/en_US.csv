@@ -42,3 +42,6 @@
 "Address not found.","Address not found."
 "Please enter a valid zip/postal code.","Please enter a valid zip/postal code."
 "Please enter a valid house number.","Please enter a valid house number."
+"Please enter an address and select it.","Please enter an address and select it."
+"An error has occurred while retrieving address data. Please contact us if the problem persists.","An error has occurred while retrieving address data. Please contact us if the problem persists."
+"Please select a house number.","Please select a house number."
