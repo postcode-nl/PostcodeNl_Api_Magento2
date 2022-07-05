@@ -75,7 +75,7 @@ class PostcodeApiClient extends AbstractHelper
      */
     public function internationalAutocomplete(string $context, string $term, ?string $session = null, $language=""): array
     {
-        return $this->performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->generateSessionString());
+        return $this->_performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->_generateSessionString());
     }
 
     /**
@@ -83,7 +83,7 @@ class PostcodeApiClient extends AbstractHelper
      */
     public function internationalGetDetails(string $context, ?string $session = null): array
     {
-        return $this->performApiCall('international/v1/address/' . rawurlencode($context), $session ?? $this->generateSessionString());
+        return $this->_performApiCall('international/v1/address/' . rawurlencode($context), $session ?? $this->_generateSessionString());
     }
 
     /**
@@ -91,7 +91,7 @@ class PostcodeApiClient extends AbstractHelper
      */
     public function internationalGetSupportedCountries(): array
     {
-        return $this->performApiCall('international/v1/supported-countries', null);
+        return $this->_performApiCall('international/v1/supported-countries', null);
     }
 
     /**
@@ -123,12 +123,12 @@ class PostcodeApiClient extends AbstractHelper
         {
             $urlParts[] = rawurlencode($houseNumberAddition);
         }
-        return $this->performApiCall(implode('/', $urlParts), null);
+        return $this->_performApiCall(implode('/', $urlParts), null);
     }
 
     public function accountInfo(): array
     {
-        return $this->performApiCall('account/v1/info', null);
+        return $this->_performApiCall('account/v1/info', null);
     }
 
     /**
@@ -155,12 +155,12 @@ class PostcodeApiClient extends AbstractHelper
         curl_close($this->_curlHandler);
     }
 
-    protected function generateSessionString(): string
+    protected function _generateSessionString(): string
     {
         return bin2hex(random_bytes(8));
     }
 
-    protected function performApiCall(string $path, ?string $session): array
+    protected function _performApiCall(string $path, ?string $session): array
     {
         $url = static::SERVER_URL . $path;
         curl_setopt($this->_curlHandler, CURLOPT_URL, $url);

@@ -106,7 +106,7 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _prepareApiClient(): PostcodeApiClient
     {
-        $isApiReady = $this->isPostCodeApiReady();
+        $isApiReady = $this->_isPostCodeApiReady();
         if ($isApiReady !== true) {
             return $isApiReady;
         }
@@ -139,7 +139,7 @@ class ApiClientHelper extends AbstractHelper
 
             $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
             if (empty($sessionStr)) {
-                $sessionStr = $this->generateSessionString();
+                $sessionStr = $this->_generateSessionString();
             }
 
             $response = $client->internationalAutocomplete($context, $term, $sessionStr, $locale);
@@ -172,7 +172,7 @@ class ApiClientHelper extends AbstractHelper
 
             $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
             if (empty($sessionStr)) {
-                $sessionStr = $this->generateSessionString();
+                $sessionStr = $this->_generateSessionString();
             }
 
             $response = $client->internationalGetDetails($context, $sessionStr);
@@ -397,12 +397,12 @@ class ApiClientHelper extends AbstractHelper
 
 
     /**
-     * isPostCodeApiReady function.
+     * _isPostCodeApiReady function.
      *
      * @access private
      * @return bool|array
      */
-    private function isPostCodeApiReady()
+    private function _isPostCodeApiReady()
     {
         if (empty($this->getStoreConfig('postcodenl_api/general/enabled'))) {
             return ['message' => __('Postcode.eu API not enabled.')];
