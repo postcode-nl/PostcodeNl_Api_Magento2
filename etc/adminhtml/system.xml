@@ -17,12 +17,20 @@
                     <comment/>
                     <source_model>Flekto\Postcode\Model\Config\Source\NlInputBehavior</source_model>
                 </field>
-                <field id="show_hide_address_fields" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label" type="select">
+                <field id="show_hide_address_fields" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label" type="select">
                     <label>Address fields behavior in autocomplete</label>
                     <comment/>
                     <source_model>Flekto\Postcode\Model\Config\Source\ShowHideAddressFields</source_model>
                 </field>
-                <field id="change_fields_position" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label" type="select" canRestore="1">
+                <field id="allow_autofill_bypass" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="24" translate="label" type="select" canRestore="1">
+                    <label>Add manual entry link</label>
+                    <comment>Allows users to skip the autocomplete field and manually enter an address. Enabling this option may lead to invalid addresses.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="show_hide_address_fields" separator="|">format|disable|hide</field>
+                    </depends>
+                </field>
+                <field id="change_fields_position" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="26" translate="label" type="select" canRestore="1">
                     <label>Change address fields position</label>
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

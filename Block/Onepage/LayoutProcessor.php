@@ -145,6 +145,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             'address_autofill_intl' => '910',
             'address_autofill_nl' => '920',
             'address_autofill_formatted_output' => '930',
+            'address_autofill_bypass' => '935',
             'street' => '940',
             'postcode' => '950',
             'city' => '960',

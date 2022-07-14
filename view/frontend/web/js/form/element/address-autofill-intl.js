@@ -65,6 +65,8 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
+            this.reset();
+
             if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
                 this.visible(false);
                 return;

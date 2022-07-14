@@ -21,4 +21,12 @@ class Data extends AbstractHelper
     public function isDisabled() {
         return in_array($this->scopeConfig->getValue('postcodenl_api/general/enabled', ScopeInterface::SCOPE_STORE), ['0', NULL], true);
     }
+
+    public function isAutofillBypassDisabled() {
+        return
+            $this->isDisabled()
+            || ShowHideAddressFields::SHOW == $this->scopeConfig->getValue('postcodenl_api/general/show_hide_address_fields', ScopeInterface::SCOPE_STORE)
+            || in_array($this->scopeConfig->getValue('postcodenl_api/general/allow_autofill_bypass', ScopeInterface::SCOPE_STORE), ['0', NULL], true);
+    }
+
 }
