@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Helper\Exception;
+namespace Flekto\Postcode\Service\Exception;
 
 
 class ServerUnavailableException extends ClientException

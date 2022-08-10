@@ -2,6 +2,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <postcodenl_api>
+            <status>
+                <module_version>3.1.7</module_version>
+                <account_status>new</account_status>
+            </status>
             <general>
                 <enabled>1</enabled>
                 <change_fields_position>1</change_fields_position>

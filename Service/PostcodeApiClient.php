@@ -1,22 +1,20 @@
 <?php
 
-namespace Flekto\Postcode\Helper;
+namespace Flekto\Postcode\Service;
 
-use Magento\Framework\App\Helper\AbstractHelper;
+use Flekto\Postcode\Service\Exception\AuthenticationException;
+use Flekto\Postcode\Service\Exception\BadRequestException;
+use Flekto\Postcode\Service\Exception\CurlException;
+use Flekto\Postcode\Service\Exception\CurlNotLoadedException;
+use Flekto\Postcode\Service\Exception\ForbiddenException;
+use Flekto\Postcode\Service\Exception\InvalidJsonResponseException;
+use Flekto\Postcode\Service\Exception\InvalidPostcodeException;
+use Flekto\Postcode\Service\Exception\ServerUnavailableException;
+use Flekto\Postcode\Service\Exception\TooManyRequestsException;
+use Flekto\Postcode\Service\Exception\UnexpectedException;
+use Flekto\Postcode\Service\Exception\NotFoundException;
 
-use Flekto\Postcode\Helper\Exception\AuthenticationException;
-use Flekto\Postcode\Helper\Exception\BadRequestException;
-use Flekto\Postcode\Helper\Exception\CurlException;
-use Flekto\Postcode\Helper\Exception\CurlNotLoadedException;
-use Flekto\Postcode\Helper\Exception\ForbiddenException;
-use Flekto\Postcode\Helper\Exception\InvalidJsonResponseException;
-use Flekto\Postcode\Helper\Exception\InvalidPostcodeException;
-use Flekto\Postcode\Helper\Exception\ServerUnavailableException;
-use Flekto\Postcode\Helper\Exception\TooManyRequestsException;
-use Flekto\Postcode\Helper\Exception\UnexpectedException;
-use Flekto\Postcode\Helper\Exception\NotFoundException;
-
-class PostcodeApiClient extends AbstractHelper
+class PostcodeApiClient
 {
     public const SESSION_HEADER_KEY = 'X-Autocomplete-Session';
 
@@ -73,7 +71,7 @@ class PostcodeApiClient extends AbstractHelper
     /**
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete
      */
-    public function internationalAutocomplete(string $context, string $term, ?string $session = null, $language=""): array
+    public function internationalAutocomplete(string $context, string $term, ?string $session = null, $language = ''): array
     {
         return $this->_performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->_generateSessionString());
     }
