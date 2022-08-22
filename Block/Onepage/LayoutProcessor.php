@@ -51,7 +51,15 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
         $shippingFields = $this->_changeAddressFieldsPosition($shippingFields);
 
         // Autofill fields copy
-        $autofillFields = array_intersect_key($shippingFields, ['address_autofill_nl' => 1, 'address_autofill_intl' => 1, 'address_autofill_formatted_output' => 1]);
+        $autofillFields = array_intersect_key(
+            $shippingFields,
+            [
+                'address_autofill_nl' => 1,
+                'address_autofill_intl' => 1,
+                'address_autofill_formatted_output' => 1,
+                'address_autofill_bypass' => 1,
+            ]
+        );
 
         // Billing step
         $billingConfiguration = &$jsLayout['components']
