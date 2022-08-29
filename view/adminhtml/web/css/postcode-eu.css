@@ -1,0 +1,109 @@
+.postcode-eu-api-group {
+    border-color: #c2e1eb;
+}
+
+.postcode-eu-status-header,
+.postcode-eu-api-group .entry-edit-head {
+    background-color: #003b4d;
+    background-image: linear-gradient(90deg, #003b4d, #2094b0);
+}
+
+.postcode-eu-status-header,
+.postcode-eu-api-group .entry-edit-head a,
+.postcode-eu-api-group .entry-edit-head a:focus,
+.postcode-eu-api-group .entry-edit-head a:hover {
+    color: #fff;
+}
+
+.postcode-eu-api-group .entry-edit-head a {
+    padding-left: 1.9rem;
+}
+
+.postcode-eu-status-header {
+    padding: 0 1.9rem;
+}
+
+.postcode-eu-status-header h2 {
+    padding-left: 21rem;
+    margin: 0;
+    line-height: 6rem;
+    font-size: 2rem;
+    font-weight: 600;
+    background: url(../images/postcode-eu-logo.svg) no-repeat 0 1.7rem;
+    background-size: auto 3.4rem;
+    color: #fff;
+}
+
+.postcode-eu-status-container {
+    margin-bottom: 2.2rem;
+    background-color: #edf6f9;
+}
+
+.postcode-eu-status-content {
+    padding: 2.2rem 1.9rem;
+}
+
+.postcode-eu-status-content h3 {
+    margin: 1.7rem 0 1rem 0;
+    font-size: 1.7rem;
+    color: #003b4d;
+}
+
+.postcode-eu-status-content dt,
+.postcode-eu-status-content dd {
+    padding: .5rem 0;
+    border: 0;
+}
+
+.postcode-eu-status-content dt {
+    float: left;
+    min-width: 20rem;
+}
+
+.postcode-eu-status-content dd {
+    display: block;
+    margin: 0;
+}
+
+.postcode-eu-status-content-header {
+    display: flex;
+    margin-bottom: 2.2rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.postcode-eu-supported-countries-list {
+    margin: 0;
+}
+
+.postcode-eu-supported-countries-list li {
+    display: inline;
+}
+
+.postcode-eu-supported-countries-list li:nth-last-child(n+2):after {
+    content: ', ';
+}
+
+.badge-account-status {
+    display: inline-block;
+	padding: 1px 10px 2px 10px;
+	border-radius: 20px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.badge-account-status-new {
+	background-color: #00759a;
+}
+
+.badge-account-status-active {
+	background-color: #007819;
+}
+
+.badge-account-status-invalid_credentials {
+	background-color: #a51700;
+}
+
+.badge-account-status-inactive {
+	background-color: #666;
+}

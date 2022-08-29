@@ -90,6 +90,16 @@
                                                                     <item name="sortOrder" xsi:type="string">67</item>
                                                                     <item name="additionalClasses" xsi:type="string">address-autofill-formatted-output</item>
                                                                 </item>
+                                                                <item name="address_autofill_bypass" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/address-autofill-bypass</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isAutofillBypassDisabled"/>
+                                                                        <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-bypass</item>
+                                                                        <item name="tooltipTpl" xsi:type="string">ui/form/element/helper/tooltip</item>
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">68</item>
+                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-bypass</item>
+                                                                </item>
                                                             </item>
                                                         </item>
                                                     </item>

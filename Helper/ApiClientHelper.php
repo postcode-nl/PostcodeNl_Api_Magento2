@@ -2,29 +2,39 @@
 
 namespace Flekto\Postcode\Helper;
 
-use Magento\Framework\App\Helper\Context;
-use Magento\Store\Model\ScopeInterface;
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\Module\ModuleListInterface;
-use Flekto\Postcode\Helper\PostcodeApiClient;
+use Flekto\Postcode\Helper\StoreConfigHelper;
+use Flekto\Postcode\Service\Exception\NotFoundException;
+use Flekto\Postcode\Service\PostcodeApiClient;
 use Magento\Developer\Helper\Data;
-use Flekto\Postcode\Helper\CountryCodeConvertorHelper;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\Locale\Resolver as LocaleResolver;
+use Magento\Framework\Module\ModuleListInterface;
+use Magento\Framework\Stdlib\DateTime;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
-use Magento\Framework\Stdlib\DateTime;
-use Flekto\Postcode\Helper\Exception\NotFoundException;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 
 class ApiClientHelper extends AbstractHelper
 {
-    protected $modules = null;
+    const API_ACCOUNT_STATUS_NEW = 'new';
+    const API_ACCOUNT_STATUS_INVALID_CREDENTIALS = 'invalid_credentials';
+    const API_ACCOUNT_STATUS_INACTIVE = 'inactive';
+    const API_ACCOUNT_STATUS_ACTIVE = 'active';
 
-    protected $moduleList;
-    protected $developerHelper;
-    protected $request;
-    protected $response;
+    protected $_modules;
+    protected $_moduleList;
+    protected $_developerHelper;
+    protected $_request;
+    protected $_response;
+    protected $_storeManager;
+    protected $_client;
+    protected $_localeResolver;
+    protected $_countryCodeMap = [];
+    protected $_storeConfigHelper;
 
 
     /**
@@ -37,36 +47,58 @@ class ApiClientHelper extends AbstractHelper
      * @param Request $request
      * @param Response $response
      * @param StoreManagerInterface $storeManager
+     * @param LocaleResolver $localeResolver
+     * @param StoreConfigHelper $storeConfigHelper
      * @return void
      */
-    public function __construct(ModuleListInterface $moduleList, Data $developerHelper, Context $context, Request $request, Response $response, StoreManagerInterface $storeManager) {
-        $this->moduleList = $moduleList;
-        $this->developerHelper = $developerHelper;
-        $this->request = $request;
-        $this->response = $response;
-        $this->storeManager = $storeManager;
+    public function __construct(
+        ModuleListInterface $moduleList,
+        Data $developerHelper,
+        Context $context,
+        Request $request,
+        Response $response,
+        StoreManagerInterface $storeManager,
+        LocaleResolver $localeResolver,
+        StoreConfigHelper $storeConfigHelper
+    ) {
+        $this->_moduleList = $moduleList;
+        $this->_developerHelper = $developerHelper;
+        $this->_request = $request;
+        $this->_response = $response;
+        $this->_storeManager = $storeManager;
+        $this->_localeResolver = $localeResolver;
+        $this->_storeConfigHelper = $storeConfigHelper;
         parent::__construct($context);
     }
 
+    /**
+     * Get API client.
+     *
+     * @access public
+     * @return PostcodeApiClient
+     */
+    public function getApiClient(): PostcodeApiClient
+    {
+        if (!isset($this->_client)) {
+            $this->_client = new PostcodeApiClient($this->_getKey(), $this->_getSecret());
+        }
+
+        return $this->_client;
+    }
 
     /**
-     * getJsinit function.
+     * Get settings to be used in frontend.
      *
      * @access public
      * @return array
      */
     public function getJsinit(): array
     {
-        if (!$this->getStoreConfig('postcodenl_api/general/enabled')) {
-            return ['enabled' => false];
-        }
-
         $settings = [
-            'enabled' => (bool)$this->getStoreConfig('postcodenl_api/general/enabled'),
-            'supported_countries' => json_encode($this->formatSupportedCountriesJs($this->getStoreConfig('postcodenl_api/general/supported_countries'))),
-            'nl_input_behavior' => (!empty($this->getStoreConfig('postcodenl_api/general/nl_input_behavior')) ? $this->getStoreConfig('postcodenl_api/general/nl_input_behavior') : 'zip_house'),
-            'show_hide_address_fields' => (!empty($this->getStoreConfig('postcodenl_api/general/show_hide_address_fields')) ? $this->getStoreConfig('postcodenl_api/general/show_hide_address_fields') : 'show'),
-            'base_url' => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
+            'supported_countries' => array_column($this->_storeConfigHelper->getSupportedCountries(), 'iso2'),
+            'nl_input_behavior' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['nl_input_behavior']) ?? \Flekto\Postcode\Model\Config\Source\NlInputBehavior::ZIP_HOUSE,
+            'show_hide_address_fields' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
+            'base_url' => $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
             'debug' => $this->isDebugging(),
             'fixedCountry' => $this->_getFixedCountry(),
         ];
@@ -74,50 +106,8 @@ class ApiClientHelper extends AbstractHelper
         return $settings;
     }
 
-
     /**
-     * formatSupportedCountriesJs function.
-     *
-     * @access public
-     * @param Mixed $countries (default: Array)
-     * @return String
-     */
-    public function formatSupportedCountriesJs($countries=[])
-    {
-        if (empty($countries)) return [];
-
-        $countries = explode(', ', $countries);
-        $countriesReturn = [];
-        if (!empty($countries)) {
-            foreach ($countries as $country) {
-                $countriesReturn[] = CountryCodeConvertorHelper::alpha3ToAlpha2($country);
-            }
-        }
-
-        return $countriesReturn;
-    }
-
-
-    /**
-     * _prepareApiClient function.
-     *
-     * @access private
-     * @return PostcodeApiClient
-     */
-    private function _prepareApiClient(): PostcodeApiClient
-    {
-        $isApiReady = $this->_isPostCodeApiReady();
-        if ($isApiReady !== true) {
-            return $isApiReady;
-        }
-
-        $client = new PostcodeApiClient($this->_getKey(), $this->_getSecret());
-        return $client;
-    }
-
-
-    /**
-     * getAddressAutocomplete function.
+     * Get address autocomplete suggestions.
      *
      * @access public
      * @param string $context
@@ -126,18 +116,18 @@ class ApiClientHelper extends AbstractHelper
      */
     public function getAddressAutocomplete(string $context, string $term): array
     {
-        $context = CountryCodeConvertorHelper::alpha2ToAlpha3($context);
-        $client = $this->_prepareApiClient();
-
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $locale = $objectManager->get('Magento\Framework\Locale\Resolver')->getLocale();
+        if (strlen($context) < 3) {
+            $context = strtolower($this->getCountryIso3Code($context) ?? $context);
+        }
 
         // API requires format 'nl-NL'
-        $locale = str_replace('_', '-', $locale);
+        $locale = str_replace('_', '-', $this->_localeResolver->getLocale());
 
         try {
 
-            $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
+            $client = $this->getApiClient();
+
+            $sessionStr = $this->_request->getHeader($client::SESSION_HEADER_KEY);
             if (empty($sessionStr)) {
                 $sessionStr = $this->_generateSessionString();
             }
@@ -153,24 +143,19 @@ class ApiClientHelper extends AbstractHelper
 
 
     /**
-     * getAddressDetails function.
+     * Get address details
      *
      * @access public
      * @param string $context
-     * @param string $dispatchCountry
      * @return array
      */
-    public function getAddressDetails(string $context, string $dispatchCountry = ''): array
+    public function getAddressDetails(string $context): array
     {
-        if (strlen($dispatchCountry) > 2) {
-            $dispatchCountry = CountryCodeConvertorHelper::alpha2ToAlpha3($dispatchCountry);
-        }
-
-        $client = $this->_prepareApiClient();
-
         try {
 
-            $sessionStr = $this->request->getHeader($client::SESSION_HEADER_KEY);
+            $client = $this->getApiClient();
+
+            $sessionStr = $this->_request->getHeader($client::SESSION_HEADER_KEY);
             if (empty($sessionStr)) {
                 $sessionStr = $this->_generateSessionString();
             }
@@ -194,7 +179,6 @@ class ApiClientHelper extends AbstractHelper
      */
     public function getNlAddress(string $zipCode, string $houseNumber): array
     {
-        $client = $this->_prepareApiClient();
         $address = null;
 
         preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
@@ -206,6 +190,8 @@ class ApiClientHelper extends AbstractHelper
         }
 
         try {
+
+            $client = $this->getApiClient();
             $address = $client->dutchAddressByPostcode($zipCode, $houseNumber, $houseNumberAddition);
             $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
@@ -275,22 +261,22 @@ class ApiClientHelper extends AbstractHelper
         // only in this case we actually pass error
         // to front-end without debug option needed
         if ($exception instanceof NotFoundException) {
-            $response['message_details'] = __("Combination not found.");
+            $response['message_details'] = __('Combination not found.');
         }
 
         if (!$this->isDebugging()) {
             if (empty($response['message_details'])) {
-                $response['message_details'] = __("Something went wrong. Please try again.");
+                $response['message_details'] = __('Something went wrong. Please try again.');
             }
 
             return $response;
         }
 
         $exceptionClass = get_class($exception);
-        $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass).$exception->getTraceAsString();
+        $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass) . $exception->getTraceAsString();
 
         $response['message_details'] = __($exception->getMessage());
-        $response['magentoDebugInfo'] = $this->_getDebugInfo();
+        $response['magento_debug_info'] = $this->_getDebugInfo();
 
         return $response;
     }
@@ -309,19 +295,19 @@ class ApiClientHelper extends AbstractHelper
         // set Cache-Control header from API response
         $clientResponseHeaders = $client->getApiCallResponseHeaders();
         if (!empty($clientResponseHeaders) && isset($clientResponseHeaders['cache-control']) && !empty($clientResponseHeaders['cache-control'])) {
-            $this->response->setHeader('Cache-control', $clientResponseHeaders['cache-control'][0], true);
-            $this->response->setHeader('Pragma', 'cache', true);
+            $this->_response->setHeader('Cache-control', $clientResponseHeaders['cache-control'][0], true);
+            $this->_response->setHeader('Pragma', 'cache', true);
 
             preg_match("#max-age=(.*?)$#sim", $clientResponseHeaders['cache-control'][0], $secondsToLive);
             if (!empty($secondsToLive) && isset($secondsToLive[1])) {
                 $secondsToLive = $secondsToLive[1];
                 $dateTime = new DateTime();
-                $this->response->setHeader('expires', $dateTime->gmDate('D, d M Y H:i:s T', $dateTime->strToTime('+ '.$secondsToLive.' seconds')), true);
+                $this->_response->setHeader('expires', $dateTime->gmDate('D, d M Y H:i:s T', $dateTime->strToTime('+ '.$secondsToLive.' seconds')), true);
             }
         }
 
         if ($this->isDebugging()) {
-            $apiResult['magentoDebugInfo'] = $this->_getDebugInfo();
+            $apiResult['magento_debug_info'] = $this->_getDebugInfo();
         }
 
         return $apiResult;
@@ -329,21 +315,42 @@ class ApiClientHelper extends AbstractHelper
 
 
     /**
-     * getSupportedCountries function.
+     * Get supported countries from API.
      *
      * @access public
      * @return array
      */
     public function getSupportedCountries(): array
     {
-        $client = $this->_prepareApiClient();
-
         try {
-            return $client->internationalGetSupportedCountries();
-
+            return $this->getApiClient()->internationalGetSupportedCountries();
         } catch (\Exception $e) {
             return [];
         }
+    }
+
+
+    /**
+     * Get country ISO3 code from ISO2 code, or NULL if not found.
+     *
+     * @access public
+     * @param string $iso2Code
+     * @return string|null Lowercase ISO3 country code or NULL.
+     */
+    public function getCountryIso3Code(string $iso2Code): ?string
+    {
+        $mapKey = 'iso2_to_iso3';
+
+        if (!isset($this->_countryCodeMap[$mapKey])) {
+            $countries = $this->_storeConfigHelper->getSupportedCountries();
+            $this->_countryCodeMap[$mapKey] = [];
+
+            foreach ($countries as $country) {
+                $this->_countryCodeMap[$mapKey][$country->iso2] = $country->iso3;
+            }
+        }
+
+        return $this->_countryCodeMap[$mapKey][strtoupper($iso2Code)] ?? null;
     }
 
 
@@ -355,80 +362,31 @@ class ApiClientHelper extends AbstractHelper
      */
     public function isDebugging(): bool
     {
-        return (bool) $this->getStoreConfig('postcodenl_api/advanced_config/api_debug') && $this->developerHelper->isDevAllowed();
+        return $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
     }
 
 
     /**
-     * getStoreConfig function.
+     * Get API key.
      *
-     * @access private
-     * @param mixed $path
-     * @return string|null
-     */
-    public function getStoreConfig($path): ?string
-    {
-        return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
-    }
-
-
-    /**
-     * _getKey function.
-     *
-     * @access private
+     * @access protected
      * @return string
      */
-    private function _getKey(): string
+    protected function _getKey(): string
     {
-        return trim($this->getStoreConfig('postcodenl_api/general/api_key'));
+        return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_key']) ?? '');
     }
 
 
     /**
-     * _getSecret function.
+     * Get API secret.
      *
-     * @access private
+     * @access protected
      * @return string
      */
-    private function _getSecret(): string
+    protected function _getSecret(): string
     {
-        return trim($this->getStoreConfig('postcodenl_api/general/api_secret'));
-    }
-
-
-    /**
-     * _isPostCodeApiReady function.
-     *
-     * @access private
-     * @return bool|array
-     */
-    private function _isPostCodeApiReady()
-    {
-        if (empty($this->getStoreConfig('postcodenl_api/general/enabled'))) {
-            return ['message' => __('Postcode.eu API not enabled.')];
-        }
-
-        if (empty($this->_getKey()) || empty($this->_getSecret())) {
-            return [
-                'message' => __('Postcode.eu API not configured.'),
-                'info' => [__('Configure your `API key` and `API secret`.')]
-            ];
-        }
-
-        if (!extension_loaded('curl')) {
-            return [
-                'message' => __('Cannot connect to Postcode.eu API: Server is missing support for CURL.')
-            ];
-        }
-
-        $curlInfo = curl_version();
-        if (!($curlInfo['features'] & CURL_VERSION_SSL)) {
-            return [
-                'message' => __('Cannot connect to Postcode.eu API: Server is missing SSL (https) support for CURL.')
-            ];
-        }
-
-        return true;
+        return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_secret']) ?? '');
     }
 
 
@@ -459,22 +417,22 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _getMagentoModules(): array
     {
-        if ($this->modules !== null) {
-            return $this->modules;
+        if (isset($this->_modules)) {
+            return $this->_modules;
         }
 
-        $this->modules = [];
+        $this->_modules = [];
 
-        foreach ($this->moduleList->getAll() as $name => $module) {
-            $this->modules[$name] = [];
+        foreach ($this->_moduleList->getAll() as $name => $module) {
+            $this->_modules[$name] = [];
             foreach ($module as $key => $value) {
                 if (in_array((string) $key, ['setup_version', 'name'])) {
-                    $this->modules[$name][$key] = (string) $value;
+                    $this->_modules[$name][$key] = (string) $value;
                 }
             }
         }
 
-        return $this->modules;
+        return $this->_modules;
     }
 
 
@@ -482,14 +440,13 @@ class ApiClientHelper extends AbstractHelper
      * Get fixed country (ISO2) if there's only one allowed country.
      *
      * @access private
-     * @return string\null
+     * @return string|null
      */
     private function _getFixedCountry(): ?string
     {
-        $allowedCountries = $this->getStoreConfig('general/country/allow');
+        $allowedCountries = $this->_storeConfigHelper->getValue('general/country/allow');
 
-        if (isset($allowedCountries) && strlen($allowedCountries) === 2)
-        {
+        if (isset($allowedCountries) && strlen($allowedCountries) === 2) {
             return $allowedCountries;
         }
 
@@ -509,30 +466,26 @@ class ApiClientHelper extends AbstractHelper
             'configuration' => [
                 'key' => substr($this->_getKey(), 0, 6) . '[hidden]',
                 'secret' => substr($this->_getSecret(), 0, 6) . '[hidden]',
-                'debug' => $this->getStoreConfig('postcodenl_api/advanced_config/api_debug'),
+                'debug' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_debug']),
             ],
             'modules' => $this->_getMagentoModules(),
         ];
 
         // Module version
-        $moduleVersion = $this->_getModuleInfo('Flekto_Postcode');
-        $debug['extensionVersion'] = 'unknown';
-        if (!empty($moduleVersion) && isset($moduleVersion['setup_version'])) {
-            $debug['extensionVersion'] = $moduleVersion['setup_version'];
-        }
+        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['module_version']);
 
         // Magento version
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
         $version = $productMetadata->getVersion();
 
-        $debug['magentoVersion'] = 'Magento/'.$version;
+        $debug['magentoVersion'] = 'Magento/' . $version;
         if ($this->_getModuleInfo('Enterprise_CatalogPermissions') !== null) {
-            $debug['magentoVersion'] = 'MagentoEnterprise/'.$version;
+            $debug['magentoVersion'] = 'MagentoEnterprise/' . $version;
 
         } elseif ($this->_getModuleInfo('Enterprise_Enterprise') !== null) {
 
-            $debug['magentoVersion'] = 'MagentoProfessional/'.$version;
+            $debug['magentoVersion'] = 'MagentoProfessional/' . $version;
         }
 
         return $debug;

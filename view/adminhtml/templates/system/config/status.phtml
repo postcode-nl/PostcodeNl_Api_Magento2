@@ -1,0 +1,44 @@
+<?php
+
+$config = $block->getConfig();
+
+?><div class="postcode-eu-status-container">
+    <div class="postcode-eu-status-header">
+        <h2>Address API</h2>
+    </div>
+
+    <div class="postcode-eu-status-content">
+        <div class="postcode-eu-status-content-header">
+            <p>Module version <strong><?php echo $config['module_version'] ?></strong></p>
+
+            <?php if ($config['has_credentials']): ?>
+                <button type="submit" name="refresh_api_data" value="1" class="action-default scalable button-refresh-api-data"><?php echo __('↻ Refresh API data') ?></button>
+            <?php endif ?>
+        </div>
+
+        <?php if (!$config['enabled']): ?>
+            <div class="message message-warning">Module is disabled via configuration.</div>
+        <?php endif ?>
+
+        <?php if (isset($config['account_status'])): ?>
+            <h3>API connection</h3>
+
+            <dl class="postcode-eu-api-connection">
+                <?php if (isset($config['account_name'])): ?>
+                    <dt>Account name</dt>
+                    <dd><?php echo $config['account_name'] ?></dd>
+                <?php endif ?>
+                <dt>Subscription status</dt>
+                <dd><span class="badge-account-status badge-account-status-<?php echo $config['account_status'] ?>"><?php echo $block->getApiStatusDescription() ?></span></dd>
+            </dl>
+
+            <h3>Supported countries</h3>
+
+            <ul class="postcode-eu-supported-countries-list">
+                <?php foreach ($config['supported_countries'] as $country): ?>
+                    <li><?php echo $country->name ?></li>
+                <?php endforeach ?>
+            </ul>
+        <?php endif ?>
+    </div>
+</div>

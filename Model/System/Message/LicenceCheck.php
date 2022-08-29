@@ -2,8 +2,8 @@
 
 namespace Flekto\Postcode\Model\System\Message;
 
+use Flekto\Postcode\Helper\StoreConfigHelper;
 use Magento\Framework\Notification\MessageInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\UrlInterface;
 
 class LicenceCheck implements MessageInterface
@@ -11,27 +11,22 @@ class LicenceCheck implements MessageInterface
     const MESSAGE_IDENTITY = 'flekto_system_message';
 
     /**
-     * @var scopeConfig
-     */
-    private $scopeConfig;
-
-    /**
      * @var UrlInterface
      */
-    private $urlBuilder;
+    private $_urlBuilder;
 
     /**
      * __construct function.
      *
      * @access public
-     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreConfigHelper $storeConfigHelper
      * @param UrlInterface $urlBuilder
      * @return void
      */
-    public function __construct(ScopeConfigInterface $scopeConfig, UrlInterface $urlBuilder)
+    public function __construct(StoreConfigHelper $storeConfigHelper, UrlInterface $urlBuilder)
     {
-        $this->scopeConfig = $scopeConfig;
-        $this->urlBuilder = $urlBuilder;
+        $this->_storeConfigHelper = $storeConfigHelper;
+        $this->_urlBuilder = $urlBuilder;
     }
 
 
@@ -51,12 +46,11 @@ class LicenceCheck implements MessageInterface
      * isDisplayed function.
      *
      * @access public
-     * @return void
+     * @return bool
      */
     public function isDisplayed()
     {
-        $keyIsValid = $this->scopeConfig->getValue('postcodenl_api/general/api_key_is_valid', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        return !($keyIsValid == 'yes');
+        return $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']) != \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
 
 
@@ -69,7 +63,7 @@ class LicenceCheck implements MessageInterface
     public function getText()
     {
         $msg = __('Your Postcode.eu API licence is invalid.');
-        $msg .= ' <a href="' . $this->urlBuilder->getUrl('adminhtml/system_config/edit', ['section' => 'postcodenl_api']) . '">' . __('Check your API credentials.') . '</a>';
+        $msg .= ' <a href="' . $this->_urlBuilder->getUrl('adminhtml/system_config/edit', ['section' => 'postcodenl_api']) . '">' . __('Check your API credentials.') . '</a>';
 
         return $msg;
     }

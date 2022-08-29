@@ -21,7 +21,6 @@ define([
             loading: false,
             address: null,
             intlAutocompleteInstance: null,
-            intlAutocompleteCountries: null,
         },
 
         initialize: function () {
@@ -65,6 +64,8 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
+            this.reset();
+
             if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
                 this.visible(false);
                 return;
@@ -84,11 +85,7 @@ define([
         },
 
         isSupportedCountry: function (countryCode) {
-            if (this.intlAutocompleteCountries === null) {
-                this.intlAutocompleteCountries = JSON.parse(this.settings.supported_countries);
-            }
-
-            return this.intlAutocompleteCountries.indexOf(countryCode) > -1;
+            return this.settings.supported_countries.indexOf(countryCode) > -1;
         },
 
         setInputAddress: function (result) {

@@ -1,0 +1,15 @@
+<div class="field" data-bind="visible: visible, css: $data.additionalClasses">
+    <div class="control" data-bind="css: {'_with-tooltip': element.tooltip}">
+        <a href="#" data-bind="click: editAddress, i18n: 'Enter an address'"></a>
+
+        <!-- ko if: element.tooltip -->
+            <!-- ko template: element.tooltipTpl --><!-- /ko -->
+        <!-- /ko -->
+
+        <!-- ko if: element.description || element.notice -->
+            <div class="field-note field-note-autofill-bypass">
+                <span data-bind="text: element.description || element.notice"></span>
+            </div>
+        <!-- /ko -->
+    </div>
+</div>
