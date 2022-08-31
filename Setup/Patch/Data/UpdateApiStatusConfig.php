@@ -30,7 +30,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
         ApiClientHelper $apiClientHelper,
         WriterInterface $configWriter,
         StoreConfigHelper $storeConfigHelper,
-        ConfigInterface $resourceConfig,
+        ConfigInterface $resourceConfig
     ) {
         $this->_apiClientHelper = $apiClientHelper;
         $this->_configWriter = $configWriter;
