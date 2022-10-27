@@ -7,9 +7,6 @@ define([
         defaults: {
             modules: {
                 autofillIntl: '${$.parentName}.address_autofill_intl',
-                street: '${$.parentName}.street',
-                city: '${$.parentName}.city',
-                postcode: '${$.parentName}.postcode',
             },
             listens: {
                 '${ $.parentName }.address_autofill_intl:error': 'visible',
@@ -20,11 +17,7 @@ define([
         editAddress: function () {
             this.visible(false);
             this.autofillIntl().visible(false);
-            this.street().visible(true);
-            this.street().elems().forEach(function (element) { element.disabled(false); });
-            this.city().visible(true).disabled(false);
-            this.postcode().visible(true).disabled(false);
-            this.street().elems()[0].focused(true); // Focus first street input.
+            this.autofillIntl().toggleFields(true, true);
         },
 
     });

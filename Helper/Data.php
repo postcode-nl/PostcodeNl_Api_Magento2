@@ -24,7 +24,7 @@ class Data extends AbstractHelper
 
     public function isDisabled() {
         return
-            in_array($this->scopeConfig->getValue('postcodenl_api/general/enabled', ScopeInterface::SCOPE_STORE), ['0', NULL], true)
+            false === $this->scopeConfig->isSetFlag('postcodenl_api/general/enabled', ScopeInterface::SCOPE_STORE)
             || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->scopeConfig->getValue(StoreConfigHelper::PATH['account_status'], ScopeInterface::SCOPE_STORE);
     }
 
@@ -32,7 +32,7 @@ class Data extends AbstractHelper
         return
             $this->isDisabled()
             || ShowHideAddressFields::SHOW == $this->scopeConfig->getValue(StoreConfigHelper::PATH['show_hide_address_fields'], ScopeInterface::SCOPE_STORE)
-            || in_array($this->scopeConfig->getValue(StoreConfigHelper::PATH['allow_autofill_bypass'], ScopeInterface::SCOPE_STORE), ['0', NULL], true);
+            || $this->scopeConfig->isSetFlag(StoreConfigHelper::PATH['allow_autofill_bypass'], ScopeInterface::SCOPE_STORE) === false;
     }
 
 }

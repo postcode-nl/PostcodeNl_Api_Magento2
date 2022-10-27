@@ -6,16 +6,24 @@ define([
 
     return Select.extend({
 
+        defaults: {
+            imports: {
+                settings: '${$.parentName}:settings',
+            },
+        },
+
         initialize: function () {
             this._super();
 
-            if (window.checkoutConfig.flekto_postcode.settings.show_hide_address_fields !== 'show') {
+            if (this.settings.show_hide_address_fields !== 'show') {
                 this.validation['validate-callback'] = {
                     message: $t('Please select a house number.'),
                     isValid: this.isValid.bind(this),
                 };
-                this.additionalClasses['required'] = true;
+                this.required(true);
             }
+
+            return this;
         },
 
         isValid: function () {

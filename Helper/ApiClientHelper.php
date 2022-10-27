@@ -101,6 +101,7 @@ class ApiClientHelper extends AbstractHelper
             'base_url' => $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
             'debug' => $this->isDebugging(),
             'fixedCountry' => $this->_getFixedCountry(),
+            'change_fields_position' => $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['change_fields_position']),
         ];
 
         return $settings;
