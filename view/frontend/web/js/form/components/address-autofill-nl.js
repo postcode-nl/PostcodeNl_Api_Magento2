@@ -1,50 +1,31 @@
 define([
     'uiCollection',
-    'uiRegistry',
-    'ko',
     'jquery',
     'mage/translate',
     'Flekto_Postcode/js/model/address-nl',
-], function (Collection, Registry, ko, $, $t, addressModel) {
+], function (Collection, $, $t, addressModel) {
     'use strict';
 
     return Collection.extend({
         defaults: {
             imports: {
-                countryCode: '${$.parentName}.country_id:value',
-                postcodeValue: '${$.name}.postcode:value',
-                houseNumberValue: '${$.name}.house_number:value',
-                onChangeCountry: '${$.parentName}.country_id:value',
                 onInputPostcode: '${$.name}.postcode:value',
                 onInputHouseNumber: '${$.name}.house_number:value',
                 onChangeHouseNumberAddition: '${$.name}.house_number_select:value',
             },
             modules: {
-                street: '${$.parentName}.street',
-                city: '${$.parentName}.city',
-                postcode: '${$.parentName}.postcode',
-                regionIdInput: '${$.parentName}.region_id_input',
                 childPostcode: '${$.name}.postcode',
                 childHouseNumber: '${$.name}.house_number',
                 childHouseNumberSelect: '${$.name}.house_number_select',
             },
-            settings: window.checkoutConfig.flekto_postcode.settings,
             address: null,
             lookupTimeout: null,
             loading: false,
             status: null,
-            addressFields: null,
         },
 
         initialize: function () {
             this._super();
-
-            this.addressFields = Registry.async([
-                this.parentName + '.street',
-                this.parentName + '.city',
-                this.parentName + '.postcode',
-                this.parentName + '.region_id_input',
-            ]),
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
@@ -73,18 +54,16 @@ define([
         },
 
         onChangeCountry: function () {
-            this.addressFields(function () { // Wait for address fields to be available.
-                const isNl = this.isNl();
+            const isNl = this.isNl();
 
-                this.childPostcode().visible(isNl);
-                this.childHouseNumber().visible(isNl);
-                this.childHouseNumberSelect().visible(isNl && this.childHouseNumberSelect().options().length > 0);
-                this.toggleFields(!isNl, true);
+            this.childPostcode(component => component.visible(isNl));
+            this.childHouseNumber(component => component.visible(isNl));
+            this.childHouseNumberSelect(component => component.visible(isNl && component.options().length > 0));
+            this.toggleFields(!isNl, true);
 
-                if (isNl) {
-                    this.resetInputAddress();
-                }
-            }.bind(this));
+            if (isNl) {
+                this.resetInputAddress();
+            }
         },
 
         isNl: function () {
@@ -140,7 +119,7 @@ define([
             this.resetInputAddress();
             this.loading(true);
 
-            const url = this.settings.base_url + 'postcode-eu/V1/nl/address/' + postcode + '/' + houseNumber;
+            const url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
             $.get({
                 url: url,
@@ -171,28 +150,6 @@ define([
             }).always(this.loading.bind(null, false));
         },
 
-        setInputAddress: function (address) {
-            const streetInputs = this.street().elems(),
-                addition = address.houseNumberAddition ? ' ' + address.houseNumberAddition : '';
-
-            if (streetInputs.length > 2) {
-                streetInputs[0].value(address.street);
-                streetInputs[1].value(String(address.houseNumber));
-                streetInputs[2].value(addition.trim());
-            }
-            else if (streetInputs.length > 1) {
-                streetInputs[0].value(address.street);
-                streetInputs[1].value(address.houseNumber + addition);
-            }
-            else {
-                streetInputs[0].value(address.street + ' ' + address.houseNumber + addition);
-            }
-
-            this.city().value(address.city);
-            this.postcode().value(address.postcode);
-            this.regionIdInput().value(address.province);
-        },
-
         onChangeHouseNumberAddition: function (value) {
             if (typeof value === 'undefined') {
                 this.toggleFields(false);
@@ -210,63 +167,23 @@ define([
             }
         },
 
-        resetInputAddress: function () {
-            this.street().elems.each(function (streetInput) { streetInput.reset(); });
-            this.city().reset();
-            this.postcode().reset();
-            this.regionIdInput().reset();
-            this.status(null);
-        },
-
         resetHouseNumberSelect: function () {
             this.childHouseNumberSelect().setOptions([]).hide();
         },
 
-        toggleFields: function (state, force) {
-            if (!this.isNl()) {
-                // Always re-enable region. This is not needed for .visible() because the region field has its own logic for that.
-                this.regionIdInput(function (component) { component.enable() });
-                return;
-            }
+        getAddressParts: function (address) {
+            const houseNumber = `${address.houseNumber || ''}`,
+                houseNumberAddition = `${address.houseNumberAddition || ''}`.trim();
 
-            switch (this.settings.show_hide_address_fields) {
-                case 'disable':
-                    {
-                        const fields = ['city', 'postcode', 'regionIdInput'];
-
-                        for (let i = 0, field; field = fields[i++];) {
-                            this[field](function (component) { component.disabled(!state) });
-                        }
-
-                        let j = 4;
-
-                        while (j--) {
-                            Registry.async(this.street().name + '.' + j)('disabled', !state);
-                        }
-                    }
-                break;
-                case 'format':
-                    if (!force)
-                    {
-                        if (!this.street().visible()) {
-                            return;
-                        }
-
-                        state = false;
-                    }
-                    /* falls through */
-                case 'hide':
-                    {
-                        const fields = ['street', 'city', 'postcode'];
-
-                        for (let i = 0, field; field = fields[i++];) {
-                            this[field](function (component) { component.visible(state) });
-                        }
-
-                        this.regionIdInput(function (component) { component.visible(state) });
-                    }
-                break;
-            }
+            return {
+                street: address.street,
+                house: `${houseNumber} ${houseNumberAddition}`.trim(),
+                houseNumber: houseNumber,
+                houseNumberAddition: houseNumberAddition,
+                postcode: address.postcode,
+                city: address.city,
+                province: address.province,
+            };
         },
 
     });

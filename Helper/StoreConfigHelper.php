@@ -15,6 +15,7 @@ class StoreConfigHelper extends AbstractHelper
         'nl_input_behavior' => 'postcodenl_api/general/nl_input_behavior',
         'show_hide_address_fields' => 'postcodenl_api/general/show_hide_address_fields',
         'allow_autofill_bypass' => 'postcodenl_api/general/allow_autofill_bypass',
+        'change_fields_position' => 'postcodenl_api/general/change_fields_position',
 
         // Advanced
         'api_debug' => 'postcodenl_api/advanced_config/api_debug',

@@ -4,34 +4,19 @@ define([
     'use strict';
 
     return Html.extend({
+
         defaults: {
-            modules: {
-                street: '${$.parentName}.street',
-                city: '${$.parentName}.city',
-                postcode: '${$.parentName}.postcode',
-                regionIdInput: '${$.parentName}.region_id_input',
-                houseNumberSelect: '${$.parentName}.address_autofill_nl.house_number_select',
-            },
             imports: {
+                renderIntlAddress: '${$.parentName}.address_autofill_intl:address',
                 renderNlAddress: '${$.parentName}.address_autofill_nl:address',
                 nlAddressStatus: '${$.parentName}.address_autofill_nl:status',
-                renderIntlAddress: '${$.parentName}.address_autofill_intl:address',
-                onChangeCountry: '${$.parentName}.country_id:value',
-            }
+                onChangeHouseNumberSelect: '${$.parentName}.address_autofill_nl.house_number_select:value',
+            },
         },
 
         initialize: function () {
             this._super();
             this.visible(false);
-
-            // Hide result if house number addition caption is selected.
-            this.houseNumberSelect(function (component) {
-                component.value.subscribe(function (value) {
-                    if (typeof value === 'undefined') {
-                        this.visible(false);
-                    }
-                }.bind(this));
-            }.bind(this));
 
             return this;
         },
@@ -41,17 +26,11 @@ define([
             this.visible(false);
         },
 
-        renderNlAddress: function (address) {
-            if (this.nlAddressStatus !== 'valid') {
+        onChangeHouseNumberSelect: function (value) {
+            // Hide result if house number addition caption is selected.
+            if (typeof value === 'undefined') {
                 this.visible(false);
-                return; // Waiting for house number addition to be selected.
             }
-
-            const line1 = address.street + ' ' + address.houseNumber + (address.houseNumberAddition ? ' ' + address.houseNumberAddition : ''),
-                line2 = address.postcode + ' ' + address.city;
-
-            this.content(line1 + '<br>' + line2);
-            this.visible(true);
         },
 
         renderIntlAddress: function (address) {
@@ -59,9 +38,25 @@ define([
                 this.visible(false);
             }
             else {
-                this.content(address.mailLines[0] +'<br>' + address.mailLines[1]);
+                this.content(address.mailLines.join('<br>'));
                 this.visible(true);
             }
         },
+
+        renderNlAddress: function (address) {
+            if (this.nlAddressStatus !== 'valid') {
+                this.visible(false);
+                return; // Waiting for house number addition to be selected.
+            }
+
+            this.content(
+                `${address.street} ${address.houseNumber}${address.houseNumberAddition ? ' ' + address.houseNumberAddition : ''}
+                <br>
+                ${address.postcode} ${address.city}`
+            );
+                
+            this.visible(true);
+        },
+
     });
 });

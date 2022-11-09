@@ -6,9 +6,20 @@ define([
     return Abstract.extend({
 
         defaults: {
-            validation: {
-                'required-entry': window.checkoutConfig.flekto_postcode.settings.show_hide_address_fields !== 'show',
+            imports: {
+                settings: '${$.parentName}:settings',
             },
+        },
+
+        initialize: function () {
+            this._super();
+
+            if (this.settings.show_hide_address_fields !== 'show') {
+                this.validation['required-entry'] = true;
+                this.required(true);
+            }
+
+            return this;
         },
     });
 });
