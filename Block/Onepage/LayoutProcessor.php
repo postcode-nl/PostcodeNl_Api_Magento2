@@ -75,6 +75,11 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                     continue;
                 }
 
+                // Make sure form fields exist.
+                if (!isset($billingForm['children']['form-fields'])) {
+                    continue;
+                }
+
                 // Billing fields
                 $billingForm['children']['form-fields']['children'] += $this->_updateCustomScope($autofillFields, $billingForm['dataScopePrefix']);
                 $billingForm['children']['form-fields']['children'] = $this->_changeAddressFieldsPosition($billingForm['children']['form-fields']['children']);
