@@ -38,17 +38,17 @@ define([
         onChangeCountry: function (countryCode) {
             this.reset();
 
-            if (this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
+            const isEnabled = this.isEnabledCountry(countryCode);
+
+            if (isEnabled && this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
                 this.visible(false);
                 return;
             }
 
-            const isSupported = this.isSupportedCountry(countryCode);
+            this.visible(isEnabled);
+            this.toggleFields(!isEnabled, true);
 
-            this.visible(isSupported);
-            this.toggleFields(!isSupported, true);
-
-            if (isSupported && this.intlAutocompleteInstance !== null) {
+            if (isEnabled && this.intlAutocompleteInstance !== null) {
                 // Reset address fields on country change.
                 this.resetInputAddress();
                 this.intlAutocompleteInstance.reset();
@@ -56,8 +56,8 @@ define([
             }
         },
 
-        isSupportedCountry: function (countryCode) {
-            return this.settings.supported_countries.indexOf(countryCode) > -1;
+        isEnabledCountry: function (countryCode) {
+            return this.settings.enabled_countries.indexOf(countryCode) > -1;
         },
 
         isValid: function () {

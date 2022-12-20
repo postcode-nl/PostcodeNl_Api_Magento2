@@ -3,7 +3,7 @@
     <default>
         <postcodenl_api>
             <status>
-                <module_version>3.1.8</module_version>
+                <module_version>3.1.9</module_version>
                 <account_status>new</account_status>
             </status>
             <general>
