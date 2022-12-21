@@ -26,7 +26,7 @@ define([
                         viewModel.address(result[0]);
                         viewModel.toggleFields(true);
                         viewModel.loading(false);
-                        viewModel.error(false);
+                        viewModel.validate();
                     });
                 }
             });

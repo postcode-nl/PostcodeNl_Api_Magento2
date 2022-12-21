@@ -25,6 +25,7 @@ define([
 
             this.additionalClasses['loading'] = this.loading;
             this.address.subscribe(this.setInputAddress.bind(this));
+            this.validation['validate-overseas-territories'] = {component: this};
 
             return this;
         },
