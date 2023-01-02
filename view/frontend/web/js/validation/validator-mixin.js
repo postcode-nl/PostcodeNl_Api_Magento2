@@ -38,12 +38,12 @@ define([
         );
 
         validator.addRule(
-            'validate-overseas-territories',
+            'validate-overseas-france',
             function (value, params) {
                 if (
                     params.component.visible() === false
                     || params.component.address() === null
-                    || params.component.countryCode !== 'FR' // Only France for now...
+                    || params.component.countryCode !== 'FR'
                 ) {
                     return true;
                 }
