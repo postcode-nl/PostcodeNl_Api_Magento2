@@ -19,6 +19,7 @@ class StoreConfigHelper extends AbstractHelper
 
         // Advanced
         'api_debug' => 'postcodenl_api/advanced_config/api_debug',
+        'disabled_countries' => 'postcodenl_api/advanced_config/disabled_countries',
 
         // Status
         'module_version' => 'postcodenl_api/status/module_version',
@@ -71,6 +72,24 @@ class StoreConfigHelper extends AbstractHelper
     public function getSupportedCountries(): array
     {
         return json_decode($this->getValue(static::PATH['supported_countries']) ?? '[]');
+    }
+
+    /**
+     * Get supported countries, excluding disabled countries.
+     *
+     * @access public
+     * @return array
+     */
+    public function getEnabledCountries(): array
+    {
+        $supported = array_column($this->getSupportedCountries(), 'iso2');
+        $disabled = $this->getValue(static::PATH['disabled_countries']);
+
+        if (empty($disabled)) {
+            return $supported;
+        }
+
+        return array_values(array_diff($supported, explode(',', $disabled)));
     }
 
     /**

@@ -8,7 +8,7 @@
  * https://tldrlegal.com/l/mit
  *
  * @author Postcode.nl
- * @version 1.3.0
+ * @version 1.3.2
  */
 
 (function (global, factory) {
@@ -31,7 +31,7 @@
 	const document = window.document,
 		$ = function (selector) { return document.querySelectorAll(selector); },
 		elementData = new WeakMap(),
-		VERSION = '1.3.0',
+		VERSION = '1.3.2',
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
@@ -265,7 +265,7 @@
 				const data = elementData.get(item);
 
 				// Update the input element value unless the focus event was cancelled.
-				if (setValue && true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'focus', {detail: data, cancelable: true})))
+				if (setValue && true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'focus', {detail: data, cancelable: true, bubbles: true})))
 				{
 					inputElement.value = data.value;
 					elementData.get(inputElement).context = data.context;
@@ -438,7 +438,7 @@
 			wrapper.classList.add(classNames.menuOpen);
 			ul.scrollTop = 0;
 			isOpen = true;
-			inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'open'));
+			inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'open', {bubbles: true}));
 		}
 
 		/**
@@ -463,7 +463,7 @@
 			item = null;
 			wrapper.classList.remove(classNames.menuOpen);
 			isOpen = false;
-			inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'close'));
+			inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'close', {bubbles: true}));
 		}
 
 		/**
@@ -496,7 +496,7 @@
 			const selectedMatch = elementData.get(item);
 
 			// Update the input element value unless the select event was cancelled.
-			if (true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'select', {detail: selectedMatch, cancelable: true})))
+			if (true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'select', {detail: selectedMatch, cancelable: true, bubbles: true})))
 			{
 				inputElement.value = selectedMatch.value;
 			}
@@ -539,9 +539,10 @@
 	/**
 	 * Get a random session identifier.
 	 *
-	 * @return {string} Cached session identifier.
+	 * @return {string} Session identifier.
 	 */
-	const getSessionId = (function () {
+	const getSessionId = function ()
+	{
 		const length = 32,
 			randomIntegers = new Uint8Array(length),
 			randomCharacters = [],
@@ -554,12 +555,8 @@
 			randomCharacters.push(characterSet[randomIntegers[i] % j]);
 		}
 
-		const id = randomCharacters.join('');
-
-		return function () {
-			return id;
-		};
-	})();
+		return randomCharacters.join('');
+	};
 
 	/**
 	 * Get a unique element identifier.
@@ -693,7 +690,8 @@
 
 		const self = this,
 			menu = new Menu(options),
-			inputBlankClassName = options.cssPrefix + 'address-input-blank';
+			inputBlankClassName = options.cssPrefix + 'address-input-blank',
+			instanceSessionId = getSessionId();
 
 		// Create an ARIA live region for screen readers.
 		// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
@@ -758,6 +756,8 @@
 				}
 			});
 
+			let sessionId = instanceSessionId;
+
 			if (activeElement !== null)
 			{
 				const element = activeElement,
@@ -765,9 +765,11 @@
 					{
 						if (this.status !== 200)
 						{
-							element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: {'event': e, request: this}}));
+							element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'error', {detail: {'event': e, request: this}, bubbles: true}));
 						}
 					};
+
+				sessionId = elementData.get(element).sessionId;
 
 				// Trigger an error event for failed requests.
 				xhr.addEventListener('error', xhrErrorHandler);
@@ -781,7 +783,7 @@
 			}
 
 			xhr.open('GET', url);
-			xhr.setRequestHeader('X-Autocomplete-Session', getSessionId());
+			xhr.setRequestHeader('X-Autocomplete-Session', sessionId);
 			xhr.send();
 
 			return xhr;
@@ -941,13 +943,21 @@
 		 * Trigger a search on the specified input element. If invoked without a term, the current input's value is used.
 		 *
 		 * @param {HTMLElement} element - Input element associated with the autocomplete instance.
-		 * @param {string} term - Search query.
+		 * @param {string} term - Search query, optional.
+		 * @param {string} context - Autocomplete context, optional.
 		 */
-		this.search = function (element, term)
+		this.search = function (element, term, context)
 		{
 			if (typeof term !== 'undefined')
 			{
 				element.value = term;
+			}
+
+			if (typeof context !== 'undefined')
+			{
+				const data = elementData.get(element);
+				data.context = context;
+				elementData.set(element, data);
 			}
 
 			activeElement = element;
@@ -1031,6 +1041,7 @@
 					autocomplete: element.hasAttribute('autocomplete') ? element.getAttribute('autocomplete') : null,
 					'aria-controls': element.hasAttribute('aria-controls') ? element.getAttribute('aria-controls') : null,
 				},
+				sessionId: getSessionId(),
 			});
 
 			if (false === element.hasAttribute('autocomplete'))
@@ -1168,7 +1179,7 @@
 				element.classList.toggle(inputBlankClassName, element.value === '');
 			});
 
-			element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'create', {detail: self}));
+			element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'create', {detail: self, bubbles: true}));
 		});
 
 		/**
@@ -1230,14 +1241,14 @@
 			}
 
 			// Trigger the search event. Cancel this event to prevent the request for address suggestions.
-			if (false === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'search', {cancelable: true})))
+			if (false === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'search', {cancelable: true, bubbles: true})))
 			{
 				return;
 			}
 
 			self.getSuggestions.call(self, data.context, element.value, function (result) {
 				// Trigger the response event. Cancel this event to prevent rendering address suggestions.
-				if (true === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'response', {detail: result, cancelable: true})))
+				if (true === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'response', {detail: result, cancelable: true, bubbles: true})))
 				{
 					matches = result.matches || [];
 

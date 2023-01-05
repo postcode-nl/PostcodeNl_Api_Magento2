@@ -95,7 +95,7 @@ class ApiClientHelper extends AbstractHelper
     public function getJsinit(): array
     {
         $settings = [
-            'supported_countries' => array_column($this->_storeConfigHelper->getSupportedCountries(), 'iso2'),
+            'enabled_countries' => $this->_storeConfigHelper->getEnabledCountries(),
             'nl_input_behavior' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['nl_input_behavior']) ?? \Flekto\Postcode\Model\Config\Source\NlInputBehavior::ZIP_HOUSE,
             'show_hide_address_fields' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
             'base_url' => $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),

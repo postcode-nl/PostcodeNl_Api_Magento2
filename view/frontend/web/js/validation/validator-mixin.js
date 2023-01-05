@@ -37,6 +37,22 @@ define([
             $t('Please enter a valid house number.')
         );
 
+        validator.addRule(
+            'validate-overseas-france',
+            function (value, params) {
+                if (
+                    params.component.visible() === false
+                    || params.component.address() === null
+                    || params.component.countryCode !== 'FR'
+                ) {
+                    return true;
+                }
+
+                return false === /^9[78]/.test(params.component.address().address.postcode);
+            },
+            $t('Please select an address from metropolitan France.')
+        );
+
         return validator;
     };
 });
