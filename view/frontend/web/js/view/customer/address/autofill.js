@@ -2,6 +2,7 @@ define([
     'uiCollection',
     'uiRegistry',
     'jquery',
+    'jquery/validate',
 ], function (Collection, Registry, $) {
     'use strict';
 
