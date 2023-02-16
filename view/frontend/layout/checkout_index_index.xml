@@ -29,7 +29,7 @@
                                                                     <item name="sortOrder" xsi:type="number">65</item>
                                                                     <item name="children" xsi:type="array">
                                                                         <item name="postcode" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/postcode</item>
+                                                                            <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/checkout/postcode</item>
                                                                             <item name="label" translate="true" xsi:type="string">Zip/Postal Code</item>
                                                                             <item name="config" xsi:type="array">
                                                                                 <item name="template" xsi:type="string">ui/form/field</item>
@@ -42,7 +42,7 @@
                                                                             <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                         </item>
                                                                         <item name="house_number" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/house-number</item>
+                                                                            <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/checkout/house-number</item>
                                                                             <item name="label" translate="true" xsi:type="string">House number and addition</item>
                                                                             <item name="config" xsi:type="array">
                                                                                 <item name="template" xsi:type="string">ui/form/field</item>
