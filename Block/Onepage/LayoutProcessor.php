@@ -82,6 +82,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 
                 // Billing fields
                 $billingForm['children']['form-fields']['children'] += $this->_updateCustomScope($autofillFields, $billingForm['dataScopePrefix']);
+                $billingForm['children']['form-fields']['children'] = $this->_updateDataScope($billingForm['children']['form-fields']['children'], $billingForm['dataScopePrefix']);
                 $billingForm['children']['form-fields']['children'] = $this->_changeAddressFieldsPosition($billingForm['children']['form-fields']['children']);
             }
         }
@@ -98,6 +99,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 
         if (isset($billingFields)) {
             $billingFields += $this->_updateCustomScope($autofillFields, 'billingAddressshared');
+            $billingFields = $this->_updateDataScope($billingFields, 'billingAddressshared');
             $billingFields = $this->_changeAddressFieldsPosition($billingFields);
         }
 
@@ -111,6 +113,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 
         if (isset($magePlazaBillingFields)) {
             $magePlazaBillingFields += $this->_updateCustomScope($autofillFields, 'billingAddress');
+            $magePlazaBillingFields = $this->_updateDataScope($magePlazaBillingFields, 'billingAddress');
             $magePlazaBillingFields = $this->_changeAddressFieldsPosition($magePlazaBillingFields);
         }
 
@@ -134,6 +137,30 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 
             if (isset($items['children'])) {
                 $fields[$name]['children'] = $this->_updateCustomScope($items['children'], $dataScope);
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Find and update dataScope
+     * The default dataScope is 'shippingAddress.item-name'. But, it needs to be '$dataScope.item-name' for the billingAddress and billingAddressshared
+     *
+     * @access private
+     * @param array $fields
+     * @param string $dataScope
+     * @return array - Fields with modified customScope.
+     */
+    private function _updateDataScope($fields, $dataScope)
+    {
+        foreach ($fields as $name => $items) {
+            if (isset($items['dataScope'])) {
+                $fields[$name]['dataScope'] = str_replace('shippingAddress', $dataScope, $items['dataScope']);
+            }
+
+            if (isset($items['children'])) {
+                $fields[$name]['children'] = $this->_updateDataScope($items['children'], $dataScope);
             }
         }
 
