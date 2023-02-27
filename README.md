@@ -28,6 +28,15 @@ $ php bin/magento setup:di:compile
 $ php bin/magento cache:flush
 ```
 
+## OneStepCheckout.com configuration instructions
+
+1. Go to Stores -> Configuration -> Sales -> Postcode.eu Address API
+   1. 'Change address fields position' to 'no'
+2. Go to Stores -> Configuration -> Sales -> OneStepCheckout
+   1. The fields 'street.0', 'postcode', 'city' and 'region' need to be enabled for the billing **and** shipping fields.
+   2. Add 'address_autofill_nl.postcode', 'address_autofill_nl.house_number', 'address_autofill_nl.house_number_select', 'address_autofill_intl' and 'address_autofill_formatted_output' to the billing **and** shipping fields.
+   3. Optional: you may need to apply some custom CSS to display the fields correctly. You may set the region field to hidden.
+   
 License
 =============
 
