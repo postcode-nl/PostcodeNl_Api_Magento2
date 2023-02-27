@@ -159,7 +159,7 @@ define([
 
             const option = this.childHouseNumberSelect().getOption(value);
 
-            if (typeof option.houseNumberAddition !== 'undefined') {
+            if (option && typeof option.houseNumberAddition !== 'undefined') {
                 this.address().houseNumberAddition = option.houseNumberAddition;
                 this.status('valid');
                 this.address.valueHasMutated();
