@@ -15,12 +15,14 @@ define([
         initialize: function (config) {
             this._super();
 
-            if (this.settings.show_hide_address_fields !== 'show') {
-                this.validation['validate-callback'] = {
-                    message: $t('Please enter an address and select it.'),
-                    isValid: this.isValid.bind(this),
-                };
-                this.required(true);
+            if (this.settings){
+                if (this.settings.show_hide_address_fields !== 'show') {
+                    this.validation['validate-callback'] = {
+                        message: $t('Please enter an address and select it.'),
+                        isValid: this.isValid.bind(this),
+                    };
+                    this.required(true);
+                }
             }
 
             this.additionalClasses['loading'] = this.loading;

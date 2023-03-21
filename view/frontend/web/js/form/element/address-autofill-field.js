@@ -14,9 +14,11 @@ define([
         initialize: function () {
             this._super();
 
-            if (this.settings.show_hide_address_fields !== 'show') {
-                this.validation['required-entry'] = true;
-                this.required(true);
+            if(this.settings) {
+                if (this.settings.show_hide_address_fields !== 'show') {
+                    this.validation['required-entry'] = true;
+                    this.required(true);
+                }
             }
 
             return this;
