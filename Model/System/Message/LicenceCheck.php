@@ -11,6 +11,11 @@ class LicenceCheck implements MessageInterface
     const MESSAGE_IDENTITY = 'flekto_system_message';
 
     /**
+     * @var StoreConfigHelper
+     */
+    private $_storeConfigHelper;
+
+    /**
      * @var UrlInterface
      */
     private $_urlBuilder;
