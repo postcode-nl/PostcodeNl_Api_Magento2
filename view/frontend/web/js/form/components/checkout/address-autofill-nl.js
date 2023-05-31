@@ -41,12 +41,10 @@ define([
                 streetInputs[0].value(addressParts.street);
                 streetInputs[1].value(addressParts.houseNumber);
                 streetInputs[2].value(addressParts.houseNumberAddition);
-            }
-            else if (streetInputs.length > 1) {
+            } else if (streetInputs.length > 1) {
                 streetInputs[0].value(addressParts.street);
                 streetInputs[1].value(addressParts.house);
-            }
-            else {
+            } else {
                 streetInputs[0].value(`${addressParts.street} ${addressParts.house}`);
             }
 
@@ -56,7 +54,7 @@ define([
         },
 
         resetInputAddress: function () {
-            this.street().elems.each(function (streetInput) { streetInput.reset(); });
+            this.street().elems.each((streetInput) => streetInput.reset());
             this.city().reset();
             this.postcode().reset();
             this.regionIdInput().reset();
@@ -66,7 +64,7 @@ define([
         toggleFields: function (state, force) {
             if (!this.isNl()) {
                 // Always re-enable region. This is not needed for .visible() because the region field has its own logic for that.
-                this.regionIdInput(function (component) { component.enable() });
+                this.regionIdInput((component) => component.enable());
                 return;
             }
 

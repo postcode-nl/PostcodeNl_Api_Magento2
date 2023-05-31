@@ -17,13 +17,12 @@ use Magento\Framework\Webapi\Rest\Response;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-
 class ApiClientHelper extends AbstractHelper
 {
-    const API_ACCOUNT_STATUS_NEW = 'new';
-    const API_ACCOUNT_STATUS_INVALID_CREDENTIALS = 'invalid_credentials';
-    const API_ACCOUNT_STATUS_INACTIVE = 'inactive';
-    const API_ACCOUNT_STATUS_ACTIVE = 'active';
+    public const API_ACCOUNT_STATUS_NEW = 'new';
+    public const API_ACCOUNT_STATUS_INVALID_CREDENTIALS = 'invalid_credentials';
+    public const API_ACCOUNT_STATUS_INACTIVE = 'inactive';
+    public const API_ACCOUNT_STATUS_ACTIVE = 'active';
 
     protected $_modules;
     protected $_moduleList;
@@ -35,7 +34,6 @@ class ApiClientHelper extends AbstractHelper
     protected $_localeResolver;
     protected $_countryCodeMap = [];
     protected $_storeConfigHelper;
-
 
     /**
      * __construct function.
@@ -142,9 +140,8 @@ class ApiClientHelper extends AbstractHelper
         }
     }
 
-
     /**
-     * Get address details
+     * Get address details.
      *
      * @access public
      * @param string $context
@@ -169,9 +166,8 @@ class ApiClientHelper extends AbstractHelper
         }
     }
 
-
     /**
-     * getNlAddress function.
+     * Get Dutch address.
      *
      * @access public
      * @param string $zipCode
@@ -186,7 +182,7 @@ class ApiClientHelper extends AbstractHelper
         $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
         $houseNumberAddition = isset($matches[2]) ? trim($matches[2]) : null;
 
-        if (is_null($houseNumber)) {
+        if (null === $houseNumber) {
             return ['error' => true, 'message_details' => __('Invalid house number.')];
         }
 
@@ -197,10 +193,9 @@ class ApiClientHelper extends AbstractHelper
             $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
-            if (
-                (strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
+            if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
                 ||
-                (!empty($address['houseNumberAdditions']) && is_null($address['houseNumberAddition']))
+                (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
             ) {
                 $status = 'houseNumberAdditionIncorrect';
             }
@@ -235,7 +230,6 @@ class ApiClientHelper extends AbstractHelper
         return $out;
     }
 
-
     /**
      * _generateSessionString function.
      *
@@ -246,7 +240,6 @@ class ApiClientHelper extends AbstractHelper
     {
         return bin2hex(random_bytes(8));
     }
-
 
     /**
      * _handleClientException function.
@@ -282,7 +275,6 @@ class ApiClientHelper extends AbstractHelper
         return $response;
     }
 
-
     /**
      * _prepareResponse function.
      *
@@ -314,7 +306,6 @@ class ApiClientHelper extends AbstractHelper
         return $apiResult;
     }
 
-
     /**
      * Get supported countries from API.
      *
@@ -329,7 +320,6 @@ class ApiClientHelper extends AbstractHelper
             return [];
         }
     }
-
 
     /**
      * Get country ISO3 code from ISO2 code, or NULL if not found.
@@ -354,9 +344,8 @@ class ApiClientHelper extends AbstractHelper
         return $this->_countryCodeMap[$mapKey][strtoupper($iso2Code)] ?? null;
     }
 
-
     /**
-     * isDebugging function.
+     * Check if debugging is active.
      *
      * @access public
      * @return bool
@@ -365,7 +354,6 @@ class ApiClientHelper extends AbstractHelper
     {
         return $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
     }
-
 
     /**
      * Get API key.
@@ -378,7 +366,6 @@ class ApiClientHelper extends AbstractHelper
         return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_key']) ?? '');
     }
 
-
     /**
      * Get API secret.
      *
@@ -389,7 +376,6 @@ class ApiClientHelper extends AbstractHelper
     {
         return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_secret']) ?? '');
     }
-
 
     /**
      * _getModuleInfo function.
@@ -408,7 +394,6 @@ class ApiClientHelper extends AbstractHelper
 
         return $modules[$moduleName];
     }
-
 
     /**
      * _getMagentoModules function.
@@ -436,7 +421,6 @@ class ApiClientHelper extends AbstractHelper
         return $this->_modules;
     }
 
-
     /**
      * Get fixed country (ISO2) if there's only one allowed country.
      *
@@ -453,7 +437,6 @@ class ApiClientHelper extends AbstractHelper
 
         return null;
     }
-
 
     /**
      * _getDebugInfo function.
@@ -477,7 +460,7 @@ class ApiClientHelper extends AbstractHelper
 
         // Magento version
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
+        $productMetadata = $objectManager->get(Magento\Framework\App\ProductMetadataInterface::class);
         $version = $productMetadata->getVersion();
 
         $debug['magentoVersion'] = 'Magento/' . $version;

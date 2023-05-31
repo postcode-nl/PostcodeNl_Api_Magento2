@@ -11,7 +11,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     protected $scopeConfig;
 
     /**
-     * __construct function.
+     * Constructor
      *
      * @access public
      * @param Context $context
@@ -26,7 +26,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     }
 
     /**
-     * process function.
+     * Process Javascript layout of block.
      *
      * @access public
      * @param mixed $jsLayout
@@ -70,8 +70,8 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             ['payments-list']['children'];
 
         if (isset($billingConfiguration)) {
-            foreach($billingConfiguration as $key => &$billingForm) {
-                if (!strpos($key, '-form')) {
+            foreach ($billingConfiguration as $key => &$billingForm) {
+                if (false === strpos($key, '-form')) {
                     continue;
                 }
 
@@ -145,6 +145,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 
     /**
      * Find and update dataScope
+     *
      * The default dataScope is 'shippingAddress.item-name'. But, it needs to be '$dataScope.item-name' for the billingAddress and billingAddressshared
      *
      * @access private

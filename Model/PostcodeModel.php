@@ -15,7 +15,6 @@ class PostcodeModel implements PostcodeModelInterface
      */
     protected $apiClientHelper;
 
-
     /**
      * __construct function.
      *
@@ -28,7 +27,6 @@ class PostcodeModel implements PostcodeModelInterface
         $this->apiClientHelper = $apiClientHelper;
     }
 
-
     /**
      * @inheritdoc
      */
@@ -37,7 +35,6 @@ class PostcodeModel implements PostcodeModelInterface
         $result = $this->apiClientHelper->getAddressAutocomplete($context, $term);
         return new AutocompleteData($result);
     }
-
 
     /**
      * @inheritdoc
@@ -48,7 +45,6 @@ class PostcodeModel implements PostcodeModelInterface
         return [$result];
     }
 
-
     /**
      * @inheritdoc
      */
@@ -58,7 +54,6 @@ class PostcodeModel implements PostcodeModelInterface
         return [$result];
     }
 
-
     /**
      * @inheritdoc
      */
@@ -67,5 +62,4 @@ class PostcodeModel implements PostcodeModelInterface
         $result = $this->apiClientHelper->getNlAddress($zipCode, $houseNumber);
         return [$result];
     }
-
 }

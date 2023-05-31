@@ -15,14 +15,12 @@ interface PostcodeModelInterface
      */
     public function getAddressAutocomplete(string $context, string $term): \Flekto\Postcode\Api\Data\AutocompleteInterface;
 
-
     /**
      * @access public
      * @param string $context
      * @return string[][]
      */
     public function getAddressDetails(String $context): array;
-
 
     /**
      * @access public
@@ -32,7 +30,6 @@ interface PostcodeModelInterface
      */
     public function getAddressDetailsCountry(String $context, String $dispatchCountry): array;
 
-
     /**
      * @access public
      * @param string $zipCode
@@ -40,5 +37,4 @@ interface PostcodeModelInterface
      * @return string[][]
      */
     public function getNlAddress(String $zipCode, String $houseNumber): array;
-
 }

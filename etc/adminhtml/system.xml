@@ -21,11 +21,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="text">
-                    <label>Api key</label>
+                    <label>API key</label>
                     <comment/>
                 </field>
                 <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="password">
-                    <label>Api secret</label>
+                    <label>API secret</label>
                     <comment/>
                 </field>
                 <field id="nl_input_behavior" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="select">

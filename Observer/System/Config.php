@@ -22,6 +22,7 @@ class Config implements ObserverInterface
 
     /**
      * Constructor
+     *
      * @access public
      * @param WriterInterface $configWriter
      * @param LoggerInterface $logger

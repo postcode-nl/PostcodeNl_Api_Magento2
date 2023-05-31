@@ -8,7 +8,7 @@ use Magento\Framework\UrlInterface;
 
 class LicenceCheck implements MessageInterface
 {
-    const MESSAGE_IDENTITY = 'flekto_system_message';
+    public const MESSAGE_IDENTITY = 'flekto_system_message';
 
     /**
      * @var StoreConfigHelper
@@ -21,7 +21,7 @@ class LicenceCheck implements MessageInterface
     private $_urlBuilder;
 
     /**
-     * __construct function.
+     * Constructor
      *
      * @access public
      * @param StoreConfigHelper $storeConfigHelper
@@ -34,9 +34,8 @@ class LicenceCheck implements MessageInterface
         $this->_urlBuilder = $urlBuilder;
     }
 
-
     /**
-     * getIdentity function.
+     * Retrieve unique message identity.
      *
      * @access public
      * @return void
@@ -46,9 +45,8 @@ class LicenceCheck implements MessageInterface
         return self::MESSAGE_IDENTITY;
     }
 
-
     /**
-     * isDisplayed function.
+     * Check whether account status isn't active.
      *
      * @access public
      * @return bool
@@ -58,9 +56,8 @@ class LicenceCheck implements MessageInterface
         return $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']) != \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
 
-
     /**
-     * getText function.
+     * Retrieve message text.
      *
      * @access public
      * @return void
@@ -73,9 +70,8 @@ class LicenceCheck implements MessageInterface
         return $msg;
     }
 
-
     /**
-     * getSeverity function.
+     * Retrieve message severity.
      *
      * @access public
      * @return void

@@ -40,12 +40,10 @@ define([
                 this.inputs.street[0].value = address.street;
                 this.inputs.street[1].value = address.buildingNumber;
                 this.inputs.street[2].value = address.buildingNumberAddition;
-            }
-            else if (this.inputs.street.length > 1) {
+            } else if (this.inputs.street.length > 1) {
                 this.inputs.street[0].value = address.street;
                 this.inputs.street[1].value = address.building;
-            }
-            else {
+            } else {
                 this.inputs.street[0].value = address.street + ' ' + address.building;
             }
 

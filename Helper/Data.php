@@ -11,6 +11,11 @@ use Magento\Framework\App\Helper\Context;
 class Data extends AbstractHelper
 {
     /**
+     * @var StoreConfigHelper
+     */
+    private $_storeConfigHelper;
+
+    /**
      * Constructor
      *
      * @access public
@@ -32,7 +37,8 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isFormattedOutputDisabled() {
+    public function isFormattedOutputDisabled()
+    {
         return
             $this->isDisabled()
             || ShowHideAddressFields::FORMAT != $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields']);
@@ -44,7 +50,8 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isNlComponentDisabled() {
+    public function isNlComponentDisabled()
+    {
         return
             $this->isDisabled()
             || false === in_array('NL', $this->_storeConfigHelper->getEnabledCountries())
@@ -57,7 +64,8 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isDisabled() {
+    public function isDisabled()
+    {
         return
             false === $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['enabled'])
             || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
@@ -69,11 +77,11 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isAutofillBypassDisabled() {
+    public function isAutofillBypassDisabled()
+    {
         return
             $this->isDisabled()
             || ShowHideAddressFields::SHOW == $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields'])
             || $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['allow_autofill_bypass']) === false;
     }
-
 }

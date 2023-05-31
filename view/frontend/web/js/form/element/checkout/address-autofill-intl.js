@@ -53,12 +53,10 @@ define([
                 streetInputs[0].value(addressParts.street);
                 streetInputs[1].value(addressParts.buildingNumber);
                 streetInputs[2].value(addressParts.buildingNumberAddition);
-            }
-            else if (streetInputs.length > 1) {
+            } else if (streetInputs.length > 1) {
                 streetInputs[0].value(addressParts.street);
                 streetInputs[1].value(addressParts.building)
-            }
-            else {
+            } else {
                 streetInputs[0].value(`${addressParts.street} ${addressParts.building}`);
             }
 
@@ -67,7 +65,7 @@ define([
         },
 
         resetInputAddress: function () {
-            this.street().elems.each(function (streetInput) { streetInput.reset(); });
+            this.street().elems.each((streetInput) => streetInput.reset());
             this.city().reset();
             this.postcode().reset();
             this.address(null);
@@ -82,12 +80,11 @@ define([
                         Registry.async(`${this.street().name}.${j}`)('disabled', !state);
                     }
 
-                    this.city(function (component) { component.disabled(!state) });
-                    this.postcode(function (component) { component.disabled(!state) });
+                    this.city((component) => component.disabled(!state));
+                    this.postcode((component) => component.disabled(!state));
                 break;
                 case 'format':
-                    if (!force)
-                    {
+                    if (!force) {
                         if (!this.street().visible()) {
                             return;
                         }

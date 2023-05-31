@@ -79,5 +79,4 @@ class UpdateApiData
 
         $this->_logger->info(__('Postcode.eu API data update complete'));
     }
-
 }

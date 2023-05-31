@@ -4,10 +4,10 @@ namespace Flekto\Postcode\Model\Config\Source;
 
 class ShowHideAddressFields implements \Magento\Framework\Option\ArrayInterface
 {
-    const SHOW = 'show';
-    const DISABLE = 'disable';
-    const HIDE = 'hide';
-    const FORMAT = 'format';
+    public const SHOW = 'show';
+    public const DISABLE = 'disable';
+    public const HIDE = 'hide';
+    public const FORMAT = 'format';
 
     public function toOptionArray()
     {

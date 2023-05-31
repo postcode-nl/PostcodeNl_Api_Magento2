@@ -142,8 +142,7 @@ define([
                         this.childHouseNumberSelect()
                             .setOptions(response[0].address.houseNumberAdditions)
                             .show();
-                    }
-                    else {
+                    } else {
                         this.toggleFields(true);
                     }
                 }.bind(this)
@@ -159,7 +158,7 @@ define([
 
             const option = this.childHouseNumberSelect().getOption(value);
 
-            if (option && typeof option.houseNumberAddition !== 'undefined') {
+            if (typeof option !== 'undefined' && typeof option.houseNumberAddition !== 'undefined') {
                 this.address().houseNumberAddition = option.houseNumberAddition;
                 this.status('valid');
                 this.address.valueHasMutated();

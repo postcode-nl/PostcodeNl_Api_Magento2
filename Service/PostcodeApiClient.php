@@ -30,14 +30,12 @@ class PostcodeApiClient
     /** @var array Response headers received in the most recent API call. */
     protected $_mostRecentResponseHeaders = [];
 
-
     public function __construct(string $key, string $secret)
     {
         $this->_key = $key;
         $this->_secret = $secret;
 
-        if (!extension_loaded('curl'))
-        {
+        if (!extension_loaded('curl')) {
             throw new CurlNotLoadedException('Cannot use Postcode.eu International Autocomplete client, the server needs to have the PHP `cURL` extension installed.');
         }
 
@@ -48,17 +46,15 @@ class PostcodeApiClient
         curl_setopt($this->_curlHandler, CURLOPT_TIMEOUT, 5);
         curl_setopt($this->_curlHandler, CURLOPT_USERAGENT, str_replace('\\', '_', static::class) . '/' . static::VERSION .' PHP/'. PHP_VERSION);
 
-        if (isset($_SERVER['HTTP_REFERER']))
-        {
+        if (isset($_SERVER['HTTP_REFERER'])) {
             curl_setopt($this->_curlHandler, CURLOPT_REFERER, $_SERVER['HTTP_REFERER']);
         }
-        curl_setopt($this->_curlHandler, CURLOPT_HEADERFUNCTION, function($curl, string $header) {
+        curl_setopt($this->_curlHandler, CURLOPT_HEADERFUNCTION, function ($curl, string $header) {
             $length = strlen($header);
 
             $headerParts = explode(':', $header, 2);
             // Ignore invalid headers
-            if (count($headerParts) < 2)
-            {
+            if (count($headerParts) < 2) {
                 return $length;
             }
             [$headerName, $headerValue] = $headerParts;
@@ -106,8 +102,7 @@ class PostcodeApiClient
     {
         // Test postcode format
         $postcode = trim($postcode);
-        if (!$this->_isValidDutchPostcodeFormat($postcode))
-        {
+        if (!$this->_isValidDutchPostcodeFormat($postcode)) {
             throw new InvalidPostcodeException(sprintf('Postcode `%s` has an invalid format, it should be in the format 1234AB.', $postcode));
         }
 
@@ -117,8 +112,7 @@ class PostcodeApiClient
             rawurlencode($postcode),
             $houseNumber,
         ];
-        if ($houseNumberAddition !== null)
-        {
+        if ($houseNumberAddition !== null) {
             $urlParts[] = rawurlencode($houseNumberAddition);
         }
         return $this->_performApiCall(implode('/', $urlParts), null);
@@ -164,8 +158,7 @@ class PostcodeApiClient
         curl_setopt($this->_curlHandler, CURLOPT_URL, $url);
         curl_setopt($this->_curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($this->_curlHandler, CURLOPT_USERPWD, $this->_key .':'. $this->_secret);
-        if ($session !== null)
-        {
+        if ($session !== null) {
             curl_setopt($this->_curlHandler, CURLOPT_HTTPHEADER, [
                 static::SESSION_HEADER_KEY . ': ' . $session,
             ]);
@@ -177,18 +170,15 @@ class PostcodeApiClient
         $responseStatusCode = curl_getinfo($this->_curlHandler, CURLINFO_RESPONSE_CODE);
         $curlError = curl_error($this->_curlHandler);
         $curlErrorNr = curl_errno($this->_curlHandler);
-        if ($curlError !== '')
-        {
+        if ($curlError !== '') {
             throw new CurlException(vsprintf('Connection error number `%s`: `%s`.', [$curlErrorNr, $curlError]));
         }
 
         // Parse the response as JSON, will be null if not parsable JSON.
         $jsonResponse = json_decode($response, true);
-        switch ($responseStatusCode)
-        {
+        switch ($responseStatusCode) {
             case 200:
-                if (!is_array($jsonResponse))
-                {
+                if (!is_array($jsonResponse)) {
                     throw new InvalidJsonResponseException('Invalid JSON response from the server for request: ' . $url);
                 }
 

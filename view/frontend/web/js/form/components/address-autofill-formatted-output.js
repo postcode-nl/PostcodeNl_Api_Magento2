@@ -36,8 +36,7 @@ define([
         renderIntlAddress: function (address) {
             if (address === null) {
                 this.visible(false);
-            }
-            else {
+            } else {
                 this.content(address.mailLines.join('<br>'));
                 this.visible(true);
             }

@@ -23,7 +23,7 @@ class AutocompleteMatch implements MatchInterface
     public $highlights;
 
     /**
-     * __construct function.
+     * Constructor
      *
      * @access public
      * @param array $match
