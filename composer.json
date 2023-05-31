@@ -4,7 +4,7 @@
     "description": "Postcode.eu International Address API module for Magento 2. Adds autocompletion for addresses in multiple countries using official postal data.",
     "require": {
       "php": "^7.4 || ^8.0 || ^8.1 || ^8.2",
-      "magento/module-checkout": "~100.4",
+      "magento/module-checkout": "~100.4"
     },
     "type": "magento2-module",
     "license": "BSD-2-Clause",
