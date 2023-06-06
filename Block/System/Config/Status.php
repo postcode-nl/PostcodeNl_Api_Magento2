@@ -35,6 +35,8 @@ class Status extends Template implements RendererInterface
     }
 
     /**
+     * Render template.
+     *
      * @param AbstractElement $element
      *
      * @return string
@@ -69,23 +71,21 @@ class Status extends Template implements RendererInterface
      *
      * @return string
      */
-	public function getApiStatusDescription(): string
-	{
+    public function getApiStatusDescription(): string
+    {
         $status = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
 
-		switch ($status)
-		{
-			case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_NEW:
-				return __('not connected');
-			case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE:
-				return __('active');
-			case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS:
-				return __('invalid key and/or secret');
-			case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE:
-				return __('inactive');
-			default:
-				throw new \Exception('Invalid account status value.');
-		}
-	}
-
+        switch ($status) {
+            case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_NEW:
+                return __('not connected');
+            case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE:
+                return __('active');
+            case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS:
+                return __('invalid key and/or secret');
+            case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE:
+                return __('inactive');
+            default:
+                throw new Status\Exception(__('Invalid account status value.'));
+        }
+    }
 }

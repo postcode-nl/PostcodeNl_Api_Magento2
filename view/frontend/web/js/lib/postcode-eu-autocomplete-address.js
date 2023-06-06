@@ -4,8 +4,8 @@
  * https://api.postcode.nl
  *
  * Copyright Postcode.nl
- * Released under the MIT license
- * https://tldrlegal.com/l/mit
+ * Released under the Apple MIT License (AML)
+ * https://www.tldrlegal.com/license/apple-mit-license-aml
  *
  * @author Postcode.nl
  * @version 1.3.2

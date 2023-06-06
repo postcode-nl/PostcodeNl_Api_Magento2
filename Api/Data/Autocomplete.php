@@ -18,8 +18,7 @@ class Autocomplete implements AutocompleteInterface
      */
     public function __construct(array $response)
     {
-        foreach ($response['matches'] ?? [] as $match)
-        {
+        foreach ($response['matches'] ?? [] as $match) {
             $this->matches[] = new Autocomplete\AutocompleteMatch($match);
         }
     }

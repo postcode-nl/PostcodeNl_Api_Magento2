@@ -7,9 +7,17 @@ use Flekto\Postcode\Helper\StoreConfigHelper;
 class DisabledCountries implements \Magento\Framework\Option\ArrayInterface
 {
     /**
+     * @var StoreConfigHelper
+     */
+    private $_storeConfigHelper;
+
+    /**
+     * Constructor
+     *
      * @param StoreConfigHelper $storeConfigHelper
      */
-    public function __construct(StoreConfigHelper $storeConfigHelper) {
+    public function __construct(StoreConfigHelper $storeConfigHelper)
+    {
         $this->_storeConfigHelper = $storeConfigHelper;
     }
 

@@ -105,5 +105,4 @@ class StoreConfigHelper extends AbstractHelper
 
         return isset($key, $secret);
     }
-
 }

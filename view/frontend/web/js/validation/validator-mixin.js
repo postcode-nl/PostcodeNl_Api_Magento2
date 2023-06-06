@@ -21,19 +21,19 @@ define([
              * @param {Object} params - Object with isValid() method.
              * @return {boolean} - Valid if true.
              */
-            function (value, params) { return params.isValid(); },
+            (value, params) => params.isValid(),
             $t('Please enter a valid value.') // Customize via params.message property.
         );
 
         validator.addRule(
             'validate-postcode',
-            function (value) { return value === '' || addressNlModel.postcodeRegex.test(value); },
+            (value) => value === '' || addressNlModel.postcodeRegex.test(value),
             $t('Please enter a valid zip/postal code.')
         );
 
         validator.addRule(
             'validate-house-number',
-            function (value) { return value === '' || addressNlModel.houseNumberRegex.test(value); },
+            (value) => value === '' || addressNlModel.houseNumberRegex.test(value),
             $t('Please enter a valid house number.')
         );
 
