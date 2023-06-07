@@ -460,7 +460,7 @@ class ApiClientHelper extends AbstractHelper
 
         // Magento version
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $productMetadata = $objectManager->get(Magento\Framework\App\ProductMetadataInterface::class);
+        $productMetadata = $objectManager->get(ProductMetadataInterface::class);
         $version = $productMetadata->getVersion();
 
         $debug['magentoVersion'] = 'Magento/' . $version;
