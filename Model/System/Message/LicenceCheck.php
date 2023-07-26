@@ -38,9 +38,9 @@ class LicenceCheck implements MessageInterface
      * Retrieve unique message identity.
      *
      * @access public
-     * @return void
+     * @return string
      */
-    public function getIdentity()
+    public function getIdentity(): string
     {
         return self::MESSAGE_IDENTITY;
     }
@@ -51,7 +51,7 @@ class LicenceCheck implements MessageInterface
      * @access public
      * @return bool
      */
-    public function isDisplayed()
+    public function isDisplayed(): bool
     {
         return $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']) != \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
@@ -60,9 +60,9 @@ class LicenceCheck implements MessageInterface
      * Retrieve message text.
      *
      * @access public
-     * @return void
+     * @return string
      */
-    public function getText()
+    public function getText(): string
     {
         $msg = __('Your Postcode.eu API licence is invalid.');
         $msg .= ' <a href="' . $this->_urlBuilder->getUrl('adminhtml/system_config/edit', ['section' => 'postcodenl_api']) . '">' . __('Check your API credentials.') . '</a>';
@@ -74,9 +74,9 @@ class LicenceCheck implements MessageInterface
      * Retrieve message severity.
      *
      * @access public
-     * @return void
+     * @return int
      */
-    public function getSeverity()
+    public function getSeverity(): int
     {
         return self::SEVERITY_MAJOR;
     }

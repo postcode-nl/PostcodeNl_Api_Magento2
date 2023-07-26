@@ -24,12 +24,26 @@ $config = $block->getConfig();
             <h3>API connection</h3>
 
             <dl class="postcode-eu-api-connection">
-                <?php if (isset($config['account_name'])): ?>
+                <?php if (isset($block->accountInfo['name'])): ?>
                     <dt>Account name</dt>
-                    <dd><?= $block->escapeHtml($config['account_name']) ?></dd>
+                    <dd><?= $block->escapeHtml($block->accountInfo['name']) ?></dd>
                 <?php endif ?>
                 <dt>Subscription status</dt>
-                <dd><span class="badge-account-status badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>"><?= /* @noEscape */ $block->getApiStatusDescription() ?></span></dd>
+                <dd>
+                    <span class="badge-account-status badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>"><?= /* @noEscape */ $block->getApiStatusDescription() ?></span>
+
+                    <?php if (isset($block->accountInfo['subscription'])): ?>
+                        <?php
+                            $limit = $block->accountInfo['subscription']['limit'];
+                            $usage = $block->accountInfo['subscription']['usage'];
+                            $usage_percent = round($usage / $limit * 100, 1);
+                            $low = round($limit * .75, 2);
+                            $high = round($limit * .9, 2);
+                        ?>
+                            <meter class="accont-usage-meter" min="0" max="<?= $limit ?>" value="<?= $usage ?>" optimum="0" low="<?= $low ?>" high="<?= $high ?>" title="Usage at <?= $usage_percent ?>%"></meter>
+                        <?= $usage . ' / ' . $limit ?> euro
+                    <?php endif ?>
+                </dd>
             </dl>
 
             <h3>Supported countries</h3>

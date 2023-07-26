@@ -107,3 +107,8 @@
 .badge-account-status-inactive {
 	background-color: #666;
 }
+
+.accont-usage-meter {
+    width: 100px;
+    margin: 0 5px 0 10px;
+}

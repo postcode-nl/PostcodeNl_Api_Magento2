@@ -11,7 +11,6 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Locale\Resolver as LocaleResolver;
 use Magento\Framework\Module\ModuleListInterface;
-use Magento\Framework\Stdlib\DateTime;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
 use Magento\Store\Model\ScopeInterface;
@@ -180,6 +179,7 @@ class ApiClientHelper extends AbstractHelper
     public function getNlAddress(string $zipCode, string $houseNumber): array
     {
         $address = null;
+        $matches = [];
 
         preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
         $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
@@ -253,6 +253,7 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
+        $response = [];
         $response['error'] = true;
 
         // only in this case we actually pass error
@@ -297,8 +298,7 @@ class ApiClientHelper extends AbstractHelper
             preg_match("#max-age=(.*?)$#sim", $clientResponseHeaders['cache-control'][0], $secondsToLive);
             if (!empty($secondsToLive) && isset($secondsToLive[1])) {
                 $secondsToLive = $secondsToLive[1];
-                $dateTime = new DateTime();
-                $this->_response->setHeader('expires', $dateTime->gmDate('D, d M Y H:i:s T', $dateTime->strToTime('+ '.$secondsToLive.' seconds')), true);
+                $this->_response->setHeader('expires', gmdate('D, d M Y H:i:s T', strtotime('+ '.$secondsToLive.' seconds')), true);
             }
         }
 
