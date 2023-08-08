@@ -32,6 +32,7 @@ class Config implements ObserverInterface
      * @param CacheFrontendPool $cacheFrontendPool
      * @param ApiClientHelper $apiClientHelper
      * @param StoreConfigHelper $storeConfigHelper
+     * @param RequestInterface $request
      * @return void
      */
     public function __construct(
@@ -123,6 +124,7 @@ class Config implements ObserverInterface
 
     /**
      * Clean config cache.
+     *
      * @return void
      */
     protected function _cleanConfigCache(): void

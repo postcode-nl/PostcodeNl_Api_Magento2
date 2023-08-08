@@ -15,7 +15,7 @@ class UpdateApiData
     protected $_storeConfigHelper;
 
     /**
-     * __construct function.
+     * Constructor
      *
      * @access public
      * @param LoggerInterface $logger
