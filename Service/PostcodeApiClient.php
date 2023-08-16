@@ -67,7 +67,7 @@ class PostcodeApiClient
     /**
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete
      */
-    public function internationalAutocomplete(string $context, string $term, ?string $session = null, $language = ''): array
+    public function internationalAutocomplete(string $context, string $term, ?string $session = null, string $language = ''): array
     {
         return $this->_performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->_generateSessionString());
     }

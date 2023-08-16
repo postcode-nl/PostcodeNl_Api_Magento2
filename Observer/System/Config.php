@@ -5,6 +5,7 @@ namespace Flekto\Postcode\Observer\System;
 use Flekto\Postcode\Helper\ApiClientHelper;
 use Flekto\Postcode\Helper\StoreConfigHelper;
 use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Cache\Frontend\Pool as CacheFrontendPool;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -17,6 +18,7 @@ class Config implements ObserverInterface
     protected $_logger;
     protected $_apiClientHelper;
     protected $_cacheTypeList;
+    protected $_cacheFrontendPool;
     protected $_storeConfigHelper;
     protected $_request;
 
@@ -27,14 +29,17 @@ class Config implements ObserverInterface
      * @param WriterInterface $configWriter
      * @param LoggerInterface $logger
      * @param TypeListInterface $cacheTypeList
+     * @param CacheFrontendPool $cacheFrontendPool
      * @param ApiClientHelper $apiClientHelper
      * @param StoreConfigHelper $storeConfigHelper
+     * @param RequestInterface $request
      * @return void
      */
     public function __construct(
         WriterInterface $configWriter,
         LoggerInterface $logger,
         TypeListInterface $cacheTypeList,
+        CacheFrontendPool $cacheFrontendPool,
         ApiClientHelper $apiClientHelper,
         StoreConfigHelper $storeConfigHelper,
         RequestInterface $request
@@ -42,6 +47,7 @@ class Config implements ObserverInterface
         $this->_configWriter = $configWriter;
         $this->_logger = $logger;
         $this->_cacheTypeList = $cacheTypeList;
+        $this->_cacheFrontendPool = $cacheFrontendPool;
         $this->_apiClientHelper = $apiClientHelper;
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_request = $request;
@@ -51,7 +57,7 @@ class Config implements ObserverInterface
      * @param Observer $observer
      * @return void
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
         if (empty($this->_request->getParam('refresh_api_data'))) {
 
@@ -65,7 +71,7 @@ class Config implements ObserverInterface
 
                 $this->_configWriter->delete(StoreConfigHelper::PATH['account_name']);
                 $this->_configWriter->delete(StoreConfigHelper::PATH['account_status']);
-                $this->_cleanConfigCache();
+                $this->_purgeCachedData();
 
                 return;
             }
@@ -113,15 +119,28 @@ class Config implements ObserverInterface
             }
         }
 
-        $this->_cleanConfigCache(); // Clean cache to update status block.
+        $this->_purgeCachedData(); // Clean cache to update status block.
     }
 
     /**
      * Clean config cache.
+     *
      * @return void
      */
-    protected function _cleanConfigCache()
+    protected function _cleanConfigCache(): void
     {
         $this->_cacheTypeList->cleanType(\Magento\Framework\App\Cache\Type\Config::TYPE_IDENTIFIER);
+    }
+
+    /**
+     * Purge cached data.
+     *
+     * @return void
+     */
+    private function _purgeCachedData(): void
+    {
+        $this->_cleanConfigCache();
+        $cache = $this->_cacheFrontendPool->get(\Magento\Framework\App\Cache\Type\Config::TYPE_IDENTIFIER);
+        $cache->remove(\Flekto\Postcode\Block\System\Config\Status::CACHE_ID);
     }
 }

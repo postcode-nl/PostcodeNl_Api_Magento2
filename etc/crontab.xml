@@ -4,5 +4,8 @@
         <job name="flekto_postcode_update_api_data" instance="Flekto\Postcode\Cron\UpdateApiData" method="execute">
             <schedule>3 3 * * *</schedule>
         </job>
+        <job name="flekto_postcode_notify_module_update" instance="Flekto\Postcode\Cron\NotifyModuleUpdate" method="execute">
+            <schedule>3 3 * * *</schedule>
+        </job>
     </group>
 </config>

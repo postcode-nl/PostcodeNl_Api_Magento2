@@ -107,3 +107,20 @@
 .badge-account-status-inactive {
 	background-color: #666;
 }
+
+.account-usage-meter {
+    width: 100px;
+    margin: 0 5px 0 10px;
+}
+
+.update-available-message {
+    display: inline-block;
+	padding: 1px 10px 2px 7px;
+	border-radius: 20px;
+    background-color: #00759a;
+    color: white;
+}
+
+.update-available-message a {
+    color: inherit;
+}

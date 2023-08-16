@@ -2,7 +2,8 @@ define([
     'ko',
     'Magento_Ui/js/lib/knockout/template/renderer',
     'Flekto_Postcode/js/lib/postcode-eu-autocomplete-address',
-], function (ko, renderer, AutocompleteAddress) {
+    'mage/translate',
+], function (ko, renderer, AutocompleteAddress, $t) {
     'use strict';
 
     ko.bindingHandlers.initIntlAutocomplete = {

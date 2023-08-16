@@ -105,4 +105,15 @@ class StoreConfigHelper extends AbstractHelper
 
         return isset($key, $secret);
     }
+
+    /**
+     * Get current module version.
+     *
+     * @access public
+     * @return string
+     */
+    public function getModuleVersion(): string
+    {
+        return $this->getValue(static::PATH['module_version']);
+    }
 }

@@ -43,7 +43,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
      *
      * @return string[]
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }
@@ -53,7 +53,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
      *
      * @return string[]
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
@@ -61,9 +61,9 @@ class UpdateApiStatusConfig implements DataPatchInterface
     /**
      * Apply patch.
      *
-     * @return $this
+     * @return void
      */
-    public function apply()
+    public function apply(): void
     {
         $this->_resourceConfig->getConnection()->startSetup();
         $connection = $this->_resourceConfig->getConnection();

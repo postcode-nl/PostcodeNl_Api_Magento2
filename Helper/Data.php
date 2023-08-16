@@ -7,13 +7,35 @@ use Flekto\Postcode\Model\Config\Source\NlInputBehavior;
 use Flekto\Postcode\Model\Config\Source\ShowHideAddressFields;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem\DriverInterface;
+use Magento\Framework\HTTP\Client\Curl;
 
 class Data extends AbstractHelper
 {
+    public const MODULE_RELEASE_URL = 'https://github.com/postcode-nl/PostcodeNl_Api_Magento2/releases/latest';
+    public const PACKAGIST_URL = 'https://repo.packagist.org/p2/postcode-nl/api-magento2-module.json';
+
     /**
      * @var StoreConfigHelper
      */
     private $_storeConfigHelper;
+
+    /**
+     * @var DirectoryList
+     */
+    private $_dir;
+
+    /**
+     * @var DriverInterface
+     */
+    private $_fs;
+
+    /**
+     * @var Curl
+     */
+    private $_curl;
 
     /**
      * Constructor
@@ -21,13 +43,22 @@ class Data extends AbstractHelper
      * @access public
      * @param Context $context
      * @param StoreConfigHelper $storeConfigHelper
+     * @param DirectoryList $dir
+     * @param DriverInterface $filesystem
+     * @param Curl $curl
      * @return void
      */
     public function __construct(
         Context $context,
-        StoreConfigHelper $storeConfigHelper
+        StoreConfigHelper $storeConfigHelper,
+        DirectoryList $dir,
+        DriverInterface $filesystem,
+        Curl $curl,
     ) {
         $this->_storeConfigHelper = $storeConfigHelper;
+        $this->_dir = $dir;
+        $this->_fs = $filesystem;
+        $this->_curl = $curl;
         parent::__construct($context);
     }
 
@@ -37,7 +68,7 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isFormattedOutputDisabled()
+    public function isFormattedOutputDisabled(): bool
     {
         return
             $this->isDisabled()
@@ -50,7 +81,7 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isNlComponentDisabled()
+    public function isNlComponentDisabled(): bool
     {
         return
             $this->isDisabled()
@@ -64,7 +95,7 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isDisabled()
+    public function isDisabled(): bool
     {
         return
             false === $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['enabled'])
@@ -77,11 +108,94 @@ class Data extends AbstractHelper
      * @access public
      * @return bool
      */
-    public function isAutofillBypassDisabled()
+    public function isAutofillBypassDisabled(): bool
     {
         return
             $this->isDisabled()
             || ShowHideAddressFields::SHOW == $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields'])
             || $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['allow_autofill_bypass']) === false;
+    }
+
+    /**
+     * Get module info.
+     *
+     * @return array
+     */
+    public function getModuleInfo(): array
+    {
+        $version = $this->_storeConfigHelper->getModuleVersion();
+
+        try {
+            $data = $this->_getPackageData();
+            $latest_version = $data['packages']['postcode-nl/api-magento2-module'][0]['version'];
+        } catch (LocalizedException $e) {
+            $this->_logger->error(__('Failed to get package data: "%1".', $e->getMessage()));
+            $latest_version = $version;
+        }
+
+        return [
+            'version' => $version,
+            'latest_version' => $latest_version,
+            'has_update' => version_compare($latest_version, $version, '>'),
+            'release_url' => $this->getModuleReleaseUrl(),
+        ];
+    }
+
+    /**
+     * Request module info from Packagist.
+     *
+     * Will only download from Packagist if their file is newer.
+     *
+     * @throws LocalizedException
+     * @return array - Decoded JSON data.
+     */
+    private function _getPackageData(): array
+    {
+        $path = $this->_dir->getPath('var') . '/Flekto_Postcode';
+        if (!$this->_fs->isDirectory($path)) {
+            $this->_fs->createDirectory($path, 0755);
+        }
+
+        $filePath = $path . '/package-data.json';
+        if ($this->_fs->isExists($filePath)) {
+            $lastModified = $this->_fs->stat($filePath)['mtime'];
+
+            if ($lastModified !== false) {
+                $this->_curl->setHeaders(['If-Modified-Since' => gmdate('D, d M Y H:i:s T', $lastModified)]);
+            }
+        }
+
+        $this->_curl->get(self::PACKAGIST_URL);
+        $status = $this->_curl->getStatus();
+        if ($status == 200) {
+            $response = $this->_curl->getBody();
+
+            if ($this->_fs->filePutContents($filePath, $response) === false) {
+                throw new LocalizedException(__('Failed to write package data to %1.', $filePath));
+            }
+
+            return json_decode($response, true);
+
+        } elseif ($status == 304) { // Not modified, use cached file.
+            $data = $this->_fs->fileGetContents($filePath);
+
+            if ($data === false) {
+                throw new LocalizedException(__('Failed to read package data from %1.', $filePath));
+            }
+
+            return json_decode($data, true);
+        }
+
+        throw new LocalizedException(__('Unexpected status code %1 while fetching package data.', $status));
+    }
+
+    /**
+     * Get URL to the latest version of the module.
+     *
+     * @return string
+     */
+    public function getModuleReleaseUrl(): string
+    {
+        return self::MODULE_RELEASE_URL;
     }
 }

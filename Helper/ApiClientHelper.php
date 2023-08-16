@@ -11,11 +11,11 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Locale\Resolver as LocaleResolver;
 use Magento\Framework\Module\ModuleListInterface;
-use Magento\Framework\Stdlib\DateTime;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\UrlInterface;
 
 class ApiClientHelper extends AbstractHelper
 {
@@ -30,6 +30,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_request;
     protected $_response;
     protected $_storeManager;
+    protected $_urlBuilder;
     protected $_client;
     protected $_localeResolver;
     protected $_countryCodeMap = [];
@@ -56,6 +57,7 @@ class ApiClientHelper extends AbstractHelper
         Request $request,
         Response $response,
         StoreManagerInterface $storeManager,
+        UrlInterface $urlBuilder,
         LocaleResolver $localeResolver,
         StoreConfigHelper $storeConfigHelper
     ) {
@@ -64,6 +66,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_request = $request;
         $this->_response = $response;
         $this->_storeManager = $storeManager;
+        $this->_urlBuilder = $urlBuilder;
         $this->_localeResolver = $localeResolver;
         $this->_storeConfigHelper = $storeConfigHelper;
         parent::__construct($context);
@@ -96,7 +99,7 @@ class ApiClientHelper extends AbstractHelper
             'enabled_countries' => $this->_storeConfigHelper->getEnabledCountries(),
             'nl_input_behavior' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['nl_input_behavior']) ?? \Flekto\Postcode\Model\Config\Source\NlInputBehavior::ZIP_HOUSE,
             'show_hide_address_fields' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
-            'base_url' => $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB),
+            'base_url' => $this->getCurrentStoreBaseUrl(),
             'debug' => $this->isDebugging(),
             'fixedCountry' => $this->_getFixedCountry(),
             'change_fields_position' => $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['change_fields_position']),
@@ -119,8 +122,7 @@ class ApiClientHelper extends AbstractHelper
             $context = strtolower($this->getCountryIso3Code($context) ?? $context);
         }
 
-        // API requires format 'nl-NL'
-        $locale = str_replace('_', '-', $this->_localeResolver->getLocale());
+        $language = explode('_', $this->_localeResolver->getLocale())[0];
 
         try {
 
@@ -131,7 +133,7 @@ class ApiClientHelper extends AbstractHelper
                 $sessionStr = $this->_generateSessionString();
             }
 
-            $response = $client->internationalAutocomplete($context, $term, $sessionStr, $locale);
+            $response = $client->internationalAutocomplete($context, $term, $sessionStr, $language);
 
             return $this->_prepareResponse($response, $client);
 
@@ -177,6 +179,7 @@ class ApiClientHelper extends AbstractHelper
     public function getNlAddress(string $zipCode, string $houseNumber): array
     {
         $address = null;
+        $matches = [];
 
         preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
         $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
@@ -250,6 +253,7 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
+        $response = [];
         $response['error'] = true;
 
         // only in this case we actually pass error
@@ -294,8 +298,7 @@ class ApiClientHelper extends AbstractHelper
             preg_match("#max-age=(.*?)$#sim", $clientResponseHeaders['cache-control'][0], $secondsToLive);
             if (!empty($secondsToLive) && isset($secondsToLive[1])) {
                 $secondsToLive = $secondsToLive[1];
-                $dateTime = new DateTime();
-                $this->_response->setHeader('expires', $dateTime->gmDate('D, d M Y H:i:s T', $dateTime->strToTime('+ '.$secondsToLive.' seconds')), true);
+                $this->_response->setHeader('expires', gmdate('D, d M Y H:i:s T', strtotime('+ '.$secondsToLive.' seconds')), true);
             }
         }
 
@@ -353,6 +356,12 @@ class ApiClientHelper extends AbstractHelper
     public function isDebugging(): bool
     {
         return $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
+    }
+
+    public function getCurrentStoreBaseUrl(): string
+    {
+        $currentStore = $this->_storeManager->getStore();
+        return $this->_urlBuilder->getBaseUrl(['_store' => $currentStore->getCode()]);
     }
 
     /**
@@ -460,7 +469,7 @@ class ApiClientHelper extends AbstractHelper
 
         // Magento version
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $productMetadata = $objectManager->get(Magento\Framework\App\ProductMetadataInterface::class);
+        $productMetadata = $objectManager->get(ProductMetadataInterface::class);
         $version = $productMetadata->getVersion();
 
         $debug['magentoVersion'] = 'Magento/' . $version;

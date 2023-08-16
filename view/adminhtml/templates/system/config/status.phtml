@@ -1,6 +1,8 @@
 <?php
 
 $config = $block->getConfig();
+$accountInfo = $block->getAccountInfo();
+$moduleInfo = $block->getModuleInfo();
 
 ?><div class="postcode-eu-status-container">
     <div class="postcode-eu-status-header">
@@ -9,10 +11,25 @@ $config = $block->getConfig();
 
     <div class="postcode-eu-status-content">
         <div class="postcode-eu-status-content-header">
-            <p>Module version <strong><?= $block->escapeHtml($config['module_version']) ?></strong></p>
+            <p>
+                Module version <strong><?= $block->escapeHtml($moduleInfo['version']) ?></strong>
+                <?php if ($moduleInfo['has_update']): ?>
+                <span class="update-available-message">
+                    ↻ <a href="<?= $block->escapeHtml($moduleInfo['release_url']) ?>"
+                         title="Please update to version <?= $block->escapeHtml($moduleInfo['latest_version']) ?>">
+                         <?= $block->escapeHtml(__('update available')) ?>
+                    </a>
+                </span>
+                <?php endif ?>
+            </p>
 
             <?php if ($config['has_credentials']): ?>
-                <button type="submit" name="refresh_api_data" value="1" class="action-default scalable button-refresh-api-data"><?= $block->escapeHtml(__('↻ Refresh API data')) ?></button>
+                <button type="submit"
+                    name="refresh_api_data"
+                    value="1"
+                    class="action-default scalable button-refresh-api-data">
+                    <?= $block->escapeHtml(__('↻ Refresh API data')) ?>
+                </button>
             <?php endif ?>
         </div>
 
@@ -24,12 +41,35 @@ $config = $block->getConfig();
             <h3>API connection</h3>
 
             <dl class="postcode-eu-api-connection">
-                <?php if (isset($config['account_name'])): ?>
+                <?php if (isset($accountInfo['name'])): ?>
                     <dt>Account name</dt>
-                    <dd><?= $block->escapeHtml($config['account_name']) ?></dd>
+                    <dd><?= $block->escapeHtml($accountInfo['name']) ?></dd>
                 <?php endif ?>
                 <dt>Subscription status</dt>
-                <dd><span class="badge-account-status badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>"><?= /* @noEscape */ $block->getApiStatusDescription() ?></span></dd>
+                <dd>
+                    <span class="badge-account-status badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>">
+                        <?= /* @noEscape */ $block->getApiStatusDescription() ?>
+                    </span>
+
+                    <?php if (isset($accountInfo['subscription'])): ?>
+                        <?php
+                            $limit = $accountInfo['subscription']['limit'];
+                            $usage = $accountInfo['subscription']['usage'];
+                            $usage_percent = round($usage / $limit * 100, 1);
+                            $low = round($limit * .75, 2);
+                            $high = round($limit * .9, 2);
+                        ?>
+                            <meter class="account-usage-meter"
+                                min="0"
+                                max="<?= /* @noEscape */ $limit ?>"
+                                value="<?= /* @noEscape */ $usage ?>"
+                                optimum="0"
+                                low="<?= /* @noEscape */ $low ?>"
+                                high="<?= /* @noEscape */ $high ?>"
+                                title="Usage at <?= /* @noEscape */ $usage_percent ?>%"></meter>
+                        <?= /* @noEscape */ $usage . ' / ' . /* @noEscape */ $limit ?> euro
+                    <?php endif ?>
+                </dd>
             </dl>
 
             <h3>Supported countries</h3>

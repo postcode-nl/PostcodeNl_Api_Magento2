@@ -118,6 +118,7 @@ define([
             this.resetHouseNumberSelect();
             this.resetInputAddress();
             this.loading(true);
+            this.childHouseNumber().error(false);
 
             const url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
