@@ -7,19 +7,18 @@ define([
 
         defaults: {
             imports: {
-                settings: '${$.parentName}:settings',
+                setValidation: '${$.parentName}:settings',
             },
         },
 
-        initialize: function () {
-            this._super();
-
-            if (this.settings.show_hide_address_fields !== 'show') {
-                this.validation['required-entry'] = true;
-                this.required(true);
+        setValidation: function (settings) {
+            if (settings.show_hide_address_fields === 'show') {
+                return;
             }
 
-            return this;
+            this.required(true);
+            this.validation['required-entry'] = true;
         },
+
     });
 });
