@@ -8,7 +8,7 @@
  * https://www.tldrlegal.com/license/apple-mit-license-aml
  *
  * @author Postcode.nl
- * @version 1.3.2
+ * @version 1.3.3
  */
 
 (function (global, factory) {
@@ -31,7 +31,7 @@
 	const document = window.document,
 		$ = function (selector) { return document.querySelectorAll(selector); },
 		elementData = new WeakMap(),
-		VERSION = '1.3.2',
+		VERSION = '1.3.3',
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
@@ -338,6 +338,10 @@
 					return ul;
 				},
 			},
+			suppress: {
+				value: false,
+				writable: true,
+			},
 		});
 
 		wrapper.classList.add(options.cssPrefix + 'menu');
@@ -429,7 +433,7 @@
 				this.focusNext(false);
 			}
 
-			if (isOpen)
+			if (isOpen || this.suppress)
 			{
 				return;
 			}
@@ -595,6 +599,20 @@
 		return target;
 	}
 
+	/**
+	 * Returns the name of the class of an object.
+	 *
+	 * To be used instead of typeof or instanceof, which are broken.
+	 * @see {@link https://github.com/BonsaiDen/JavaScript-Garden/blob/master/doc/en/types/typeof.md}
+	 *
+	 * @param {*} value - Any value.
+	 * @return {string} Class name extracted from internal [[class]] property.
+	 */
+	const getClass = function (value)
+	{
+		return Object.prototype.toString.call(value).slice(8, -1);
+	}
+
 	if (typeof window.CustomEvent !== 'function')
 	{
 		/**
@@ -646,7 +664,7 @@
 	{
 		let inputElements;
 
-		if (typeof elementsOrSelector === 'string')
+		if (getClass(elementsOrSelector) === 'String')
 		{
 			inputElements = $(elementsOrSelector);
 		}
@@ -940,29 +958,53 @@
 		}
 
 		/**
+		 * @typedef SearchOptions
+		 * @type {Object}
+		 * @property {string} term - Search query, optional.
+		 * @property {string} context - Autocomplete context, optional.
+		 * @property {boolean} showMenu - Wether to show the menu, optional. Default is true.
+		 */
+
+		/**
 		 * Trigger a search on the specified input element. If invoked without a term, the current input's value is used.
 		 *
 		 * @param {HTMLElement} element - Input element associated with the autocomplete instance.
-		 * @param {string} term - Search query, optional.
-		 * @param {string} context - Autocomplete context, optional.
+		 * @param {(string|SearchOptions)} [term] - Search query, optional. Or SearchOptions object, optional.
+		 * @param {string} [context] - Autocomplete context, optional. Ignored if using SearchOptions.
 		 */
-		this.search = function (element, term, context)
+		this.search = function (element)
 		{
-			if (typeof term !== 'undefined')
+			let options;
+
+			if (getClass(arguments[1]) === 'Object')
 			{
-				element.value = term;
+				options = arguments[1];
+			}
+			else
+			{
+				options = { term: arguments[1], context: arguments[2] };
 			}
 
-			if (typeof context !== 'undefined')
+			if (typeof options.term !== 'undefined')
+			{
+				element.value = options.term;
+			}
+
+			if (typeof options.context !== 'undefined')
 			{
 				const data = elementData.get(element);
-				data.context = context;
+				data.context = options.context;
 				elementData.set(element, data);
 			}
+
+			const currentMenuSuppress = menu.suppress;
+			menu.suppress = !(typeof options.showMenu === 'undefined' || options.showMenu);
 
 			activeElement = element;
 			element.classList.toggle(inputBlankClassName, element.value === '');
 			search(element);
+
+			menu.suppress = currentMenuSuppress;
 		}
 
 		/**
@@ -1214,20 +1256,16 @@
 			const data = elementData.get(element);
 			activeElement = element;
 
-			// Bug #51485 - this shouldn't happen, but it does in IE
-			/*
-			if (typeof data.context === 'undefined')
-			{
-				return;
-			}
-			*/
-
 			if (element.value === previousValue && data.context === previousContext)
 			{
 				return;
 			}
 
-			const hasSubstring = data.context === previousContext && previousValue !== null && (element.value.indexOf(previousValue) === 0 || previousValue.indexOf(element.value) === 0);
+			const hasSubstring = (
+				data.context === previousContext
+				&& previousValue !== null
+				&& (element.value.indexOf(previousValue) === 0 || previousValue.indexOf(element.value) === 0)
+			);
 			previousValue = element.value;
 			previousContext = data.context;
 			data.match = {};
@@ -1247,6 +1285,12 @@
 			}
 
 			self.getSuggestions.call(self, data.context, element.value, function (result) {
+				if (getClass(result.newContext) === 'String')
+				{
+					// Forced switch away from current context - current context no longer valid given user input.
+					data.context = result.newContext;
+				}
+
 				// Trigger the response event. Cancel this event to prevent rendering address suggestions.
 				if (true === element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'response', {detail: result, cancelable: true, bubbles: true})))
 				{
