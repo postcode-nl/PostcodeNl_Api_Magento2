@@ -53,7 +53,7 @@ class Data extends AbstractHelper
         StoreConfigHelper $storeConfigHelper,
         DirectoryList $dir,
         DriverInterface $filesystem,
-        Curl $curl,
+        Curl $curl
     ) {
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_dir = $dir;
