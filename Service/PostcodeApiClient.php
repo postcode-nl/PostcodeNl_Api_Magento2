@@ -2,10 +2,15 @@
 
 namespace Flekto\Postcode\Service;
 
+use Flekto\Postcode\Helper\StoreConfigHelper;
+
+use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\App\Request\Http as HttpRequest;
+
 use Flekto\Postcode\Service\Exception\AuthenticationException;
 use Flekto\Postcode\Service\Exception\BadRequestException;
 use Flekto\Postcode\Service\Exception\CurlException;
-use Flekto\Postcode\Service\Exception\CurlNotLoadedException;
 use Flekto\Postcode\Service\Exception\ForbiddenException;
 use Flekto\Postcode\Service\Exception\InvalidJsonResponseException;
 use Flekto\Postcode\Service\Exception\InvalidPostcodeException;
@@ -19,57 +24,72 @@ class PostcodeApiClient
     public const SESSION_HEADER_KEY = 'X-Autocomplete-Session';
 
     protected const SERVER_URL = 'https://api.postcode.eu/';
-    protected const VERSION = 1.0;
 
     /** @var string The Postcode.eu API key, required for all requests. Provided when registering an account. */
     protected $_key;
+
     /** @var string The Postcode.eu API secret, required for all requests */
     protected $_secret;
-    /** @var resource */
-    protected $_curlHandler;
-    /** @var array Response headers received in the most recent API call. */
-    protected $_mostRecentResponseHeaders = [];
 
-    public function __construct(string $key, string $secret)
+    protected $_curl;
+    protected $_storeConfigHelper;
+    protected $_productMetadata;
+
+    public function __construct(
+        Curl $curl,
+        HttpRequest $request,
+        ProductMetadataInterface $productMetadata,
+        StoreConfigHelper $storeConfigHelper
+    ) {
+        $this->_curl = $curl;
+        $this->_productMetadata = $productMetadata;
+        $this->_storeConfigHelper = $storeConfigHelper;
+        $this->_key = trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_key']) ?? '');
+        $this->_secret = trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_secret']) ?? '');
+
+        $curl->setOptions([
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_USERAGENT => $this->getUserAgent(),
+        ]);
+
+        if (null !== $request->getServer('HTTP_REFERER')) {
+            $curl->setOption(CURLOPT_REFERER, $request->getServer('HTTP_REFERER'));
+        }
+    }
+
+    public function getUserAgent(): string
     {
-        $this->_key = $key;
-        $this->_secret = $secret;
-
-        if (!extension_loaded('curl')) {
-            throw new CurlNotLoadedException('Cannot use Postcode.eu International Autocomplete client, the server needs to have the PHP `cURL` extension installed.');
-        }
-
-        $this->_curlHandler = curl_init();
-        curl_setopt($this->_curlHandler, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($this->_curlHandler, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->_curlHandler, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($this->_curlHandler, CURLOPT_TIMEOUT, 5);
-        curl_setopt($this->_curlHandler, CURLOPT_USERAGENT, str_replace('\\', '_', static::class) . '/' . static::VERSION .' PHP/'. PHP_VERSION);
-
-        if (isset($_SERVER['HTTP_REFERER'])) {
-            curl_setopt($this->_curlHandler, CURLOPT_REFERER, $_SERVER['HTTP_REFERER']);
-        }
-        curl_setopt($this->_curlHandler, CURLOPT_HEADERFUNCTION, function ($curl, string $header) {
-            $length = strlen($header);
-
-            $headerParts = explode(':', $header, 2);
-            // Ignore invalid headers
-            if (count($headerParts) < 2) {
-                return $length;
-            }
-            [$headerName, $headerValue] = $headerParts;
-            $this->_mostRecentResponseHeaders[strtolower(trim($headerName))][] = trim($headerValue);
-
-            return $length;
-        });
+        return sprintf(
+            '%s/%s %s/%s/%s PHP/%s',
+            \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
+            $this->_storeConfigHelper->getModuleVersion(),
+            $this->_productMetadata->getName(),
+            $this->_productMetadata->getEdition(),
+            $this->_productMetadata->getVersion(),
+            PHP_VERSION
+        );
     }
 
     /**
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete
      */
-    public function internationalAutocomplete(string $context, string $term, ?string $session = null, string $language = ''): array
+    public function internationalAutocomplete(
+        string $context,
+        string $term,
+        ?string $session = null,
+        string $language = ''
+    ): array
     {
-        return $this->_performApiCall('international/v1/autocomplete/' . rawurlencode($context) . '/' . rawurlencode($term) . '/' . rawurlencode($language), $session ?? $this->_generateSessionString());
+        return $this->_fetch(
+            sprintf(
+                'international/v1/autocomplete/%s/%s/%s',
+                rawurlencode($context),
+                rawurlencode($term),
+                rawurlencode($language)
+            ),
+            $session ?? $this->_generateSessionString()
+        );
     }
 
     /**
@@ -77,7 +97,10 @@ class PostcodeApiClient
      */
     public function internationalGetDetails(string $context, ?string $session = null): array
     {
-        return $this->_performApiCall('international/v1/address/' . rawurlencode($context), $session ?? $this->_generateSessionString());
+        return $this->_fetch(
+            sprintf('international/v1/address/%s', rawurlencode($context)),
+            $session ?? $this->_generateSessionString()
+        );
     }
 
     /**
@@ -85,7 +108,7 @@ class PostcodeApiClient
      */
     public function internationalGetSupportedCountries(): array
     {
-        return $this->_performApiCall('international/v1/supported-countries', null);
+        return $this->_fetch('international/v1/supported-countries', null);
     }
 
     /**
@@ -98,12 +121,18 @@ class PostcodeApiClient
      *
      * @see https://api.postcode.nl/documentation
      */
-    public function dutchAddressByPostcode(string $postcode, int $houseNumber, ?string $houseNumberAddition = null): array
+    public function dutchAddressByPostcode(
+        string $postcode,
+        int $houseNumber,
+        ?string $houseNumberAddition = null
+    ): array
     {
         // Test postcode format
         $postcode = trim($postcode);
         if (!$this->_isValidDutchPostcodeFormat($postcode)) {
-            throw new InvalidPostcodeException(sprintf('Postcode `%s` has an invalid format, it should be in the format 1234AB.', $postcode));
+            throw new InvalidPostcodeException(
+                sprintf('Postcode `%s` has an invalid format, it should be in the format 1234AB.', $postcode)
+            );
         }
 
         // Use the regular validation function
@@ -115,20 +144,20 @@ class PostcodeApiClient
         if ($houseNumberAddition !== null) {
             $urlParts[] = rawurlencode($houseNumberAddition);
         }
-        return $this->_performApiCall(implode('/', $urlParts), null);
+        return $this->_fetch(implode('/', $urlParts), null);
     }
 
     public function accountInfo(): array
     {
-        return $this->_performApiCall('account/v1/info', null);
+        return $this->_fetch('account/v1/info', null);
     }
 
     /**
-     * @return array The response headers from the most recent API call.
-     */
-    public function getApiCallResponseHeaders(): array
+    * @return array The response headers from the most recent API call.
+    */
+    public function getMostRecentResponseHeaders(): array
     {
-        return $this->_mostRecentResponseHeaders;
+        return $this->_curl->getHeaders();
     }
 
     /**
@@ -142,61 +171,68 @@ class PostcodeApiClient
         return (bool) preg_match('~^[1-9]\d{3}\s?[a-zA-Z]{2}$~', $postcode);
     }
 
-    public function __destruct()
-    {
-        curl_close($this->_curlHandler);
-    }
-
     protected function _generateSessionString(): string
     {
         return bin2hex(random_bytes(8));
     }
 
-    protected function _performApiCall(string $path, ?string $session): array
+    protected function _fetch(string $path, ?string $session = null): array
     {
-        $url = static::SERVER_URL . $path;
-        curl_setopt($this->_curlHandler, CURLOPT_URL, $url);
-        curl_setopt($this->_curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($this->_curlHandler, CURLOPT_USERPWD, $this->_key .':'. $this->_secret);
         if ($session !== null) {
-            curl_setopt($this->_curlHandler, CURLOPT_HTTPHEADER, [
-                static::SESSION_HEADER_KEY . ': ' . $session,
-            ]);
+            $this->_curl->setHeaders([static::SESSION_HEADER_KEY => $session]);
         }
 
-        $this->_mostRecentResponseHeaders = [];
-        $response = curl_exec($this->_curlHandler);
+        $this->_curl->setCredentials($this->_key, $this->_secret);
+        $url = static::SERVER_URL . $path;
 
-        $responseStatusCode = curl_getinfo($this->_curlHandler, CURLINFO_RESPONSE_CODE);
-        $curlError = curl_error($this->_curlHandler);
-        $curlErrorNr = curl_errno($this->_curlHandler);
-        if ($curlError !== '') {
-            throw new CurlException(vsprintf('Connection error number `%s`: `%s`.', [$curlErrorNr, $curlError]));
+        try {
+            $this->_curl->get($url);
+        }
+        catch (\Exception $e) {
+            throw new CurlException($e->getMessage());
         }
 
-        // Parse the response as JSON, will be null if not parsable JSON.
-        $jsonResponse = json_decode($response, true);
-        switch ($responseStatusCode) {
+        $response = $this->_curl->getBody();
+        $statusCode = $this->_curl->getStatus();
+        switch ($statusCode) {
             case 200:
+                $jsonResponse = json_decode($response, true);
                 if (!is_array($jsonResponse)) {
-                    throw new InvalidJsonResponseException('Invalid JSON response from the server for request: ' . $url);
+                    throw new InvalidJsonResponseException(
+                        sprintf('Invalid JSON response from the server for request: `%s`.' . $url)
+                    );
                 }
 
                 return $jsonResponse;
             case 400:
-                throw new BadRequestException(vsprintf('Server response code 400, bad request for `%s`.', [$url]));
+                throw new BadRequestException(
+                    sprintf('Server response code 400, bad request for `%s`.', $url)
+                );
             case 401:
-                throw new AuthenticationException('Could not authenticate your request, please make sure your API credentials are correct.');
+                throw new AuthenticationException(
+                    'Could not authenticate your request, please make sure your API credentials are correct.'
+                );
             case 403:
-                throw new ForbiddenException('Your account currently has no access to the international API, make sure you have an active subscription.');
+                throw new ForbiddenException(
+                    'Your account currently has no access to the API, make sure you have an active subscription.'
+                );
             case 404:
-                throw new NotFoundException('Combination not found.');
+                throw new NotFoundException(
+                    'Combination not found.'
+                );
             case 429:
-                throw new TooManyRequestsException('Too many requests made, please slow down: ' . $response);
+                throw new TooManyRequestsException(
+                    sprintf('Too many requests made, please slow down: `%s`.', $response)
+                );
             case 503:
-                throw new ServerUnavailableException('The international API server is currently not available: ' . $response);
+                throw new ServerUnavailableException(
+                    sprintf('The international API server is currently not available: `%s`.', $response)
+                );
             default:
-                throw new UnexpectedException(vsprintf('Unexpected server response code `%s`.', [$responseStatusCode]));
+                throw new UnexpectedException(
+                    sprintf('Unexpected server response code `%s`.', $statusCode)
+                );
         }
+
     }
 }

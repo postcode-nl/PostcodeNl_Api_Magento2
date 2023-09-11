@@ -16,6 +16,7 @@ class Data extends AbstractHelper
 {
     public const MODULE_RELEASE_URL = 'https://github.com/postcode-nl/PostcodeNl_Api_Magento2/releases/latest';
     public const PACKAGIST_URL = 'https://repo.packagist.org/p2/postcode-nl/api-magento2-module.json';
+    public const VENDOR_PACKAGE = 'postcode-nl/api-magento2-module';
 
     /**
      * @var StoreConfigHelper
@@ -127,7 +128,7 @@ class Data extends AbstractHelper
 
         try {
             $data = $this->_getPackageData();
-            $latest_version = $data['packages']['postcode-nl/api-magento2-module'][0]['version'];
+            $latest_version = $data['packages'][self::VENDOR_PACKAGE][0]['version'];
         } catch (LocalizedException $e) {
             $this->_logger->error(__('Failed to get package data: "%1".', $e->getMessage()));
             $latest_version = $version;

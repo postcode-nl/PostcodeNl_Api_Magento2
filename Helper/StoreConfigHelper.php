@@ -3,10 +3,16 @@
 namespace Flekto\Postcode\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Developer\Helper\Data as DeveloperHelperData;
 
 class StoreConfigHelper extends AbstractHelper
 {
+    protected $_storeManager;
+    protected $_developerHelper;
+
     public const PATH = [
         // General
         'enabled' => 'postcodenl_api/general/enabled',
@@ -27,6 +33,22 @@ class StoreConfigHelper extends AbstractHelper
         'account_name' => 'postcodenl_api/status/account_name',
         'account_status' => 'postcodenl_api/status/account_status',
     ];
+
+    /**
+     * @param Context $context
+     * @param StoreManagerInterface $storeManager
+     * @param Data $developerHelper
+     */
+    public function __construct(
+        Context $context,
+        StoreManagerInterface $storeManager,
+        DeveloperHelperData $developerHelper
+    )
+    {
+        $this->_storeManager = $storeManager;
+        $this->_developerHelper = $developerHelper;
+        parent::__construct($context);
+    }
 
     /**
      * Get store config value
@@ -116,4 +138,58 @@ class StoreConfigHelper extends AbstractHelper
     {
         return $this->getValue(static::PATH['module_version']);
     }
+
+    /**
+     * Get settings to be used in frontend.
+     *
+     * @access public
+     * @return array
+     */
+    public function getJsinit(): array
+    {
+        return [
+            'enabled_countries' => $this->getEnabledCountries(),
+            'nl_input_behavior' => $this->getValue(static::PATH['nl_input_behavior']) ?? \Flekto\Postcode\Model\Config\Source\NlInputBehavior::ZIP_HOUSE,
+            'show_hide_address_fields' => $this->getValue(static::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
+            'base_url' => $this->getCurrentStoreBaseUrl(),
+            'debug' => $this->isDebugging(),
+            'fixedCountry' => $this->_getFixedCountry(),
+            'change_fields_position' => $this->isSetFlag(static::PATH['change_fields_position']),
+        ];
+    }
+
+    public function getCurrentStoreBaseUrl(): string
+    {
+        $currentStore = $this->_storeManager->getStore();
+        return $this->_urlBuilder->getBaseUrl(['_store' => $currentStore->getCode()]);
+    }
+
+    /**
+     * Check if debugging is active.
+     *
+     * @access public
+     * @return bool
+     */
+    public function isDebugging(): bool
+    {
+        return $this->isSetFlag(static::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
+    }
+
+    /**
+     * Get fixed country (ISO2) if there's only one allowed country.
+     *
+     * @access private
+     * @return string|null
+     */
+    private function _getFixedCountry(): ?string
+    {
+        $allowedCountries = $this->getValue('general/country/allow');
+
+        if (isset($allowedCountries) && strlen($allowedCountries) === 2) {
+            return $allowedCountries;
+        }
+
+        return null;
+    }
+
 }

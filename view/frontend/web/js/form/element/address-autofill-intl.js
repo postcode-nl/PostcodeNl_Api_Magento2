@@ -12,7 +12,7 @@ define([
             intlAutocompleteInstance: null,
         },
 
-        initialize: function (config) {
+        initialize: function () {
             this._super();
 
             if (this.settings.show_hide_address_fields !== 'show') {

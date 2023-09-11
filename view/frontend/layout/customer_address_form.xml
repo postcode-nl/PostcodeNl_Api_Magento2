@@ -15,7 +15,7 @@
                             <item name="address_autofill" xsi:type="array">
                                 <item name="component" xsi:type="string">Flekto_Postcode/js/view/customer/address/autofill</item>
                                 <item name="config" xsi:type="array">
-                                    <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\ApiClientHelper::getJsinit"/>
+                                    <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                 </item>
                                 <item name="children" xsi:type="array">
                                     <item name="address_autofill_nl" xsi:type="array">
@@ -23,7 +23,7 @@
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">ui/collection</item>
                                             <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
-                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\ApiClientHelper::getJsinit"/>
+                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                         </item>
                                         <item name="sortOrder" xsi:type="number">65</item>
                                         <item name="children" xsi:type="array">
@@ -68,7 +68,7 @@
                                             <item name="template" xsi:type="string">ui/form/field</item>
                                             <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
                                             <item name="dataScope" xsi:type="string">test</item>
-                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\ApiClientHelper::getJsinit"/>
+                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                             <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
                                         </item>
                                         <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
