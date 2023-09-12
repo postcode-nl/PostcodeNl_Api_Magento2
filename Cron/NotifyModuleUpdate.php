@@ -24,7 +24,7 @@ class NotifyModuleUpdate
     public function __construct(
         LoggerInterface $logger,
         DataHelper $dataHelper,
-        UpdateNotifier $updateNotifier,
+        UpdateNotifier $updateNotifier
     ) {
         $this->_logger = $logger;
         $this->_dataHelper = $dataHelper;

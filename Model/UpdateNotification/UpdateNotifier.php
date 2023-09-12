@@ -22,7 +22,7 @@ class UpdateNotifier
      */
     public function __construct(
         NotifierInterface $notifier,
-        UpdateNotificationRepositoryInterface $updateNotification,
+        UpdateNotificationRepositoryInterface $updateNotification
     ) {
         $this->_notifier = $notifier;
         $this->_updateNotification = $updateNotification;
