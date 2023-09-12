@@ -312,28 +312,6 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * Get API key.
-     *
-     * @access protected
-     * @return string
-     */
-    protected function _getKey(): string
-    {
-        return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_key']) ?? '');
-    }
-
-    /**
-     * Get API secret.
-     *
-     * @access protected
-     * @return string
-     */
-    protected function _getSecret(): string
-    {
-        return trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_secret']) ?? '');
-    }
-
-    /**
      * _getModuleInfo function.
      *
      * @access protected
@@ -385,10 +363,11 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _getDebugInfo(): array
     {
+        $credentials = $this->_storeConfigHelper->getCredentials();
         $debug = [
             'configuration' => [
-                'key' => $this->_getKey(),
-                'secret' => substr_replace($this->_getSecret(), '***', 3, -3),
+                'key' => $credentials['key'],
+                'secret' => substr_replace($credentials['secret'], '***', 3, -3),
                 'debug' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_debug']),
             ],
             'modules' => $this->_getMagentoModules(),

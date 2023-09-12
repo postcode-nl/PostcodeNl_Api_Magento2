@@ -7,11 +7,13 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Developer\Helper\Data as DeveloperHelperData;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class StoreConfigHelper extends AbstractHelper
 {
     protected $_storeManager;
     protected $_developerHelper;
+    protected $_encryptor;
 
     public const PATH = [
         // General
@@ -38,15 +40,18 @@ class StoreConfigHelper extends AbstractHelper
      * @param Context $context
      * @param StoreManagerInterface $storeManager
      * @param Data $developerHelper
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
-        DeveloperHelperData $developerHelper
+        DeveloperHelperData $developerHelper,
+        EncryptorInterface $encryptor
     )
     {
         $this->_storeManager = $storeManager;
         $this->_developerHelper = $developerHelper;
+        $this->_encryptor = $encryptor;
         parent::__construct($context);
     }
 
@@ -126,6 +131,28 @@ class StoreConfigHelper extends AbstractHelper
         $secret = $this->getValue(static::PATH['api_secret']);
 
         return isset($key, $secret);
+    }
+
+
+    /**
+     * Get API credentials, decrypting API secret.
+     *
+     * @access public
+     * @return array
+     */
+    public function getCredentials(): array
+    {
+        $key = $this->getValue(static::PATH['api_key']);
+        $secret = $this->getValue(static::PATH['api_secret']);
+
+        if (
+            isset($secret)
+            && strpos($secret, ':') !== false // Magento\Framework\Encryption\Encryptor seperates parts by ':'.
+        ) {
+            $secret = $this->_encryptor->decrypt($secret);
+        }
+
+        return ['key' => $key ?? '', 'secret' => $secret ?? ''];
     }
 
     /**

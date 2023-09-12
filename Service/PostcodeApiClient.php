@@ -44,8 +44,7 @@ class PostcodeApiClient
         $this->_curl = $curl;
         $this->_productMetadata = $productMetadata;
         $this->_storeConfigHelper = $storeConfigHelper;
-        $this->_key = trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_key']) ?? '');
-        $this->_secret = trim($this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_secret']) ?? '');
+        ['key' => $this->_key, 'secret' => $this->_secret] = $storeConfigHelper->getCredentials();
 
         $curl->setOptions([
             CURLOPT_CONNECTTIMEOUT => 2,
@@ -158,6 +157,16 @@ class PostcodeApiClient
     public function getMostRecentResponseHeaders(): array
     {
         return $this->_curl->getHeaders();
+    }
+
+    /**
+    * @param string $key
+    * @param string $secret
+    */
+    public function setCredentials(string $key, string $secret): void
+    {
+        $this->_key = $key;
+        $this->_secret = $secret;
     }
 
     /**

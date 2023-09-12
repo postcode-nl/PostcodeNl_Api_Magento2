@@ -24,9 +24,10 @@
                     <label>API key</label>
                     <comment/>
                 </field>
-                <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="password">
+                <field id="api_secret" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="obscure">
                     <label>API secret</label>
                     <comment/>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
                 <field id="nl_input_behavior" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="select">
                     <label>Dutch address fields behavior</label>

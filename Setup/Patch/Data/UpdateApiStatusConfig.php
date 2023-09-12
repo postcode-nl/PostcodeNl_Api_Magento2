@@ -88,7 +88,8 @@ class UpdateApiStatusConfig implements DataPatchInterface
 
                 try {
 
-                    $client = new PostcodeApiClient($credentials[StoreConfigHelper::PATH['api_key']], $credentials[StoreConfigHelper::PATH['api_secret']]);
+                    $client = $this->_storeConfigHelper->getApiClient();
+                    $client->setCredentials($credentials[StoreConfigHelper::PATH['api_key']], $credentials[StoreConfigHelper::PATH['api_secret']]);
                     $accountInfo = $client->accountInfo();
 
                     $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_name'], $accountInfo['name'], $scope, $scopeId);
