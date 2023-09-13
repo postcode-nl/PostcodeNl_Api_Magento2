@@ -72,6 +72,8 @@ class EncryptApiSecrets implements DataPatchInterface
      */
     public static function getDependencies(): array
     {
-        return [];
+        return [
+            UpdateApiStatusConfig::class,
+        ];
     }
 }

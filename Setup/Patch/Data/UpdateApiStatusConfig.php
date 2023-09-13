@@ -4,7 +4,6 @@ namespace Flekto\Postcode\Setup\Patch\Data;
 
 use Flekto\Postcode\Helper\ApiClientHelper;
 use Flekto\Postcode\Helper\StoreConfigHelper;
-use Flekto\Postcode\Service\PostcodeApiClient;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -88,7 +87,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
 
                 try {
 
-                    $client = $this->_storeConfigHelper->getApiClient();
+                    $client = $this->_apiClientHelper->getApiClient();
                     $client->setCredentials($credentials[StoreConfigHelper::PATH['api_key']], $credentials[StoreConfigHelper::PATH['api_secret']]);
                     $accountInfo = $client->accountInfo();
 
