@@ -15,12 +15,14 @@ define([
         initialize: function () {
             this._super();
 
-            if (this.settings.show_hide_address_fields !== 'show') {
-                this.validation['validate-callback'] = {
-                    message: $t('Please select a house number.'),
-                    isValid: this.isValid.bind(this),
-                };
-                this.required(true);
+            if (this.settings){
+                if (this.settings.show_hide_address_fields !== 'show') {
+                    this.validation['validate-callback'] = {
+                        message: $t('Please select a house number.'),
+                        isValid: this.isValid.bind(this),
+                    };
+                    this.required(true);
+                }
             }
 
             return this;

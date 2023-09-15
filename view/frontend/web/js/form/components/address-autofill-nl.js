@@ -168,7 +168,10 @@ define([
         },
 
         resetHouseNumberSelect: function () {
-            this.childHouseNumberSelect().setOptions([]).hide();
+            const childHouseNumberSelect = this.childHouseNumberSelect();
+            if(childHouseNumberSelect){
+                childHouseNumberSelect.setOptions([]).hide();
+            }
         },
 
         getAddressParts: function (address) {
