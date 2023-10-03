@@ -9,7 +9,7 @@ define([
             imports: {
                 renderIntlAddress: '${$.parentName}.address_autofill_intl:address',
                 renderNlAddress: '${$.parentName}.address_autofill_nl:address',
-                nlAddressStatus: '${$.parentName}.address_autofill_nl:status',
+                onStatus: '${$.parentName}.address_autofill_nl:status',
                 onChangeHouseNumberSelect: '${$.parentName}.address_autofill_nl.house_number_select:value',
             },
         },
@@ -43,9 +43,8 @@ define([
         },
 
         renderNlAddress: function (address) {
-            if (this.nlAddressStatus !== 'valid') {
-                this.visible(false);
-                return; // Waiting for house number addition to be selected.
+            if (address === null) {
+                return;
             }
 
             this.content(
@@ -53,8 +52,10 @@ define([
                 <br>
                 ${address.postcode} ${address.city}`
             );
-                
-            this.visible(true);
+        },
+
+        onStatus: function (status) {
+            this.visible(status === 'valid');
         },
 
     });

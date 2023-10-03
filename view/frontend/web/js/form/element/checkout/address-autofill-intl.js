@@ -64,9 +64,9 @@ define([
         },
 
         resetInputAddress: function () {
-            this.street().elems.each((streetInput) => streetInput.reset());
-            this.city().reset();
-            this.postcode().reset();
+            this.street().elems.each((streetInput) => streetInput.clear().error(false));
+            this.city().clear().error(false);
+            this.postcode().clear().error(false);
             this.address(null);
         },
 
