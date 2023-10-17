@@ -9,12 +9,13 @@ define([
     return Collection.extend({
 
         defaults: {
-            validatorInstance: $('.form-address-edit').validate(),
+            validatorInstance: $('#form-validate').validate(),
+            fieldset: document.getElementById('zip').closest('fieldset'),
             fields: {
                 street: document.querySelector('.field.street'),
                 country: document.querySelector('.field.country'),
                 region: document.querySelector('.field.region'),
-                city: document.querySelector('.field.city'),
+                city: document.querySelector('[name=city]').closest('.field'), // Workaround missing city class.
                 postcode: document.querySelector('.field.zip'),
             },
             inputs: {
@@ -38,7 +39,7 @@ define([
             isCountryChanged: false,
         },
 
-        initialize: function (config) {
+        initialize: function () {
             this._super();
 
             if (this.settings.change_fields_position) {
@@ -56,23 +57,20 @@ define([
         },
 
         changeFieldsPosition: function () {
-            const fieldset = this.fields.city.parentNode;
-
-            fieldset.insertBefore(this.fields.country, this.fields.street);
-            fieldset.insertBefore(this.fields.postcode, this.fields.region);
-            fieldset.insertBefore(this.fields.city, this.fields.region);
+            this.fieldset.insertBefore(this.fields.country, this.fields.street);
+            this.fieldset.insertBefore(this.fields.postcode, this.fields.region);
+            this.fieldset.insertBefore(this.fields.city, this.fields.region);
         },
 
         moveToForm: function () {
-            this.fields.city.parentNode.insertBefore(
+            this.fieldset.insertBefore(
                 document.querySelector('.address-autofill-fieldset'),
                 this.fields.street
             );
         },
 
         validateComponentsOnSubmit: function () {
-            const originalSubmitHandler = this.validatorInstance.settings.submitHandler,
-                formButton = this.validatorInstance.currentForm.querySelector('[data-action=save-address]');
+            const originalSubmitHandler = this.validatorInstance.settings.submitHandler;
 
             let isValidating = false;
 
