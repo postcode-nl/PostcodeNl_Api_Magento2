@@ -21,6 +21,7 @@ define([
             lookupTimeout: null,
             loading: false,
             status: null,
+            settings: {},
         },
 
         initialize: function () {
@@ -168,7 +169,7 @@ define([
         },
 
         resetHouseNumberSelect: function () {
-            this.childHouseNumberSelect().setOptions([]).hide();
+            this.childHouseNumberSelect(component => component.setOptions([]).hide());
         },
 
         getAddressParts: function (address) {

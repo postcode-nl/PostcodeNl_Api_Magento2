@@ -10,6 +10,7 @@ define([
             loading: false,
             address: null,
             intlAutocompleteInstance: null,
+            settings: {},
         },
 
         initialize: function () {
