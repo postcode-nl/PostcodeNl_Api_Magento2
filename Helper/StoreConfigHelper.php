@@ -47,8 +47,7 @@ class StoreConfigHelper extends AbstractHelper
         StoreManagerInterface $storeManager,
         DeveloperHelperData $developerHelper,
         EncryptorInterface $encryptor
-    )
-    {
+    ) {
         $this->_storeManager = $storeManager;
         $this->_developerHelper = $developerHelper;
         $this->_encryptor = $encryptor;
@@ -145,8 +144,7 @@ class StoreConfigHelper extends AbstractHelper
         $key = $this->getValue(static::PATH['api_key']);
         $secret = $this->getValue(static::PATH['api_secret']);
 
-        if (
-            isset($secret)
+        if (isset($secret)
             && strpos($secret, ':') !== false // Magento\Framework\Encryption\Encryptor seperates parts by ':'.
         ) {
             $secret = $this->_encryptor->decrypt($secret);
@@ -218,5 +216,4 @@ class StoreConfigHelper extends AbstractHelper
 
         return null;
     }
-
 }

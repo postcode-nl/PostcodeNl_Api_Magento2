@@ -131,8 +131,8 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-    * @return string|null Session identifier, or null if not found.
-    */
+     * @return string|null Session identifier, or null if not found.
+     */
     private function _getSessionId(): ?string
     {
         $id = $this->_request->getHeader(PostcodeApiClient::SESSION_HEADER_KEY);

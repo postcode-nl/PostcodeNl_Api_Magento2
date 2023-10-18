@@ -78,8 +78,7 @@ class PostcodeApiClient
         string $term,
         ?string $session = null,
         string $language = ''
-    ): array
-    {
+    ): array {
         return $this->_fetch(
             sprintf(
                 'international/v1/autocomplete/%s/%s/%s',
@@ -124,8 +123,7 @@ class PostcodeApiClient
         string $postcode,
         int $houseNumber,
         ?string $houseNumberAddition = null
-    ): array
-    {
+    ): array {
         // Test postcode format
         $postcode = trim($postcode);
         if (!$this->_isValidDutchPostcodeFormat($postcode)) {
@@ -152,17 +150,17 @@ class PostcodeApiClient
     }
 
     /**
-    * @return array The response headers from the most recent API call.
-    */
+     * @return array The response headers from the most recent API call.
+     */
     public function getMostRecentResponseHeaders(): array
     {
         return $this->_curl->getHeaders();
     }
 
     /**
-    * @param string $key
-    * @param string $secret
-    */
+     * @param string $key
+     * @param string $secret
+     */
     public function setCredentials(string $key, string $secret): void
     {
         $this->_key = $key;
@@ -196,8 +194,7 @@ class PostcodeApiClient
 
         try {
             $this->_curl->get($url);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             throw new CurlException($e->getMessage());
         }
 
@@ -242,6 +239,5 @@ class PostcodeApiClient
                     sprintf('Unexpected server response code `%s`.', $statusCode)
                 );
         }
-
     }
 }

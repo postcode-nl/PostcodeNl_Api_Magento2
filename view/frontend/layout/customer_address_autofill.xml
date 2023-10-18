@@ -8,6 +8,7 @@
         <referenceContainer name="content">
             <block name="customer.address.autofill"
                     ifconfig="postcodenl_api/general/enabled"
+                    class="Flekto\Postcode\Block\Customer\Address\Autofill"
                     template="Flekto_Postcode::customer/address/autofill.phtml">
                 <arguments>
                     <argument name="jsLayout" xsi:type="array">
