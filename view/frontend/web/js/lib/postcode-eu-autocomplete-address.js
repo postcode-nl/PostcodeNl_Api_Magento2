@@ -1,14 +1,14 @@
 /*!
- * Postcode.nl international address autocompletion
+ * Postcode.eu international address autocompletion
  *
- * https://api.postcode.nl
+ * https://developer.postcode.eu/documentation/international/javascript
  *
  * Copyright Postcode.nl
  * Released under the Apple MIT License (AML)
  * https://www.tldrlegal.com/license/apple-mit-license-aml
  *
  * @author Postcode.nl
- * @version 1.3.3
+ * @version 1.4.0
  */
 
 (function (global, factory) {
@@ -31,7 +31,7 @@
 	const document = window.document,
 		$ = function (selector) { return document.querySelectorAll(selector); },
 		elementData = new WeakMap(),
-		VERSION = '1.3.3',
+		VERSION = '1.4.0',
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
@@ -126,7 +126,16 @@
 			 * @type {boolean}
 			 */
 			autoFocus: {
-				value: false,
+				value: true,
+				writable: true,
+			},
+
+			/**
+			 * Automatically select an address match if it's the only menu item.
+			 * @type {boolean}
+			 */
+			autoSelectSingleAddress: {
+				value: true,
 				writable: true,
 			},
 
@@ -212,44 +221,57 @@
 			},
 
 			/**
-			 * Move focus to the next or previous menu item and set the input element value.
+			 * Move focus to the menu item specified by index and optionally set the input element value.
 			 *
-			 * @param {boolean} focusNext - Move focus to the next item if true, to previous item otherwise.
-			 * @param {boolean} [setValue] - Set the value of the associated input element (optional).
+			 * @param {number} index - Move focus to the next item if true, to previous item otherwise.
+			 * @param {boolean} [isRelative] - Treat index as relative to current item (optional). Default false.
+			 * @param {boolean} [setValue] - Set the value of the associated input element (optional). Default false.
 			 */
-			moveItemFocus = function (focusNext, setValue)
+			moveItemFocus = function (index, isRelative, setValue)
 			{
-				if (ul.children.length === 0)
+				const numberOfItems = ul.children.length;
+				if (numberOfItems === 0)
 				{
 					return;
 				}
 
-				const startChild = focusNext? ul.firstElementChild : ul.lastElementChild,
-					endChild = focusNext? ul.lastElementChild : ul.firstElementChild;
-
-				if (typeof setValue === 'undefined')
-				{
-					setValue = true;
-				}
-
 				removeItemFocus();
 
-				if (item === null)
+				setValue = setValue || false;
+				isRelative = isRelative || false;
+
+				let toIndex = index,
+					fromIndex;
+				if (isRelative)
 				{
-					item = startChild;
+					if (item === null)
+					{
+						toIndex = index > 0 ? index - 1 : numberOfItems + index;
+					}
+					else
+					{
+						fromIndex = indexOf(item);
+						toIndex = fromIndex + index;
+					}
 				}
-				else if (item === endChild)
+
+				// Stay in range.
+				toIndex %= numberOfItems;
+				toIndex = toIndex >= 0 ? toIndex : numberOfItems + toIndex;
+
+				if (
+					isRelative
+					&& item !== null
+					&& (index > 0 && toIndex < fromIndex || index < 0 && toIndex > fromIndex) // Wrapping
+				)
 				{
 					item = null;
 					inputElement.value = inputValue;
 					elementData.get(inputElement).context = inputContext;
 					return;
 				}
-				else
-				{
-					item = (focusNext? item.nextElementSibling : item.previousElementSibling) || startChild;
-				}
 
+				item = ul.children[toIndex];
 				item.classList.add(classNames.itemFocus);
 
 				// Scroll the menu item into view if needed.
@@ -265,11 +287,25 @@
 				const data = elementData.get(item);
 
 				// Update the input element value unless the focus event was cancelled.
-				if (setValue && true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'focus', {detail: data, cancelable: true, bubbles: true})))
+				if (
+					setValue
+					&& true === inputElement.dispatchEvent(
+						new CustomEvent(EVENT_NAMESPACE + 'focus', {detail: data, cancelable: true, bubbles: true})
+					)
+				)
 				{
 					inputElement.value = data.value;
 					elementData.get(inputElement).context = data.context;
+					selectedIndex = toIndex;
 				}
+			},
+
+			/**
+			 * Get the index of an element in the menu.
+			 */
+			indexOf = function (element)
+			{
+				return Array.prototype.indexOf.call(ul.children, element);
 			},
 
 			/**
@@ -308,6 +344,7 @@
 		let isOpen = false,
 			isMousedown = false,
 			item = null,
+			selectedIndex = null,
 			inputElement,
 			inputValue,
 			inputContext;
@@ -368,8 +405,12 @@
 		});
 
 		ul.addEventListener('mouseout', function () {
-			removeItemFocus();
-			item = null;
+			self.blur();
+
+			if (selectedIndex !== null)
+			{
+				moveItemFocus(selectedIndex);
+			}
 		});
 
 		wrapper.addEventListener('mousedown', function () {
@@ -384,7 +425,8 @@
 				self.select();
 			}
 
-			window.setTimeout(function () { isMousedown = false }); // IEfix: Use setTimeout to assign after the event happens.
+			// IEfix: Use setTimeout to assign after the event happens.
+			window.setTimeout(function () { isMousedown = false });
 		});
 
 		// Add the menu to the page.
@@ -415,6 +457,7 @@
 			}
 
 			item = null;
+			selectedIndex = null;
 		}
 
 		/**
@@ -428,9 +471,14 @@
 			inputValue = inputElement.value;
 			inputContext = elementData.get(inputElement).context;
 
-			if (options.autoFocus && item === null)
+			if (options.autoFocus && selectedIndex === null)
 			{
-				this.focusNext(false);
+				selectedIndex = 0;
+			}
+
+			if (selectedIndex !== null)
+			{
+				moveItemFocus(selectedIndex);
 			}
 
 			if (isOpen || this.suppress)
@@ -461,10 +509,10 @@
 			{
 				inputElement.value = inputValue;
 				elementData.get(inputElement).context = inputContext;
+				selectedIndex = null;
 			}
 
-			removeItemFocus();
-			item = null;
+			self.blur();
 			wrapper.classList.remove(classNames.menuOpen);
 			isOpen = false;
 			inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'close', {bubbles: true}));
@@ -473,39 +521,50 @@
 		/**
 		 * Focus the previous menu item.
 		 */
-		this.focusPrevious = moveItemFocus.bind(this, false);
+		this.focusPrevious = moveItemFocus.bind(this, -1, true);
 
 		/**
 		 * Focus the next menu item.
 		 */
-		this.focusNext = moveItemFocus.bind(this, true);
+		this.focusNext = moveItemFocus.bind(this, 1, true);
 
 		/**
 		 * Remove the item focus CSS class and clear the active item, if any.
 		 */
 		this.blur = function ()
 		{
-			if (item !== null)
-			{
-				item.classList.remove(classNames.itemFocus);
-				item = null;
-			}
+			removeItemFocus();
+			item = null;
 		}
 
 		/**
-		 * Select the active menu item, update and focus the associated input element.
+		 * Select the active menu item, update and optionally focus the associated input element.
+		 *
+		 * @param {boolean} [focusInput] Focus the associated input element if true. Default true.
 		 */
-		this.select = function ()
+		this.select = function (focusInput)
 		{
-			const selectedMatch = elementData.get(item);
+			const selectedMatch = elementData.get(item),
+				itemIndex = indexOf(item);
 
 			// Update the input element value unless the select event was cancelled.
-			if (true === inputElement.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'select', {detail: selectedMatch, cancelable: true, bubbles: true})))
+			if (
+				true === inputElement.dispatchEvent(
+					new CustomEvent(
+						EVENT_NAMESPACE + 'select',
+						{detail: selectedMatch, cancelable: true, bubbles: true}
+					)
+				)
+			)
 			{
 				inputElement.value = selectedMatch.value;
+				selectedIndex = itemIndex;
 			}
 
-			inputElement.focus();
+			if (typeof focusInput === 'undefined' || focusInput)
+			{
+				inputElement.focus();
+			}
 		}
 
 		/**
@@ -515,6 +574,7 @@
 		{
 			removeItemFocus();
 			item = null;
+			selectedIndex = null;
 			ul.innerHTML = '';
 		}
 
@@ -810,7 +870,7 @@
 		/**
 		 * Get autocomplete matches for the specified context and term.
 		 *
-		 * @see {@link https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete}
+		 * @see {@link https://developer.postcode.eu/documentation/international/v1/Autocomplete/autocomplete}
 		 * @param {string} context - A place identifier denoting the context to search in. e.g. "nld".
 		 * @param {string} term - The search query to process. e.g. "2012ES", "Haarlem", "Julian".
 		 * @param {successCallback} response - Function that handles the response.
@@ -831,7 +891,7 @@
 		/**
 		 * Get address details for the specified address identifier.
 		 *
-		 * @see {@link https://api.postcode.nl/documentation/international/v1/Autocomplete/getDetails}
+		 * @see {@link https://developer.postcode.eu/documentation/international/v1/Autocomplete/getDetails}
 		 * @param {string} addressId - Address identifier returned by a match of precision "Address".
 		 * @param {string} [dispatchCountry] - Dispatching country ISO3 code, used to determine country address line presence and language.
 		 * If not given, country is not added in mailLines.
@@ -1105,7 +1165,7 @@
 					case KEY_UP_LEGACY:
 						if (menu.isOpen)
 						{
-							menu.focusPrevious();
+							menu.focusPrevious(true);
 						}
 						else
 						{
@@ -1119,7 +1179,7 @@
 					case KEY_DOWN_LEGACY:
 						if (menu.isOpen)
 						{
-							menu.focusNext();
+							menu.focusNext(true);
 						}
 						else
 						{
@@ -1217,12 +1277,28 @@
 				}
 
 				window.clearTimeout(searchTimeoutId);
+
+				autoSelectSingleAddress();
 				menu.close();
 				element.classList.toggle(inputBlankClassName, element.value === '');
 			});
 
 			element.dispatchEvent(new CustomEvent(EVENT_NAMESPACE + 'create', {detail: self, bubbles: true}));
 		});
+
+		const autoSelectSingleAddress = function ()
+		{
+			if (
+				options.autoFocus
+				&& options.autoSelectSingleAddress
+				&& menu.hasFocus
+				&& matches.length === 1
+				&& matches[0].precision === PRECISION_ADDRESS
+			)
+			{
+				menu.select(false);
+			}
+		}
 
 		/**
 		 * Search after input has stopped arriving for the amount of milliseconds specified by options.delay.
@@ -1284,6 +1360,7 @@
 				return;
 			}
 
+			const menuSuppress = menu.suppress;
 			self.getSuggestions.call(self, data.context, element.value, function (result) {
 				if (getClass(result.newContext) === 'String')
 				{
@@ -1304,9 +1381,9 @@
 					menu.setItems(matches, self.renderItem.bind(self));
 					self.announce(options.getResponseMessage(matches.length, options.language));
 
-					if (options.autoFocus)
+					if (menuSuppress === false)
 					{
-						menu.focusNext(false);
+						menu.open(element);
 					}
 				}
 			});
