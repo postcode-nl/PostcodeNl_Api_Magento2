@@ -25,10 +25,18 @@ class PostcodeApiClient
 
     protected const SERVER_URL = 'https://api.postcode.eu/';
 
-    /** @var string The Postcode.eu API key, required for all requests. Provided when registering an account. */
+    /**
+     * The Postcode.eu API key, required for all requests. Provided when registering an account.
+     *
+     * @var string
+     */
     protected $_key;
 
-    /** @var string The Postcode.eu API secret, required for all requests */
+    /**
+     * The Postcode.eu API secret, required for all requests
+     *
+     * @var string
+     */
     protected $_secret;
 
     protected $_curl;
@@ -71,6 +79,13 @@ class PostcodeApiClient
     }
 
     /**
+     * Autocomplete an address.
+     *
+     * @param string $context
+     * @param string $term
+     * @param string|null $session
+     * @param string $language
+     * @return array
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete
      */
     public function internationalAutocomplete(
@@ -91,6 +106,11 @@ class PostcodeApiClient
     }
 
     /**
+     * Get address details.
+     *
+     * @param string $context
+     * @param string|null $session
+     * @return array
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/getDetails
      */
     public function internationalGetDetails(string $context, ?string $session = null): array
@@ -102,6 +122,9 @@ class PostcodeApiClient
     }
 
     /**
+     * Get supported countries.
+     *
+     * @return array
      * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/getSupportedCountries
      */
     public function internationalGetSupportedCountries(): array
@@ -150,7 +173,9 @@ class PostcodeApiClient
     }
 
     /**
-     * @return array The response headers from the most recent API call.
+     * Get response headers from the most recent API call.
+     *
+     * @return array
      */
     public function getMostRecentResponseHeaders(): array
     {
@@ -158,6 +183,8 @@ class PostcodeApiClient
     }
 
     /**
+     * Set credentials.
+     *
      * @param string $key
      * @param string $secret
      */

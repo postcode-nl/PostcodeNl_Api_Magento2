@@ -2,8 +2,6 @@
 
 namespace Flekto\Postcode\Api;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-
 interface PostcodeModelInterface
 {
 

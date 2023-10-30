@@ -37,12 +37,9 @@ class UpdateApiData
     }
 
     /**
-     * execute function.
-     *
-     * @access public
-     * @return void
+     * Update Postcode.eu API account data.
      */
-    public function execute()
+    public function execute(): void
     {
         if (!$this->_storeConfigHelper->hasCredentials()) {
             return; // No credentials so nothing to do here.

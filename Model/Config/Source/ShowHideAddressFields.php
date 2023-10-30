@@ -2,14 +2,17 @@
 
 namespace Flekto\Postcode\Model\Config\Source;
 
-class ShowHideAddressFields implements \Magento\Framework\Option\ArrayInterface
+class ShowHideAddressFields implements \Magento\Framework\Data\OptionSourceInterface
 {
     public const SHOW = 'show';
     public const DISABLE = 'disable';
     public const HIDE = 'hide';
     public const FORMAT = 'format';
 
-    public function toOptionArray()
+    /**
+     * @inheritdoc
+     */
+    public function toOptionArray(): array
     {
         return [
             ['value' => static::FORMAT, 'label' => __('Hide fields and show a formatted address instead (default)')],

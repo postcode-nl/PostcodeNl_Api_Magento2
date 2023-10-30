@@ -4,7 +4,7 @@ namespace Flekto\Postcode\Model\Config\Source;
 
 use Flekto\Postcode\Helper\StoreConfigHelper;
 
-class DisabledCountries implements \Magento\Framework\Option\ArrayInterface
+class DisabledCountries implements \Magento\Framework\Data\OptionSourceInterface
 {
     /**
      * @var StoreConfigHelper
@@ -21,7 +21,10 @@ class DisabledCountries implements \Magento\Framework\Option\ArrayInterface
         $this->_storeConfigHelper = $storeConfigHelper;
     }
 
-    public function toOptionArray()
+    /**
+     * @inheritdoc
+     */
+    public function toOptionArray(): array
     {
         $options = [];
 

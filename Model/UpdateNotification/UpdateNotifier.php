@@ -19,6 +19,9 @@ class UpdateNotifier
 
     /**
      * Constructor
+     *
+     * @param NotifierInterface $notifier
+     * @param UpdateNotificationRepositoryInterface $updateNotification
      */
     public function __construct(
         NotifierInterface $notifier,

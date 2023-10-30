@@ -131,6 +131,8 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
+     * Get session identifier.
+     *
      * @return string|null Session identifier, or null if not found.
      */
     private function _getSessionId(): ?string
@@ -264,12 +266,14 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
+     * Repeat cache control header.
+     *
      * @param array $apiResponseHeaders
      */
     protected function _repeatCacheControlHeader(array $apiResponseHeaders): void
     {
         if (isset($apiResponseHeaders['cache-control'])) {
-            header('cache-control: ' . $apiResponseHeaders['cache-control']);
+            $this->_response->setHeader('cache-control', $apiResponseHeaders['cache-control']);
         }
     }
 

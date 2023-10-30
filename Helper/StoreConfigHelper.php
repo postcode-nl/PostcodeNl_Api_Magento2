@@ -132,7 +132,6 @@ class StoreConfigHelper extends AbstractHelper
         return isset($key, $secret);
     }
 
-
     /**
      * Get API credentials, decrypting API secret.
      *
@@ -183,6 +182,12 @@ class StoreConfigHelper extends AbstractHelper
         ];
     }
 
+    /**
+     * Get the base URL of the current store.
+     *
+     * @access public
+     * @return string
+     */
     public function getCurrentStoreBaseUrl(): string
     {
         $currentStore = $this->_storeManager->getStore();
