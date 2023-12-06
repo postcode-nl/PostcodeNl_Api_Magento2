@@ -54,8 +54,7 @@ class Config implements ObserverInterface
     }
 
     /**
-     * @param Observer $observer
-     * @return void
+     * @inheritdoc
      */
     public function execute(Observer $observer): void
     {

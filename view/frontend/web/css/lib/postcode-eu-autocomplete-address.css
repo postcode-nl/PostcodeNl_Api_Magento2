@@ -37,6 +37,10 @@ input[class].postcodenl-autocomplete-address-input.postcodenl-autocomplete-addre
 	background-size: 5.0em;
 }
 
+input[class].input-autocomplete-no-logo.postcodenl-autocomplete-address-input-blank {
+	background-image: none;
+}
+
 input[class].postcodenl-autocomplete-address-input.postcodenl-autocomplete-address-input-blank {
 	background-position: calc(100% - .85em) calc(50% + .1em);
 }

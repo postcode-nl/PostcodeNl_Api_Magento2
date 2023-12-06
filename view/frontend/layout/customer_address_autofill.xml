@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Flekto_Postcode::css/lib/postcode-eu-autocomplete-address.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block name="customer.address.autofill"
+                    ifconfig="postcodenl_api/general/enabled"
+                    class="Flekto\Postcode\Block\Customer\Address\Autofill"
+                    template="Flekto_Postcode::customer/address/autofill.phtml">
+                <arguments>
+                    <argument name="jsLayout" xsi:type="array">
+                        <item name="components" xsi:type="array">
+                            <item name="address_autofill" xsi:type="array">
+                                <item name="component" xsi:type="string">Flekto_Postcode/js/view/customer/address/autofill</item>
+                                <item name="config" xsi:type="array">
+                                    <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
+                                </item>
+                                <item name="children" xsi:type="array">
+                                    <item name="address_autofill_nl" xsi:type="array">
+                                        <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/customer/address/address-autofill-nl</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="template" xsi:type="string">ui/collection</item>
+                                            <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
+                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
+                                        </item>
+                                        <item name="sortOrder" xsi:type="number">65</item>
+                                        <item name="children" xsi:type="array">
+                                            <item name="postcode" xsi:type="array">
+                                                <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/postcode</item>
+                                                <item name="label" translate="true" xsi:type="string">Zip/Postal Code</item>
+                                                <item name="config" xsi:type="array">
+                                                    <item name="template" xsi:type="string">ui/form/field</item>
+                                                    <item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
+                                                    <item name="visible" xsi:type="boolean">true</item>
+                                                    <item name="placeholder" xsi:type="string">1234 AB</item>
+                                                </item>
+                                                <item name="additionalClasses" xsi:type="string">address-autofill-nl-postcode</item>
+                                            </item>
+                                            <item name="house_number" xsi:type="array">
+                                                <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/house-number</item>
+                                                <item name="label" translate="true" xsi:type="string">House number and addition</item>
+                                                <item name="config" xsi:type="array">
+                                                    <item name="template" xsi:type="string">ui/form/field</item>
+                                                    <item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
+                                                    <item name="visible" xsi:type="boolean">true</item>
+                                                </item>
+                                                <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number</item>
+                                            </item>
+                                            <item name="house_number_select" xsi:type="array">
+                                                <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/house-number-select</item>
+                                                <item name="label" translate="true" xsi:type="string">Which house number do you mean?</item>
+                                                <item name="config" xsi:type="array">
+                                                    <item name="template" xsi:type="string">ui/form/field</item>
+                                                    <item name="elementTmpl" xsi:type="string">ui/form/element/select</item>
+                                                    <item name="visible" xsi:type="boolean">true</item>
+                                                    <item name="caption" xsi:type="string" translate="true">- Select house number -</item>
+                                                </item>
+                                                <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number-select</item>
+                                            </item>
+                                        </item>
+                                    </item>
+
+                                    <item name="address_autofill_intl" xsi:type="array">
+                                        <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/customer/address/address-autofill-intl</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="template" xsi:type="string">ui/form/field</item>
+                                            <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
+                                            <item name="dataScope" xsi:type="string">test</item>
+                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
+                                            <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
+                                        </item>
+                                        <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
+                                        <item name="additionalClasses" xsi:type="string">address-autofill-intl-input</item>
+                                    </item>
+
+                                    <item name="address_autofill_formatted_output" xsi:type="array">
+                                        <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/customer/address/address-autofill-formatted-output</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-formatted-output</item>
+                                            <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isFormattedOutputDisabled"/>
+                                        </item>
+                                        <item name="additionalClasses" xsi:type="string">address-autofill-formatted-output</item>
+                                    </item>
+
+                                    <item name="address_autofill_bypass" xsi:type="array">
+                                        <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/customer/address/address-autofill-bypass</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isAutofillBypassDisabled"/>
+                                            <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-bypass</item>
+                                            <item name="tooltipTpl" xsi:type="string">ui/form/element/helper/tooltip</item>
+                                        </item>
+                                        <item name="additionalClasses" xsi:type="string">address-autofill-bypass</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

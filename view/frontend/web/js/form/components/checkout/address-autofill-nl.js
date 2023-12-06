@@ -54,16 +54,17 @@ define([
         },
 
         resetInputAddress: function () {
-            this.street().elems.each((streetInput) => streetInput.reset());
-            this.city().reset();
-            this.postcode().reset();
-            this.regionIdInput().reset();
+            this.street().elems.each((streetInput) => streetInput.clear().error(false));
+            this.city().clear().error(false);
+            this.postcode().clear().error(false);
+            this.regionIdInput().clear().error(false);
             this.status(null);
         },
 
         toggleFields: function (state, force) {
             if (!this.isNl()) {
-                // Always re-enable region. This is not needed for .visible() because the region field has its own logic for that.
+                // Always re-enable region.
+                // This is not needed for .visible() because the region field has its own logic for that.
                 this.regionIdInput((component) => component.enable());
                 return;
             }
@@ -90,6 +91,7 @@ define([
 
                         state = false;
                     }
+
                     /* falls through */
                 case 'hide':
                     for (const field of ['street', 'city', 'postcode', 'regionIdInput']) {

@@ -1,9 +1,8 @@
 define([
     'uiCollection',
     'jquery',
-    'mage/translate',
     'Flekto_Postcode/js/model/address-nl',
-], function (Collection, $, $t, addressModel) {
+], function (Collection, $, addressModel) {
     'use strict';
 
     return Collection.extend({
@@ -22,6 +21,7 @@ define([
             lookupTimeout: null,
             loading: false,
             status: null,
+            settings: {},
         },
 
         initialize: function () {
@@ -29,9 +29,7 @@ define([
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
-            this.childHouseNumber(function (component) {
-                component.additionalClasses['loading'] = this.loading;
-            }.bind(this));
+            this.childHouseNumber((component) => component.additionalClasses['loading'] = this.loading);
 
             this.address.subscribe(this.setInputAddress.bind(this));
 
@@ -63,6 +61,10 @@ define([
 
             if (isNl) {
                 this.resetInputAddress();
+
+                // Trigger input handlers in case the fields already have values.
+                this.childPostcode(component => this.onInputPostcode(component.value()));
+                this.childHouseNumber(component => this.onInputHouseNumber(component.value()));
             }
         },
 
@@ -73,8 +75,8 @@ define([
         onInputPostcode: function (value) {
             clearTimeout(this.lookupTimeout);
 
-            if (value === '') {
-                return this.childPostcode().error(false)
+            if (!this.childPostcode().visible() || this.childPostcode().checkInvalid()) {
+                return;
             }
 
             this.lookupTimeout = setTimeout(function () {
@@ -93,9 +95,9 @@ define([
         onInputHouseNumber: function (value) {
             clearTimeout(this.lookupTimeout);
 
-            if (value === '') {
+            if (!this.childHouseNumber().visible() || value === '') {
                 this.resetHouseNumberSelect();
-                return this.childHouseNumber().error(false);
+                return;
             }
 
             this.lookupTimeout = setTimeout(function () {
@@ -113,14 +115,13 @@ define([
 
         getAddress: function () {
             const postcode = addressModel.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, ''),
-                houseNumber = addressModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim();
+                houseNumber = addressModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim(),
+                url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
             this.resetHouseNumberSelect();
             this.resetInputAddress();
             this.loading(true);
             this.childHouseNumber().error(false);
-
-            const url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
             $.get({
                 url: url,
@@ -134,7 +135,7 @@ define([
                     this.status(response[0].status);
 
                     if (this.status() === 'notFound') {
-                        return this.childHouseNumber().error($t('Address not found.'));
+                        return;
                     }
 
                     this.address(response[0].address);
@@ -168,7 +169,7 @@ define([
         },
 
         resetHouseNumberSelect: function () {
-            this.childHouseNumberSelect().setOptions([]).hide();
+            this.childHouseNumberSelect(component => component.setOptions([]).hide());
         },
 
         getAddressParts: function (address) {

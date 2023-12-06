@@ -24,7 +24,7 @@
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="template" xsi:type="string">ui/collection</item>
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
-                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\ApiClientHelper::getJsinit"/>
+                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                     </item>
                                                                     <item name="sortOrder" xsi:type="number">65</item>
                                                                     <item name="children" xsi:type="array">
@@ -77,7 +77,7 @@
                                                                         <item name="template" xsi:type="string">ui/form/field</item>
                                                                         <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
-                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\ApiClientHelper::getJsinit"/>
+                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                         <item name="customScope" xsi:type="string">shippingAddress</item>
                                                                     </item>
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>

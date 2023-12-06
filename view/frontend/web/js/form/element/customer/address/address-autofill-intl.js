@@ -1,7 +1,6 @@
 define([
     'Flekto_Postcode/js/form/element/address-autofill-intl',
-    'mage/translate',
-], function (AddressAutofillIntl, $t) {
+], function (AddressAutofillIntl) {
     'use strict';
 
     return AddressAutofillIntl.extend({

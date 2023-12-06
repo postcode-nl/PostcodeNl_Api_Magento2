@@ -16,12 +16,13 @@ define([
          */
         validator.addRule(
             'validate-callback',
+
             /**
              * @param value - Current element value (not used here).
              * @param {Object} params - Object with isValid() method.
              * @return {boolean} - Valid if true.
              */
-            (value, params) => params.isValid(),
+            (_, params) => params.isValid(),
             $t('Please enter a valid value.') // Customize via params.message property.
         );
 
@@ -39,7 +40,7 @@ define([
 
         validator.addRule(
             'validate-overseas-france',
-            function (value, params) {
+            function (_, params) {
                 if (
                     params.component.visible() === false
                     || params.component.address() === null

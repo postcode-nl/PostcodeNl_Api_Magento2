@@ -3,10 +3,18 @@
 namespace Flekto\Postcode\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Developer\Helper\Data as DeveloperHelperData;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class StoreConfigHelper extends AbstractHelper
 {
+    protected $_storeManager;
+    protected $_developerHelper;
+    protected $_encryptor;
+
     public const PATH = [
         // General
         'enabled' => 'postcodenl_api/general/enabled',
@@ -27,6 +35,24 @@ class StoreConfigHelper extends AbstractHelper
         'account_name' => 'postcodenl_api/status/account_name',
         'account_status' => 'postcodenl_api/status/account_status',
     ];
+
+    /**
+     * @param Context $context
+     * @param StoreManagerInterface $storeManager
+     * @param Data $developerHelper
+     * @param EncryptorInterface $encryptor
+     */
+    public function __construct(
+        Context $context,
+        StoreManagerInterface $storeManager,
+        DeveloperHelperData $developerHelper,
+        EncryptorInterface $encryptor
+    ) {
+        $this->_storeManager = $storeManager;
+        $this->_developerHelper = $developerHelper;
+        $this->_encryptor = $encryptor;
+        parent::__construct($context);
+    }
 
     /**
      * Get store config value
@@ -107,6 +133,26 @@ class StoreConfigHelper extends AbstractHelper
     }
 
     /**
+     * Get API credentials, decrypting API secret.
+     *
+     * @access public
+     * @return array
+     */
+    public function getCredentials(): array
+    {
+        $key = $this->getValue(static::PATH['api_key']);
+        $secret = $this->getValue(static::PATH['api_secret']);
+
+        if (isset($secret)
+            && strpos($secret, ':') !== false // Magento\Framework\Encryption\Encryptor seperates parts by ':'.
+        ) {
+            $secret = $this->_encryptor->decrypt($secret);
+        }
+
+        return ['key' => $key ?? '', 'secret' => $secret ?? ''];
+    }
+
+    /**
      * Get current module version.
      *
      * @access public
@@ -115,5 +161,64 @@ class StoreConfigHelper extends AbstractHelper
     public function getModuleVersion(): string
     {
         return $this->getValue(static::PATH['module_version']);
+    }
+
+    /**
+     * Get settings to be used in frontend.
+     *
+     * @access public
+     * @return array
+     */
+    public function getJsinit(): array
+    {
+        return [
+            'enabled_countries' => $this->getEnabledCountries(),
+            'nl_input_behavior' => $this->getValue(static::PATH['nl_input_behavior']) ?? \Flekto\Postcode\Model\Config\Source\NlInputBehavior::ZIP_HOUSE,
+            'show_hide_address_fields' => $this->getValue(static::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
+            'base_url' => $this->getCurrentStoreBaseUrl(),
+            'debug' => $this->isDebugging(),
+            'fixedCountry' => $this->_getFixedCountry(),
+            'change_fields_position' => $this->isSetFlag(static::PATH['change_fields_position']),
+        ];
+    }
+
+    /**
+     * Get the base URL of the current store.
+     *
+     * @access public
+     * @return string
+     */
+    public function getCurrentStoreBaseUrl(): string
+    {
+        $currentStore = $this->_storeManager->getStore();
+        return $this->_urlBuilder->getBaseUrl(['_store' => $currentStore->getCode()]);
+    }
+
+    /**
+     * Check if debugging is active.
+     *
+     * @access public
+     * @return bool
+     */
+    public function isDebugging(): bool
+    {
+        return $this->isSetFlag(static::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
+    }
+
+    /**
+     * Get fixed country (ISO2) if there's only one allowed country.
+     *
+     * @access private
+     * @return string|null
+     */
+    private function _getFixedCountry(): ?string
+    {
+        $allowedCountries = $this->getValue('general/country/allow');
+
+        if (isset($allowedCountries) && strlen($allowedCountries) === 2) {
+            return $allowedCountries;
+        }
+
+        return null;
     }
 }
