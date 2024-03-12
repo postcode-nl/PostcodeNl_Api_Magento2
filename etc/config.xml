@@ -10,6 +10,9 @@
                 <enabled>1</enabled>
                 <change_fields_position>1</change_fields_position>
             </general>
+            <advanced_config>
+                <allow_pobox_shipping>1</allow_pobox_shipping>
+            </advanced_config>
         </postcodenl_api>
     </default>
 </config>

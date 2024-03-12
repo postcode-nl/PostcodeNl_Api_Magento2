@@ -18,10 +18,24 @@ define([
 
         initialize: function () {
             this._super();
+
+            let validateCallbackMessage;
             this.validation['validate-callback'] = {
-                isValid: () => this.addressStatus !== 'notFound',
-                message: $t('Address not found.'),
+                isValid: () => {
+                    if (this.addressStatus === 'notFound') {
+                        validateCallbackMessage = $t('Address not found.');
+                        return false;
+                    }
+                    else if (this.addressStatus === 'poBoxShippingNotAllowed') {
+                        validateCallbackMessage = $t('Sorry, we cannot ship to a PO Box address.');
+                        return false;
+                    }
+
+                    return true;
+                },
+                message: () => validateCallbackMessage,
             };
+
             return this;
         },
 

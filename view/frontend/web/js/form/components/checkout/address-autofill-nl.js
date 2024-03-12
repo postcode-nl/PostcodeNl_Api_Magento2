@@ -19,6 +19,20 @@ define([
             addressFields: null,
         },
 
+        validateAddress: function (address) {
+            const houseNumber = this.childHouseNumber();
+            if (
+                this.settings.allow_pobox_shipping === false
+                && address.addressType === 'PO box'
+                && houseNumber.parentScope.split('.')[0] === 'shippingAddress'
+            ) {
+                this.status('poBoxShippingNotAllowed');
+                return false;
+            }
+
+            return this._super(address);
+        },
+
         onChangeCountry: function () {
             if (this.addressFields === null) {
                 this.addressFields = Registry.async([

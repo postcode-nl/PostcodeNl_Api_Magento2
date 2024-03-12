@@ -28,6 +28,7 @@ class StoreConfigHelper extends AbstractHelper
         // Advanced
         'api_debug' => 'postcodenl_api/advanced_config/api_debug',
         'disabled_countries' => 'postcodenl_api/advanced_config/disabled_countries',
+        'allow_pobox_shipping' => 'postcodenl_api/advanced_config/allow_pobox_shipping',
 
         // Status
         'module_version' => 'postcodenl_api/status/module_version',
@@ -179,6 +180,7 @@ class StoreConfigHelper extends AbstractHelper
             'debug' => $this->isDebugging(),
             'fixedCountry' => $this->_getFixedCountry(),
             'change_fields_position' => $this->isSetFlag(static::PATH['change_fields_position']),
+            'allow_pobox_shipping' => $this->isSetFlag(static::PATH['allow_pobox_shipping']),
         ];
     }
 

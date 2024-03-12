@@ -1,7 +1,8 @@
 define([
     'Flekto_Postcode/js/form/element/address-autofill-intl',
     'uiRegistry',
-], function (AddressAutofillIntl, Registry) {
+    'mage/translate',
+], function (AddressAutofillIntl, Registry, $t) {
     'use strict';
 
     return AddressAutofillIntl.extend({
@@ -97,6 +98,19 @@ define([
                     }
                 break;
             }
+        },
+
+        validateAddress: function (address) {
+            if (
+                this.settings.allow_pobox_shipping === false
+                && address.isPoBox
+                && this.parentScope.split('.')[0] === 'shippingAddress'
+            ) {
+                this.error($t('Sorry, we cannot ship to a PO Box address.'));
+                return false;
+            }
+
+            return this._super();
         },
 
     });

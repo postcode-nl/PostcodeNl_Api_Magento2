@@ -68,7 +68,6 @@
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">ui/form/field</item>
                                             <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
-                                            <item name="dataScope" xsi:type="string">test</item>
                                             <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                             <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
                                         </item>

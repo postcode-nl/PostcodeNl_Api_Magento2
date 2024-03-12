@@ -23,10 +23,13 @@ define([
                     viewModel.loading(true);
 
                     viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                        viewModel.address(result[0]);
-                        viewModel.toggleFields(true);
                         viewModel.loading(false);
-                        viewModel.validate();
+
+                        if (viewModel.validateAddress(result[0])) {
+                            viewModel.address(result[0]);
+                            viewModel.toggleFields(true);
+                            viewModel.validate();
+                        }
                     });
                 }
             });

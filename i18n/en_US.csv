@@ -47,3 +47,6 @@
 "Please select a house number.","Please select a house number."
 "Enter an address","Enter an address"
 "Please select an address from metropolitan France.","Please select an address from metropolitan France."
+"PO box shipping","PO box shipping"
+"Allow shipping to PO boxes.","Allow shipping to PO boxes."
+"Sorry, we cannot ship to a PO Box address.","Sorry, we cannot ship to a PO Box address."

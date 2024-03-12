@@ -134,7 +134,7 @@ define([
 
                     this.status(response[0].status);
 
-                    if (this.status() === 'notFound') {
+                    if (this.status() === 'notFound' || !this.validateAddress(response[0].address)) {
                         return;
                     }
 
@@ -149,6 +149,10 @@ define([
                     }
                 }.bind(this)
             }).always(this.loading.bind(null, false));
+        },
+
+        validateAddress: function () {
+            return true;
         },
 
         onChangeHouseNumberAddition: function (value) {

@@ -66,6 +66,10 @@ define([
             return this.visible() === false || this.address() !== null;
         },
 
+        validateAddress: function () {
+            return true;
+        },
+
         getAddressParts: function (result) {
             const buildingNumber = `${result.address.buildingNumber || ''}`,
                 buildingNumberAddition = `${result.address.buildingNumberAddition || ''}`;
