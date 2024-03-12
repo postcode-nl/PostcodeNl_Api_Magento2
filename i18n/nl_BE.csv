@@ -46,4 +46,6 @@
 "An error has occurred while retrieving address data. Please contact us if the problem persists.","Er is een fout opgetreden bij het ophalen van adres gegevens. Neem contact met ons op als het probleem blijft optreden."
 "Please select a house number.","Selecteer alstublieft een huisnummer."
 "Enter an address","Vul een adres in"
-"Please select an address from metropolitan France.","Selecteer een adres uit Europees Frankrijk."
+"PO box shipping","Postbus verzending"
+"Allow shipping to PO boxes.","Verzenden naar postbussen toestaan."
+"Sorry, we cannot ship to a PO Box address.","Sorry, we versturen niet naar een postbus adres."
