@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @var \Flekto\Postcode\Block\System\Config\Status $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
 $config = $block->getConfig();
 $accountInfo = $block->getAccountInfo();
 $moduleInfo = $block->getModuleInfo();
@@ -12,12 +16,12 @@ $moduleInfo = $block->getModuleInfo();
     <div class="postcode-eu-status-content">
         <div class="postcode-eu-status-content-header">
             <p>
-                Module version <strong><?= $block->escapeHtml($moduleInfo['version']) ?></strong>
+                Module version <strong><?= $escaper->escapeHtml($moduleInfo['version']) ?></strong>
                 <?php if ($moduleInfo['has_update']): ?>
                 <span class="update-available-message">
-                    ↻ <a href="<?= $block->escapeHtml($moduleInfo['release_url']) ?>"
-                         title="Please update to version <?= $block->escapeHtml($moduleInfo['latest_version']) ?>">
-                         <?= $block->escapeHtml(__('update available')) ?>
+                    ↻ <a href="<?= $escaper->escapeHtml($moduleInfo['release_url']) ?>"
+                         title="Please update to version <?= $escaper->escapeHtml($moduleInfo['latest_version']) ?>">
+                         <?= $escaper->escapeHtml(__('update available')) ?>
                     </a>
                 </span>
                 <?php endif ?>
@@ -28,7 +32,7 @@ $moduleInfo = $block->getModuleInfo();
                     name="refresh_api_data"
                     value="1"
                     class="action-default scalable button-refresh-api-data">
-                    <?= $block->escapeHtml(__('↻ Refresh API data')) ?>
+                    <?= $escaper->escapeHtml(__('↻ Refresh API data')) ?>
                 </button>
             <?php endif ?>
         </div>
@@ -43,7 +47,7 @@ $moduleInfo = $block->getModuleInfo();
             <dl class="postcode-eu-api-connection">
                 <?php if (isset($accountInfo['name'])): ?>
                     <dt>Account name</dt>
-                    <dd><?= $block->escapeHtml($accountInfo['name']) ?></dd>
+                    <dd><?= $escaper->escapeHtml($accountInfo['name']) ?></dd>
                 <?php endif ?>
                 <dt>Subscription status</dt>
                 <dd>

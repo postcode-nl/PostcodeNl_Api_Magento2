@@ -181,7 +181,7 @@ class Status extends Template implements RendererInterface
     {
         $status = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
         if ($status === \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE) {
-            return $this->_apiClientHelper->getApiClient()->accountInfo();
+            return $this->_apiClientHelper->getAccountInfo();
         }
 
         return [];

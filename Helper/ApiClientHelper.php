@@ -315,6 +315,16 @@ class ApiClientHelper extends AbstractHelper
         return $this->_countryCodeMap[$mapKey][strtoupper($iso2Code)] ?? null;
     }
 
+    public function getAccountInfo(): array
+    {
+        try {
+            return $this->getApiClient()->accountInfo();
+        }
+        catch (\Exception $e) {
+            return [];
+        }
+    }
+
     /**
      * _getModuleInfo function.
      *
