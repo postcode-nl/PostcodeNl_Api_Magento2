@@ -9,6 +9,10 @@ define([
             validation: {
                 'validate-postcode': true,
             },
+            placeholder: '1234 AB',
+            additionalClasses: {
+                'address-autofill-nl-postcode': true,
+            },
         },
 
     });

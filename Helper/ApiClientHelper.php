@@ -123,7 +123,12 @@ class ApiClientHelper extends AbstractHelper
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
-            return $this->_prepareResponse($response, $client);
+            $response = $this->_prepareResponse($response, $client);
+
+            // Workaround for missing ISO2 code.
+            $response['country']['iso2Code'] = $this->getCountryIso2Code($response['country']['iso3Code']);
+
+            return $response;
 
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
@@ -313,6 +318,29 @@ class ApiClientHelper extends AbstractHelper
         }
 
         return $this->_countryCodeMap[$mapKey][strtoupper($iso2Code)] ?? null;
+    }
+
+    /**
+     * Get country ISO2 code from ISO3 code, or NULL if not found.
+     *
+     * @access public
+     * @param string $iso2Code
+     * @return string|null Lowercase ISO3 country code or NULL.
+     */
+    public function getCountryIso2Code(string $iso3Code): ?string
+    {
+        $mapKey = 'iso3_to_iso2';
+
+        if (!isset($this->_countryCodeMap[$mapKey])) {
+            $countries = $this->_storeConfigHelper->getSupportedCountries();
+            $this->_countryCodeMap[$mapKey] = [];
+
+            foreach ($countries as $country) {
+                $this->_countryCodeMap[$mapKey][$country->iso3] = $country->iso2;
+            }
+        }
+
+        return $this->_countryCodeMap[$mapKey][strtoupper($iso3Code)] ?? null;
     }
 
     public function getAccountInfo(): array

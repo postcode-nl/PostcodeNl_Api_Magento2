@@ -178,7 +178,6 @@ class StoreConfigHelper extends AbstractHelper
             'show_hide_address_fields' => $this->getValue(static::PATH['show_hide_address_fields']) ?? \Flekto\Postcode\Model\Config\Source\ShowHideAddressFields::SHOW,
             'base_url' => $this->getCurrentStoreBaseUrl(),
             'debug' => $this->isDebugging(),
-            'fixedCountry' => $this->_getFixedCountry(),
             'change_fields_position' => $this->isSetFlag(static::PATH['change_fields_position']),
             'allow_pobox_shipping' => $this->isSetFlag(static::PATH['allow_pobox_shipping']),
         ];
@@ -205,22 +204,5 @@ class StoreConfigHelper extends AbstractHelper
     public function isDebugging(): bool
     {
         return $this->isSetFlag(static::PATH['api_debug'], ScopeInterface::SCOPE_STORE) && $this->_developerHelper->isDevAllowed();
-    }
-
-    /**
-     * Get fixed country (ISO2) if there's only one allowed country.
-     *
-     * @access private
-     * @return string|null
-     */
-    private function _getFixedCountry(): ?string
-    {
-        $allowedCountries = $this->getValue('general/country/allow');
-
-        if (isset($allowedCountries) && strlen($allowedCountries) === 2) {
-            return $allowedCountries;
-        }
-
-        return null;
     }
 }

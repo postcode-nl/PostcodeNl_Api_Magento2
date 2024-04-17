@@ -6,6 +6,7 @@ define([
     return Html.extend({
         defaults: {
             imports: {
+                countryCode: '${$.parentName}:countryCode',
                 onChangeCountry: '${$.parentName}:countryCode',
             },
         },

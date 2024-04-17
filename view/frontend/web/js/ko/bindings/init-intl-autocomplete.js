@@ -23,13 +23,12 @@ define([
                     viewModel.loading(true);
 
                     viewModel.intlAutocompleteInstance.getDetails(e.detail.context, function (result) {
-                        viewModel.loading(false);
+                        const isValidAddress = viewModel.validateAddress(result[0]);
 
-                        if (viewModel.validateAddress(result[0])) {
-                            viewModel.address(result[0]);
-                            viewModel.toggleFields(true);
-                            viewModel.validate();
-                        }
+                        viewModel.loading(false);
+                        viewModel.address(isValidAddress ? result[0] : null);
+                        viewModel.toggleFields(isValidAddress);
+                        isValidAddress && viewModel.validate();
                     });
                 }
             });

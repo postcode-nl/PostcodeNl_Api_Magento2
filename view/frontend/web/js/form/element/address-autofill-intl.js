@@ -11,6 +11,12 @@ define([
             address: null,
             intlAutocompleteInstance: null,
             settings: {},
+            template: 'ui/form/field',
+            elementTmpl: 'Flekto_Postcode/form/element/address-autofill-intl',
+            visible: false,
+            additionalClasses: {
+                'address-autofill-intl-input': true,
+            },
         },
 
         initialize: function () {
@@ -25,7 +31,20 @@ define([
             }
 
             this.additionalClasses['loading'] = this.loading;
-            this.address.subscribe(this.setInputAddress.bind(this));
+
+            this.address.subscribe((result) => {
+                if (result === null) {
+                    this.toggleFields(false);
+                }
+                else if (result.error) {
+                    // See validateAddress() for error handling.
+                    this.address(null); // Prevent storing the error in statefull address.
+                }
+                else {
+                    this.setInputAddress(result);
+                    this.toggleFields(true);
+                }
+            });
 
             return this;
         },
@@ -37,49 +56,59 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
-            this.reset();
-
             const isEnabled = this.isEnabledCountry(countryCode);
 
-            if (isEnabled && this.settings.nl_input_behavior === 'zip_house' && countryCode === 'NL') {
-                this.visible(false);
+            this.reset();
+            this.visible(isEnabled);
+
+            if (!isEnabled) {
+                this.toggleFields(true, true);
                 return;
             }
 
-            this.visible(isEnabled);
-            this.toggleFields(!isEnabled, true);
+            this.intlAutocompleteInstance?.reset();
+            this.intlAutocompleteInstance?.setCountry(countryCode);
 
-            if (isEnabled && this.intlAutocompleteInstance !== null) {
-                // Reset address fields on country change.
+            if (this.address()?.country?.iso2Code === countryCode) {
+                this.setInputAddress(this.address());
+                this.toggleFields(true);
+            } else {
                 this.resetInputAddress();
-                this.intlAutocompleteInstance.reset();
-                this.intlAutocompleteInstance.setCountry(countryCode);
+                this.toggleFields(false);
             }
         },
 
         isEnabledCountry: function (countryCode) {
-            return this.settings.enabled_countries.indexOf(countryCode) > -1;
+            return (
+                this.settings.enabled_countries.includes(countryCode)
+                && !(countryCode === 'NL' && this.settings.nl_input_behavior === 'zip_house')
+            );
         },
 
         isValid: function () {
             return this.visible() === false || this.address() !== null;
         },
 
-        validateAddress: function () {
+        validateAddress: function (address) {
+            if (address.error) {
+                this.error($t(address.message_details));
+                return false;
+            }
+
             return true;
         },
 
-        getAddressParts: function (result) {
-            const buildingNumber = `${result.address.buildingNumber || ''}`,
-                buildingNumberAddition = `${result.address.buildingNumberAddition || ''}`;
+        getAddressParts: function (address) {
+            const buildingNumber = `${address.buildingNumber || ''}`,
+                buildingNumberAddition = `${address.buildingNumberAddition || ''}`;
 
             return {
-                street: result.address.street,
+                street: address.street,
                 building: `${buildingNumber} ${buildingNumberAddition}`.trim(),
                 buildingNumber: buildingNumber,
                 buildingNumberAddition: buildingNumberAddition,
-                locality: result.address.locality,
-                postcode: result.address.postcode,
+                locality: address.locality,
+                postcode: address.postcode,
             };
         },
 

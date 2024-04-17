@@ -6,34 +6,38 @@ define([
 
     return AddressAutofillNl.extend({
         defaults: {
-            imports: {
-                countryCode: '${$.parentName}.country_id:value',
-                onChangeCountry: '${$.parentName}.country_id:value',
-            },
             modules: {
                 street: '${$.parentName}.street',
                 city: '${$.parentName}.city',
                 postcode: '${$.parentName}.postcode',
                 regionIdInput: '${$.parentName}.region_id_input',
+                countrySelect: '${$.parentName}.country_id',
+            },
+            statefull: {
+                address: true,
+                status: true,
             },
             addressFields: null,
         },
 
-        validateAddress: function (address) {
-            const houseNumber = this.childHouseNumber();
-            if (
-                this.settings.allow_pobox_shipping === false
-                && address.addressType === 'PO box'
-                && houseNumber.parentScope.split('.')[0] === 'shippingAddress'
-            ) {
-                this.status('poBoxShippingNotAllowed');
-                return false;
+        initialize: function () {
+            this._super();
+
+            this.countrySelect((component) => {
+                this.visible(component.value() === 'NL');
+                component.value.subscribe((value) => { this.onChangeCountry(value); });
+            });
+
+            if (this.address() !== null && this.status() === 'houseNumberAdditionIncorrect') {
+                this.childHouseNumberSelect((component) => {
+                    component.setOptions(this.address().houseNumberAdditions);
+                });
             }
 
-            return this._super(address);
+            return this;
         },
 
-        onChangeCountry: function () {
+        onChangeCountry: function (countryCode) {
             if (this.addressFields === null) {
                 this.addressFields = Registry.async([
                     `${this.parentName}.street`,
@@ -44,7 +48,7 @@ define([
             }
 
             // Wait for address fields to be available.
-            this.addressFields(this._super.bind(this));
+            this.addressFields(this._super.bind(this, countryCode));
         },
 
         setInputAddress: function (address) {
@@ -68,51 +72,61 @@ define([
         },
 
         resetInputAddress: function () {
-            this.street().elems.each((streetInput) => streetInput.clear().error(false));
             this.city().clear().error(false);
             this.postcode().clear().error(false);
             this.regionIdInput().clear().error(false);
-            this.status(null);
+            this.street().elems.each((streetInput) => streetInput.clear().error(false));
         },
 
-        toggleFields: function (state, force) {
-            if (!this.isNl()) {
+        toggleFields: function (state) {
+            if (this.countrySelect()?.value() !== 'NL') {
                 // Always re-enable region.
                 // This is not needed for .visible() because the region field has its own logic for that.
                 this.regionIdInput((component) => component.enable());
-                return;
+
+                return; // Toggle will be handled by international component.
             }
 
             switch (this.settings.show_hide_address_fields) {
-                case 'disable':
-                    {
-                        for (const field of ['city', 'postcode', 'regionIdInput']) {
-                            this[field](component => component.disabled(!state));
-                        }
+            case 'disable':
+                for (const field of ['city', 'postcode', 'regionIdInput']) {
+                    this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
+                }
 
-                        let j = 4;
+                for (let j = 0; j < 4; j++) {
+                    Registry.async(`${this.street().name}.${j}`)('disabled', !state);
+                }
 
-                        while (j--) {
-                            Registry.async(`${this.street().name}.${j}`)('disabled', !state);
-                        }
-                    }
                 break;
-                case 'format':
-                    if (!force) {
-                        if (!this.street().visible()) {
-                            return;
-                        }
+            case 'format':
+                if (!this.street().visible()) {
+                    return;
+                }
 
-                        state = false;
-                    }
+                state = false;
 
-                    /* falls through */
-                case 'hide':
-                    for (const field of ['street', 'city', 'postcode', 'regionIdInput']) {
-                        this[field](component => component.visible(state));
-                    }
+            /* falls through */
+            case 'hide':
+                for (const field of ['street', 'city', 'postcode', 'regionIdInput']) {
+                    this[field](component => component.visible(state));
+                }
                 break;
             }
+        },
+
+        validateAddress: function (address) {
+            const houseNumber = this.childHouseNumber();
+
+            if (
+                this.settings.allow_pobox_shipping === false
+                && address.addressType === 'PO box'
+                && houseNumber.parentScope.split('.')[0] === 'shippingAddress'
+            ) {
+                this.status('poBoxShippingNotAllowed');
+                return false;
+            }
+
+            return this._super(address);
         },
 
     });

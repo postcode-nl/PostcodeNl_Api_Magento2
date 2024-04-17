@@ -14,12 +14,16 @@ define([
             imports: {
                 onStatus: '${ $.parentName }:status',
             },
+            additionalClasses: {
+                'address-autofill-nl-house-number': true,
+            },
         },
 
         initialize: function () {
             this._super();
 
             let validateCallbackMessage;
+
             this.validation['validate-callback'] = {
                 isValid: () => {
                     if (this.addressStatus === 'notFound') {

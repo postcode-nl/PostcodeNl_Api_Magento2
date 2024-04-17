@@ -8,7 +8,11 @@ define([
         defaults: {
             imports: {
                 onSettings: '${$.parentName}:settings',
+                visible: '${ $.parentName }:visible',
             },
+            template: 'ui/form/field',
+            elementTmpl: 'Flekto_Postcode/form/element/address-autofill-field',
+            visible: false,
         },
 
         onSettings: function (settings) {

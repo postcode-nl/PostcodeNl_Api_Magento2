@@ -7,10 +7,11 @@ define([
 
     return Collection.extend({
         defaults: {
-            imports: {
-                onInputPostcode: '${$.name}.postcode:value',
-                onInputHouseNumber: '${$.name}.house_number:value',
-                onChangeHouseNumberAddition: '${$.name}.house_number_select:value',
+            listens: {
+                '${$.name}.postcode:value': 'onInputPostcode',
+                '${$.name}.house_number:value': 'onInputHouseNumber',
+                '${$.name}.house_number_select:value': 'onChangeHouseNumberAddition',
+                visible: 'onVisible',
             },
             modules: {
                 childPostcode: '${$.name}.postcode',
@@ -22,6 +23,7 @@ define([
             loading: false,
             status: null,
             settings: {},
+            visible: false,
         },
 
         initialize: function () {
@@ -29,88 +31,86 @@ define([
 
             // The "loading" class will be added to the house number element based on loading's observable value.
             // I.e. when looking up an address.
-            this.childHouseNumber((component) => component.additionalClasses['loading'] = this.loading);
+            this.childHouseNumber((component) => { component.additionalClasses['loading'] = this.loading; });
 
-            this.address.subscribe(this.setInputAddress.bind(this));
-
-            if (this.settings.fixedCountry !== null) {
-                this.countryCode = this.settings.fixedCountry;
-                this.onChangeCountry();
-            }
+            this.address.subscribe((address) => {
+                if (address !== null) {
+                    this.setInputAddress(address);
+                }
+            });
 
             return this;
-        },
-
-        initElement: function (childInstance) {
-            childInstance.visible(this.isNl() && childInstance.index !== 'house_number_select');
         },
 
         initObservable: function () {
             this._super();
-            this.observe('address loading status');
+            this.observe('address loading status visible');
             return this;
         },
 
-        onChangeCountry: function () {
-            const isNl = this.isNl();
-
-            this.childPostcode(component => component.visible(isNl));
-            this.childHouseNumber(component => component.visible(isNl));
-            this.childHouseNumberSelect(component => component.visible(isNl && component.options().length > 0));
-            this.toggleFields(!isNl, true);
-
-            if (isNl) {
-                this.resetInputAddress();
-
-                // Trigger input handlers in case the fields already have values.
-                this.childPostcode(component => this.onInputPostcode(component.value()));
-                this.childHouseNumber(component => this.onInputHouseNumber(component.value()));
-            }
+        onVisible: function (isVisible) {
+            this.toggleFields(isVisible && this.status() === 'valid');
         },
 
-        isNl: function () {
-            return this.countryCode === 'NL';
+        onChangeCountry: function (countryCode) {
+            if (countryCode !== 'NL') {
+                this.visible(false);
+                return;
+            }
+
+            if (this.address() !== null) {
+                this.setInputAddress(this.address());
+            } else {
+                this.resetInputAddress();
+            }
+
+            this.visible(true);
         },
 
         onInputPostcode: function (value) {
             clearTimeout(this.lookupTimeout);
 
-            if (!this.childPostcode().visible() || this.childPostcode().checkInvalid()) {
+            if (
+                !this.childPostcode().valueChangedByUser
+                || !this.childPostcode().visible()
+                || this.childPostcode().checkInvalid() !== null
+            ) {
                 return;
             }
 
-            this.lookupTimeout = setTimeout(function () {
-                if (addressModel.postcodeRegex.test(value)) {
-                    if (addressModel.houseNumberRegex.test(this.childHouseNumber().value())) {
-                        this.getAddress();
-                    }
+            this.resetHouseNumberSelect();
 
-                    return;
+            this.lookupTimeout = setTimeout(() => {
+                if (
+                    addressModel.postcodeRegex.test(value)
+                    && addressModel.houseNumberRegex.test(this.childHouseNumber().value())
+                ) {
+                    this.getAddress();
                 }
-
-                this.resetHouseNumberSelect();
-            }.bind(this), addressModel.lookupDelay);
+            }, addressModel.lookupDelay);
         },
 
         onInputHouseNumber: function (value) {
             clearTimeout(this.lookupTimeout);
 
-            if (!this.childHouseNumber().visible() || value === '') {
-                this.resetHouseNumberSelect();
+            if (
+                !this.childHouseNumber().valueChangedByUser
+                || !this.childHouseNumber().visible()
+                || value === ''
+            ) {
                 return;
             }
 
-            this.lookupTimeout = setTimeout(function () {
-                if (addressModel.houseNumberRegex.test(value)) {
-                    if (addressModel.postcodeRegex.test(this.childPostcode().value())) {
-                        this.getAddress();
-                    }
+            this.resetHouseNumberSelect();
 
-                    return;
+            this.lookupTimeout = setTimeout(() => {
+                if (
+                    addressModel.houseNumberRegex.test(value)
+                    && addressModel.postcodeRegex.test(this.childPostcode().value())
+                ) {
+                    this.getAddress();
                 }
-
-                this.resetHouseNumberSelect();
-            }.bind(this), addressModel.lookupDelay);
+            }, addressModel.lookupDelay);
         },
 
         getAddress: function () {
@@ -118,8 +118,9 @@ define([
                 houseNumber = addressModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim(),
                 url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
-            this.resetHouseNumberSelect();
             this.resetInputAddress();
+            this.address(null);
+            this.status(null);
             this.loading(true);
             this.childHouseNumber().error(false);
 
@@ -127,7 +128,7 @@ define([
                 url: url,
                 cache: true,
                 dataType: 'json',
-                success: function (response) {
+                success: (response) => {
                     if (response[0].error) {
                         return this.childHouseNumber().error(response[0].message_details);
                     }
@@ -141,14 +142,12 @@ define([
                     this.address(response[0].address);
 
                     if (this.status() === 'houseNumberAdditionIncorrect') {
-                        this.childHouseNumberSelect()
-                            .setOptions(response[0].address.houseNumberAdditions)
-                            .show();
+                        this.childHouseNumberSelect().setOptions(response[0].address.houseNumberAdditions);
                     } else {
                         this.toggleFields(true);
                     }
-                }.bind(this)
-            }).always(this.loading.bind(null, false));
+                }
+            }).always(this.loading.bind(this, false));
         },
 
         validateAddress: function () {
@@ -156,24 +155,21 @@ define([
         },
 
         onChangeHouseNumberAddition: function (value) {
-            if (typeof value === 'undefined') {
-                this.toggleFields(false);
-                this.resetInputAddress();
+            if (!this.childHouseNumberSelect().visible()) {
                 return;
             }
 
-            const option = this.childHouseNumberSelect().getOption(value);
+            const option = this.childHouseNumberSelect().getOption(value),
+                isValid = typeof option !== 'undefined' && typeof option.houseNumberAddition !== 'undefined';
 
-            if (typeof option !== 'undefined' && typeof option.houseNumberAddition !== 'undefined') {
-                this.address().houseNumberAddition = option.houseNumberAddition;
-                this.status('valid');
-                this.address.valueHasMutated();
-                this.toggleFields(true);
-            }
+            this.address().houseNumberAddition = isValid ? option.houseNumberAddition : null;
+            this.status(isValid ? 'valid' : 'houseNumberAdditionIncorrect');
+            this.address.valueHasMutated();
+            this.toggleFields(isValid);
         },
 
         resetHouseNumberSelect: function () {
-            this.childHouseNumberSelect(component => component.setOptions([]).hide());
+            this.childHouseNumberSelect(component => component.setOptions([]));
         },
 
         getAddressParts: function (address) {
