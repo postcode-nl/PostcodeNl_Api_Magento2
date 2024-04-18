@@ -7,9 +7,6 @@ define([
 
         defaults: {
             imports: {
-                renderIntlAddress: '${$.parentName}.address_autofill_intl:address',
-                renderNlAddress: '${$.parentName}.address_autofill_nl:address',
-                onStatus: '${$.parentName}.address_autofill_nl:status',
                 onChangeHouseNumberSelect: '${$.parentName}.address_autofill_nl.house_number_select:value',
             },
             modules: {
@@ -21,6 +18,25 @@ define([
             additionalClasses: {
                 'address-autofill-formatted-output': true,
             },
+        },
+
+        initialize: function () {
+            this._super();
+
+            this.addressAutofillNl((component) => {
+                component.status.subscribe(this.onStatusNl.bind(this));
+                component.address.subscribe((address) => {
+                    if (component.status() === 'valid') {
+                        this.renderNlAddress(address);
+                    }
+                });
+            });
+
+            this.addressAutofillIntl((component) => {
+                component.address.subscribe(this.renderIntlAddress.bind(this));
+            });
+
+            return this;
         },
 
         onChangeCountry: function () {
@@ -45,7 +61,7 @@ define([
 
         renderStoredIntlAddress: function () {
             if (
-                this.addressAutofillIntl()?.visible()
+                this.addressAutofillIntl()?.isEnabledCountry(this.countryCode)
                 && this.addressAutofillIntl()?.address()?.country?.iso2Code === this.countryCode
             ) {
                 this.renderIntlAddress(this.addressAutofillIntl().address());
@@ -76,8 +92,13 @@ define([
             this.visible(true);
         },
 
-        onStatus: function (status) {
-            this.visible(status === 'valid');
+        onStatusNl: function (status) {
+            if (status === 'valid') {
+                this.renderNlAddress(this.addressAutofillNl().address());
+                this.visible(true);
+            } else {
+                this.visible(false);
+            }
         },
 
     });

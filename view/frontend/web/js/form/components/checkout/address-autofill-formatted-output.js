@@ -1,29 +1,26 @@
 define([
     'Flekto_Postcode/js/form/components/address-autofill-formatted-output',
-    'uiRegistry',
-], function (Html, Registry) {
+], function (Html) {
     'use strict';
 
     return Html.extend({
         defaults: {
             imports: {
                 countryCode: '${$.parentName}.country_id:value',
-                onChangeCountry: '${$.parentName}.country_id:value',
-            }
+            },
+            modules: {
+                countrySelect: '${$.parentName}.country_id',
+            },
         },
 
         initialize: function () {
             this._super();
 
-            Registry.get(
-                [`${this.parentName}.address_autofill_nl`, `${this.parentName}.country_id`],
-                this.renderStoredNlAddress.bind(this)
-            );
-
-            Registry.get(
-                [`${this.parentName}.address_autofill_intl`, `${this.parentName}.country_id`],
-                this.renderStoredIntlAddress.bind(this)
-            );
+            this.countrySelect((component) => {
+                component.value.subscribe(this.onChangeCountry.bind(this));
+                this.addressAutofillNl(this.renderStoredNlAddress.bind(this));
+                this.addressAutofillIntl(this.renderStoredIntlAddress.bind(this));
+            });
 
             return this;
         },
