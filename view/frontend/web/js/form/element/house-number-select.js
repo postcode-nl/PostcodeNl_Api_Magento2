@@ -10,7 +10,8 @@ define([
             template: 'ui/form/field',
             visible: false,
             imports: {
-                onSettings: '${$.parentName}:settings',
+                onSettings: '${ $.parentName }:settings',
+                onParentVisible: '${ $.parentName }:visible',
             },
             listens: {
                 options: 'onOptions',
@@ -34,6 +35,10 @@ define([
                 message: $t('Please select a house number.'),
                 isValid: this.isValid.bind(this),
             };
+        },
+
+        onParentVisible: function (isParentVisible) {
+            this.visible(isParentVisible && this.options().length > 0);
         },
 
         onOptions: function (options) {
