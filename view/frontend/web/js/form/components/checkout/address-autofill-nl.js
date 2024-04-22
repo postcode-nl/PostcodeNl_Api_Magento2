@@ -1,7 +1,8 @@
 define([
     'Flekto_Postcode/js/form/components/address-autofill-nl',
     'uiRegistry',
-], function (AddressAutofillNl, Registry) {
+    'Flekto_Postcode/js/model/address-nl',
+], function (AddressAutofillNl, Registry, AddressNlModel) {
     'use strict';
 
     return AddressAutofillNl.extend({
@@ -41,7 +42,7 @@ define([
                 this.childPostcode((component) => { component.value(postcode); });
                 this.childHouseNumber((component) => { component.value(house); });
 
-                if (this.status() === 'houseNumberAdditionIncorrect') {
+                if (this.status() === AddressNlModel.status.ADDITION_INCORRECT) {
                     this.childHouseNumberSelect((component) => {
                         component.setOptions(this.address().houseNumberAdditions);
                     });
@@ -128,7 +129,7 @@ define([
                 && address.addressType === 'PO box'
                 && houseNumber.parentScope.split('.')[0] === 'shippingAddress'
             ) {
-                this.status('poBoxShippingNotAllowed');
+                this.status(AddressNlModel.status.PO_BOX_SHIPPING_NOT_ALLOWED);
                 return false;
             }
 

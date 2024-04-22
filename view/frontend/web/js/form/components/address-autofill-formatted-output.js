@@ -1,6 +1,7 @@
 define([
     'Magento_Ui/js/form/components/html',
-], function (Html) {
+    'Flekto_Postcode/js/model/address-nl',
+], function (Html, AddressNlModel) {
     'use strict';
 
     return Html.extend({
@@ -26,7 +27,7 @@ define([
             this.addressAutofillNl((component) => {
                 component.status.subscribe(this.onStatusNl.bind(this));
                 component.address.subscribe((address) => {
-                    if (component.status() === 'valid') {
+                    if (component.status() === AddressNlModel.status.VALID) {
                         this.renderNlAddress(address);
                     }
                 });
@@ -54,7 +55,7 @@ define([
         },
 
         renderStoredNlAddress: function () {
-            if (this.countryCode === 'NL' && this.addressAutofillNl()?.status() === 'valid') {
+            if (this.countryCode === 'NL' && this.addressAutofillNl()?.status() === AddressNlModel.status.VALID) {
                 this.renderNlAddress(this.addressAutofillNl().address());
             }
         },
@@ -93,7 +94,7 @@ define([
         },
 
         onStatusNl: function (status) {
-            if (status === 'valid') {
+            if (status === AddressNlModel.status.VALID) {
                 this.renderNlAddress(this.addressAutofillNl().address());
                 this.visible(true);
             } else {
