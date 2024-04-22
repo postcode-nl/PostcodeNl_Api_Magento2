@@ -6,6 +6,8 @@ define([
 ], function (ko, renderer, AutocompleteAddress, $t) {
     'use strict';
 
+    const addressDetailsCache = new Map();
+
     ko.bindingHandlers.initIntlAutocomplete = {
         update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
             if (viewModel.intlAutocompleteInstance !== null || !ko.unwrap(valueAccessor())) {
@@ -18,10 +20,22 @@ define([
                 context: viewModel.countryCode || 'NL',
             });
 
-            const selectAddress = function (selectedItem) {
+            function getAddressDetails(context, callback) {
+                if (addressDetailsCache.has(context)) {
+                    callback(addressDetailsCache.get(context));
+                    return;
+                }
+
+                viewModel.intlAutocompleteInstance.getDetails(context, (result) => {
+                    callback(result);
+                    addressDetailsCache.set(context, result);
+                });
+            }
+
+            function selectAddress(selectedItem) {
                 viewModel.loading(true);
 
-                viewModel.intlAutocompleteInstance.getDetails(selectedItem.context, (result) => {
+                getAddressDetails(selectedItem.context, (result) => {
                     const isValidAddress = viewModel.validateAddress(result[0]);
 
                     viewModel.loading(false);
@@ -29,7 +43,7 @@ define([
                     viewModel.toggleFields(isValidAddress);
                     isValidAddress && viewModel.validate();
                 });
-            };
+            }
 
             // If initialized with a value that leads to exactly one address, select it.
             if (viewModel.searchInitialValue && viewModel.value() !== '') {
