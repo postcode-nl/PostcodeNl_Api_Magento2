@@ -23,32 +23,38 @@ define([
         initialize: function () {
             this._super();
 
+            this.addressFields = Registry.async([
+                `${this.parentName}.street`,
+                `${this.parentName}.city`,
+                `${this.parentName}.postcode`,
+                `${this.parentName}.region_id_input`,
+            ]);
+
             this.countrySelect((component) => {
                 this.visible(component.value() === 'NL');
                 component.value.subscribe((value) => { this.onChangeCountry(value); });
             });
 
-            if (this.address() !== null && this.status() === 'houseNumberAdditionIncorrect') {
-                this.childHouseNumberSelect((component) => {
-                    component.setOptions(this.address().houseNumberAdditions);
-                });
+            if (this.address() !== null) {
+                const { postcode, house } = this.getAddressParts(this.address());
+
+                this.childPostcode((component) => { component.value(postcode); });
+                this.childHouseNumber((component) => { component.value(house); });
+
+                if (this.status() === 'houseNumberAdditionIncorrect') {
+                    this.childHouseNumberSelect((component) => {
+                        component.setOptions(this.address().houseNumberAdditions);
+                    });
+                }
+
+                this.addressFields(this.setInputAddress.bind(this, this.address()));
             }
 
             return this;
         },
 
         onChangeCountry: function (countryCode) {
-            if (this.addressFields === null) {
-                this.addressFields = Registry.async([
-                    `${this.parentName}.street`,
-                    `${this.parentName}.city`,
-                    `${this.parentName}.postcode`,
-                    `${this.parentName}.region_id_input`,
-                ]);
-            }
-
-            // Wait for address fields to be available.
-            this.addressFields(this._super.bind(this, countryCode));
+            this.addressFields?.(this._super.bind(this, countryCode));
         },
 
         setInputAddress: function (address) {
