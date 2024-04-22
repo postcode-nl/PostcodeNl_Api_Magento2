@@ -67,7 +67,7 @@ define([
             this.visible(true);
         },
 
-        onInputPostcode: function (value) {
+        onInputPostcode: function () {
             clearTimeout(this.lookupTimeout);
 
             if (
@@ -81,10 +81,7 @@ define([
             this.resetHouseNumberSelect();
 
             this.lookupTimeout = setTimeout(() => {
-                if (
-                    addressModel.postcodeRegex.test(value)
-                    && addressModel.houseNumberRegex.test(this.childHouseNumber().value())
-                ) {
+                if (this.isPostcodeValid() && this.isHouseNumberValid()) {
                     this.getAddress();
                 }
             }, addressModel.lookupDelay);
@@ -104,13 +101,18 @@ define([
             this.resetHouseNumberSelect();
 
             this.lookupTimeout = setTimeout(() => {
-                if (
-                    addressModel.houseNumberRegex.test(value)
-                    && addressModel.postcodeRegex.test(this.childPostcode().value())
-                ) {
+                if (this.isHouseNumberValid() && this.isPostcodeValid()) {
                     this.getAddress();
                 }
             }, addressModel.lookupDelay);
+        },
+
+        isPostcodeValid: function () {
+            return addressModel.postcodeRegex.test(this.childPostcode().value());
+        },
+
+        isHouseNumberValid: function () {
+            return addressModel.houseNumberRegex.test(this.childHouseNumber().value());
         },
 
         getAddress: function () {

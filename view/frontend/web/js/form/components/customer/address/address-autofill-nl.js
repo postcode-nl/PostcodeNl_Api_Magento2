@@ -17,9 +17,46 @@ define([
         initialize: function () {
             this._super();
 
-            this.visible(this.countryCode === 'NL');
+            if (this.countryCode === 'NL') {
+                Promise.all([this.prefillPostcode(), this.prefillHouseNumber()])
+                    .then(this.getAddress.bind(this))
+                    .catch(() => { /* ignore */ });
+
+                this.visible(true);
+            }
 
             return this;
+        },
+
+        prefillPostcode: function () {
+            return new Promise((resolve, reject) => {
+                this.childPostcode((component) => {
+                    if (component.value() === '') {
+                        component.value(this.inputs.postcode.value);
+                    }
+
+                    this.isPostcodeValid() ? resolve() : reject();
+                });
+            });
+        },
+
+        prefillHouseNumber: function () {
+            return new Promise((resolve, reject) => {
+                this.childHouseNumber((component) => {
+                    if (component.value() === '') {
+                        const streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
+                            matches = streetAddress.match(/(?<houseNumber>\d+)(?<addition>\D.*)?$/);
+
+                        if (matches !== null) {
+                            const { houseNumber = '', addition = '' } = matches.groups;
+
+                            component.value(`${houseNumber} ${addition}`.trim());
+                        }
+                    }
+
+                    this.isHouseNumberValid() ? resolve() : reject();
+                });
+            });
         },
 
         onChangeCountry: function (countryCode) {
