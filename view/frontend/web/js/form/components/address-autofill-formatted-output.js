@@ -48,7 +48,7 @@ define([
 
         onChangeHouseNumberSelect: function (value) {
             // Hide result if house number addition caption is selected.
-            if (typeof value === 'undefined') {
+            if (this.addressAutofillNl()?.childHouseNumberSelect().visible() && typeof value === 'undefined') {
                 this.visible(false);
             }
         },
