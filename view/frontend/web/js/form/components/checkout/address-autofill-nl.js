@@ -48,6 +48,7 @@ define([
                     });
                 }
 
+                // Set values from stored address. Note that values may still get overwritten by checkout-data.
                 this.addressFields(this.setInputAddress.bind(this, this.address()));
             }
 
