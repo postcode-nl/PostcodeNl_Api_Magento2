@@ -76,7 +76,10 @@ define([
             });
 
             // Clear the previous values when searching for a new address.
-            element.addEventListener('autocomplete-search', viewModel.resetInputAddress.bind(viewModel));
+            element.addEventListener('autocomplete-search', () => {
+                viewModel.resetInputAddress();
+                viewModel.address(null);
+            });
         }
     };
 
