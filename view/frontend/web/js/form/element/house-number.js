@@ -1,7 +1,8 @@
 define([
     'Flekto_Postcode/js/form/element/address-autofill-field',
+    'Flekto_Postcode/js/model/address-nl',
     'mage/translate',
-], function (autofillField, $t) {
+], function (autofillField, AddressNlModel, $t) {
     'use strict';
 
     return autofillField.extend({
@@ -14,14 +15,32 @@ define([
             imports: {
                 onStatus: '${ $.parentName }:status',
             },
+            additionalClasses: {
+                'address-autofill-nl-house-number': true,
+            },
         },
 
         initialize: function () {
             this._super();
+
+            let validateCallbackMessage;
+
             this.validation['validate-callback'] = {
-                isValid: () => this.addressStatus !== 'notFound',
-                message: $t('Address not found.'),
+                isValid: () => {
+                    if (this.addressStatus === AddressNlModel.status.NOT_FOUND) {
+                        validateCallbackMessage = $t('Address not found.');
+                        return false;
+                    }
+                    else if (this.addressStatus === AddressNlModel.status.PO_BOX_SHIPPING_NOT_ALLOWED) {
+                        validateCallbackMessage = $t('Sorry, we cannot ship to a PO Box address.');
+                        return false;
+                    }
+
+                    return true;
+                },
+                message: () => validateCallbackMessage,
             };
+
             return this;
         },
 

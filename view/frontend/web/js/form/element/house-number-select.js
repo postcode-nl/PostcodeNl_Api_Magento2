@@ -7,8 +7,17 @@ define([
     return Select.extend({
 
         defaults: {
+            template: 'ui/form/field',
+            visible: false,
             imports: {
-                onSettings: '${$.parentName}:settings',
+                onSettings: '${ $.parentName }:settings',
+                onParentVisible: '${ $.parentName }:visible',
+            },
+            listens: {
+                options: 'onOptions',
+            },
+            additionalClasses: {
+                'address-autofill-nl-house-number-select': true,
             },
         },
 
@@ -26,6 +35,14 @@ define([
                 message: $t('Please select a house number.'),
                 isValid: this.isValid.bind(this),
             };
+        },
+
+        onParentVisible: function (isParentVisible) {
+            this.visible(isParentVisible && this.options().length > 0);
+        },
+
+        onOptions: function (options) {
+            this.visible(options.length > 0);
         },
 
     });

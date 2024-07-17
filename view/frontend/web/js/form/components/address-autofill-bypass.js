@@ -12,6 +12,11 @@ define([
                 '${ $.parentName }.address_autofill_intl:error': 'visible',
             },
             visible: false,
+            template: 'Flekto_Postcode/content/address-autofill-bypass',
+            tooltipTpl: 'ui/form/element/helper/tooltip',
+            additionalClasses: {
+                'address-autofill-bypass': true,
+            },
         },
 
         editAddress: function () {

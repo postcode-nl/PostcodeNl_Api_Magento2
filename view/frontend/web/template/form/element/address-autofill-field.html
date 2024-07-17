@@ -1,0 +1,14 @@
+<input class="input-text" type="text" data-bind="
+    event: {input: userChanges},
+    value: value,
+    valueUpdate: 'input',
+    hasFocus: focused,
+    attr: {
+        name: inputName,
+        placeholder: placeholder,
+        'aria-describedby': getDescriptionId(),
+        'aria-required': required,
+        'aria-invalid': error() ? true : 'false',
+        id: uid,
+        disabled: disabled
+    }" />

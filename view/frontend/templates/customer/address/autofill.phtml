@@ -1,7 +1,13 @@
+<?php
+/**
+ * @var $block \Flekto\Postcode\Block\Customer\Address\Autofill
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
 <div id="block-loader-customer-address" data-role="customer-address-loader" class="loading-mask loading-mask-customer-address">
     <div class="loader">
         <img src="<?= /* @noEscape */ $block->getViewFileUrl('images/loader-1.gif') ?>"
-            alt="<?= $block->escapeHtml(__('Loading...')) ?>" style="position: absolute;">
+            alt="<?= $escaper->escapeHtml(__('Loading...')) ?>" style="position: absolute;">
     </div>
 </div>
 

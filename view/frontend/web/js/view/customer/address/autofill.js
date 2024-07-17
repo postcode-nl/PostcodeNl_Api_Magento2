@@ -24,17 +24,18 @@ define([
                 region: document.getElementById('region'),
                 city: document.getElementById('city'),
                 postcode: document.getElementById('zip'),
+                toArray: function () {
+                    return [...this.street, this.city, this.postcode, this.region];
+                },
             },
             listens: {
                 '${$.name}.address_autofill_intl:address': 'validateInputs',
                 '${$.name}.address_autofill_nl:address': 'validateInputs',
             },
             tracks: {
-                isLoading: true,
                 countryCode: true,
                 isCountryChanged: true,
             },
-            isLoading: true,
             countryCode: '${$.inputs.country.value}',
             isCountryChanged: false,
         },
@@ -98,7 +99,7 @@ define([
                         return; // Invalid form, prevent submit.
                     }
 
-                    originalSubmitHandler();
+                    originalSubmitHandler(this.validatorInstance.currentForm);
                 });
             }.bind(this);
         },
@@ -109,7 +110,7 @@ define([
             }
 
             // Trigger jQuery validator.
-            for (const input of [...this.inputs.street, this.inputs.city, this.inputs.postcode, this.inputs.region]) {
+            for (const input of this.inputs.toArray()) {
                 this.validatorInstance.element(input);
             }
 
@@ -117,5 +118,5 @@ define([
             this.inputs.postcode.dispatchEvent(new KeyboardEvent('keyup'));
         },
 
-    })
+    });
 });

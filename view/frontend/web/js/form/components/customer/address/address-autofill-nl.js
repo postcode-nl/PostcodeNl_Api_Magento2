@@ -14,11 +14,58 @@ define([
             },
         },
 
-        setInputAddress: function (address) {
-            if (address === null) {
-                return;
+        initialize: function () {
+            this._super();
+
+            if (this.countryCode === 'NL') {
+                Promise.all([this.prefillPostcode(), this.prefillHouseNumber()])
+                    .then(this.getAddress.bind(this))
+                    .catch(() => { /* ignore */ });
+
+                this.visible(true);
             }
 
+            return this;
+        },
+
+        prefillPostcode: function () {
+            return new Promise((resolve, reject) => {
+                this.childPostcode((component) => {
+                    if (component.value() === '') {
+                        component.value(this.inputs.postcode.value);
+                    }
+
+                    this.isPostcodeValid() ? resolve() : reject();
+                });
+            });
+        },
+
+        prefillHouseNumber: function () {
+            return new Promise((resolve, reject) => {
+                this.childHouseNumber((component) => {
+                    if (component.value() === '') {
+                        const streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
+                            matches = streetAddress.match(/(?<houseNumber>\d+)(?<addition>\D.*)?$/);
+
+                        if (matches !== null) {
+                            const { houseNumber = '', addition = '' } = matches.groups;
+
+                            component.value(`${houseNumber} ${addition}`.trim());
+                        }
+                    }
+
+                    this.isHouseNumberValid() ? resolve() : reject();
+                });
+            });
+        },
+
+        onChangeCountry: function (countryCode) {
+            if (this.isCountryChanged) {
+                return this._super(countryCode);
+            }
+        },
+
+        setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
 
             if (this.inputs.street.length > 2) {
@@ -38,41 +85,30 @@ define([
         },
 
         resetInputAddress: function () {
-            if (this.isCountryChanged) {
-                [
-                    ...this.inputs.street,
-                    this.inputs.city,
-                    this.inputs.postcode,
-                    this.inputs.region,
-                ].forEach(input => input.value = '');
-
-                this.status(null);
-            }
+            this.inputs.toArray().forEach(input => { input.value = ''; });
         },
 
-        toggleFields: function (state, force) {
-            switch (this.settings.show_hide_address_fields) {
-                case 'disable':
-                    [
-                        ...this.inputs.street,
-                        this.inputs.city,
-                        this.inputs.postcode,
-                        this.inputs.region,
-                    ].forEach(input => input.disabled = !state);
-                break;
-                case 'format':
-                    if (!force) {
-                        if (this.fields.street.style.display === 'none') {
-                            return;
-                        }
+        toggleFields: function (state) {
+            if (this.countryCode !== 'NL') {
+                return; // Toggle will be handled by international component.
+            }
 
-                        state = false;
-                    }
-                    /* falls through */
-                case 'hide':
-                    for (const name of ['street', 'city', 'postcode', 'region']) {
-                        this.fields[name].style.display = state ? '' : 'none';
-                    }
+            switch (this.settings.show_hide_address_fields) {
+            case 'disable':
+                this.inputs.toArray().forEach(input => { input.disabled = !state; });
+                break;
+            case 'format':
+                if (this.fields.street.style.display === 'none') {
+                    return;
+                }
+
+                state = false;
+
+            /* falls through */
+            case 'hide':
+                for (const name of ['street', 'city', 'postcode', 'region']) {
+                    this.fields[name].style.display = state ? '' : 'none';
+                }
                 break;
             }
         },

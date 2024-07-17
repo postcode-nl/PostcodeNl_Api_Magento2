@@ -62,7 +62,12 @@
                     <comment>Selected countries will have Address API disabled.</comment>
                     <source_model>Flekto\Postcode\Model\Config\Source\DisabledCountries</source_model>
                 </field>
-                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="100" translate="label" type="select" canRestore="1">
+                <field id="allow_pobox_shipping" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="100" translate="label" type="select" canRestore="1">
+                    <label>PO box shipping</label>
+                    <comment>Allow shipping to PO boxes.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="110" translate="label" type="select" canRestore="1">
                     <label>Debug</label>
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

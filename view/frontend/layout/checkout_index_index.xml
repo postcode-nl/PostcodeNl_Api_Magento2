@@ -22,7 +22,6 @@
                                                                 <item name="address_autofill_nl" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/checkout/address-autofill-nl</item>
                                                                     <item name="config" xsi:type="array">
-                                                                        <item name="template" xsi:type="string">ui/collection</item>
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
                                                                         <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                     </item>
@@ -32,13 +31,8 @@
                                                                             <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/postcode</item>
                                                                             <item name="label" translate="true" xsi:type="string">Zip/Postal Code</item>
                                                                             <item name="config" xsi:type="array">
-                                                                                <item name="template" xsi:type="string">ui/form/field</item>
-                                                                                <item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
-                                                                                <item name="visible" xsi:type="boolean">true</item>
-                                                                                <item name="placeholder" xsi:type="string">1234 AB</item>
                                                                                 <item name="customScope" xsi:type="string">shippingAddress</item>
                                                                             </item>
-                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-postcode</item>
                                                                             <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                             <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_nl.postcode</item>
                                                                         </item>
@@ -46,12 +40,8 @@
                                                                             <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/house-number</item>
                                                                             <item name="label" translate="true" xsi:type="string">House number and addition</item>
                                                                             <item name="config" xsi:type="array">
-                                                                                <item name="template" xsi:type="string">ui/form/field</item>
-                                                                                <item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
-                                                                                <item name="visible" xsi:type="boolean">true</item>
                                                                                 <item name="customScope" xsi:type="string">shippingAddress</item>
                                                                             </item>
-                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number</item>
                                                                             <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                             <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_nl.house_number</item>
                                                                         </item>
@@ -59,13 +49,9 @@
                                                                             <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/house-number-select</item>
                                                                             <item name="label" translate="true" xsi:type="string">Which house number do you mean?</item>
                                                                             <item name="config" xsi:type="array">
-                                                                                <item name="template" xsi:type="string">ui/form/field</item>
-                                                                                <item name="elementTmpl" xsi:type="string">ui/form/element/select</item>
-                                                                                <item name="visible" xsi:type="boolean">true</item>
                                                                                 <item name="caption" xsi:type="string" translate="true">- Select house number -</item>
                                                                                 <item name="customScope" xsi:type="string">shippingAddress</item>
                                                                             </item>
-                                                                            <item name="additionalClasses" xsi:type="string">address-autofill-nl-house-number-select</item>
                                                                             <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                             <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_nl.house_number_select</item>
                                                                         </item>
@@ -74,8 +60,6 @@
                                                                 <item name="address_autofill_intl" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/checkout/address-autofill-intl</item>
                                                                     <item name="config" xsi:type="array">
-                                                                        <item name="template" xsi:type="string">ui/form/field</item>
-                                                                        <item name="elementTmpl" xsi:type="string">Flekto_Postcode/form/element/address-autofill-intl</item>
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
                                                                         <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                         <item name="customScope" xsi:type="string">shippingAddress</item>
@@ -83,28 +67,22 @@
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                     <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
                                                                     <item name="sortOrder" xsi:type="string">66</item>
-                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-intl-input</item>
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_intl</item>
                                                                 </item>
                                                                 <item name="address_autofill_formatted_output" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/checkout/address-autofill-formatted-output</item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isFormattedOutputDisabled"/>
-                                                                        <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-formatted-output</item>
                                                                     </item>
                                                                     <item name="sortOrder" xsi:type="string">67</item>
-                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-formatted-output</item>
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_formatted_output</item>
                                                                 </item>
                                                                 <item name="address_autofill_bypass" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/checkout/address-autofill-bypass</item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isAutofillBypassDisabled"/>
-                                                                        <item name="template" xsi:type="string">Flekto_Postcode/content/address-autofill-bypass</item>
-                                                                        <item name="tooltipTpl" xsi:type="string">ui/form/element/helper/tooltip</item>
                                                                     </item>
                                                                     <item name="sortOrder" xsi:type="string">68</item>
-                                                                    <item name="additionalClasses" xsi:type="string">address-autofill-bypass</item>
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_bypass</item>
                                                                 </item>
                                                             </item>

@@ -1,6 +1,8 @@
 define([
     'Flekto_Postcode/js/form/element/address-autofill-intl',
-], function (AddressAutofillIntl) {
+    'uiRegistry',
+    'mageUtils',
+], function (AddressAutofillIntl, Registry, Utils) {
     'use strict';
 
     return AddressAutofillIntl.extend({
@@ -9,31 +11,41 @@ define([
                 fields: '${$.parentName}:fields',
                 inputs: '${$.parentName}:inputs',
                 countryCode: '${$.parentName}:countryCode',
+                isCountryChanged: '${$.parentName}:isCountryChanged',
                 onChangeCountry: '${$.parentName}:countryCode',
             },
+
+            searchInitialValue: true,
         },
 
         initialize: function () {
             this._super();
 
-            if (this.countryCode === '') {
-                this.visible(false);
-            }
+            this.visible(this.isEnabledCountry(this.countryCode));
+            this.toggleFields(!this.visible());
 
-            if (this.settings.fixedCountry !== null) {
-                this.countryCode = this.settings.fixedCountry;
-                this.onChangeCountry(this.countryCode);
+            if (this.value() === '') {
+                const postcode = this.inputs.postcode.value,
+                    city = this.inputs.city.value,
+                    streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
+                    prefilledAddressValue = `${postcode} ${city} ${streetAddress}`.trim();
+
+                if (prefilledAddressValue !== '') {
+                    this.value(prefilledAddressValue);
+                }
             }
 
             return this;
         },
 
-        setInputAddress: function (result) {
-            if (result === null) {
-                return;
+        onChangeCountry: function (countryCode) {
+            if (this.isCountryChanged) {
+                return this._super(countryCode);
             }
+        },
 
-            const address = this.getAddressParts(result);
+        setInputAddress: function (result) {
+            const address = this.getAddressParts(result.address);
 
             if (this.inputs.street.length > 2) {
                 this.inputs.street[0].value = address.street;
@@ -51,37 +63,32 @@ define([
         },
 
         resetInputAddress: function () {
-            [
-                ...this.inputs.street,
-                this.inputs.city,
-                this.inputs.postcode,
-            ].forEach(input => input.value = '');
-
-            this.address(null);
+            this.inputs.toArray().forEach(input => { input.value = ''; });
         },
 
         toggleFields: function (state, force) {
-            switch (this.settings.show_hide_address_fields) {
-                case 'disable':
-                    [
-                        ...this.inputs.street,
-                        this.inputs.city,
-                        this.inputs.postcode,
-                    ].forEach(input => input.disabled = !state);
-                break;
-                case 'format':
-                    if (!force) {
-                        if (this.fields.street.style.display === 'none') {
-                            return;
-                        }
+            if (this.countryCode === 'NL' && Utils.isObject(Registry.get(`${this.parentName}.address_autofill_nl`))) {
+                return; // Toggle will be handled by NL component.
+            }
 
-                        state = false;
+            switch (this.settings.show_hide_address_fields) {
+            case 'disable':
+                this.inputs.toArray().forEach(input => { input.disabled = !state; });
+                break;
+            case 'format':
+                if (!force) {
+                    if (this.fields.street.style.display === 'none') {
+                        return;
                     }
-                    /* falls through */
-                case 'hide':
-                    for (const name of ['street', 'city', 'postcode']) {
-                        this.fields[name].style.display = state ? '' : 'none';
-                    }
+
+                    state = false;
+                }
+
+            /* falls through */
+            case 'hide':
+                for (const name of ['street', 'city', 'postcode']) {
+                    this.fields[name].style.display = state ? '' : 'none';
+                }
                 break;
             }
         },

@@ -123,7 +123,9 @@ class ApiClientHelper extends AbstractHelper
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
-            return $this->_prepareResponse($response, $client);
+            $response = $this->_prepareResponse($response, $client);
+
+            return $response;
 
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
@@ -313,6 +315,16 @@ class ApiClientHelper extends AbstractHelper
         }
 
         return $this->_countryCodeMap[$mapKey][strtoupper($iso2Code)] ?? null;
+    }
+
+    public function getAccountInfo(): array
+    {
+        try {
+            return $this->getApiClient()->accountInfo();
+        }
+        catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**

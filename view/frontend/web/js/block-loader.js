@@ -11,7 +11,7 @@ define([
      */
     function init(config, $loader)
     {
-        resolver(hideLoader.bind(config, $loader));
+        resolver(hideLoader.bind(config, $loader)); // eslint-disable-line no-use-before-define
     }
 
     /**
