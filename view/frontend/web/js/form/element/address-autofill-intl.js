@@ -91,7 +91,7 @@ define([
 
         validateAddress: function (address) {
             if (address.error) {
-                this.error($t(address.message_details));
+                this.error($t(address.message));
                 return false;
             }
 

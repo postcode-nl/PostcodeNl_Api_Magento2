@@ -59,7 +59,7 @@ class StoreConfigHelper extends AbstractHelper
      * Get store config value
      *
      * @access public
-     * @param mixed $path
+     * @param string $path
      * @return string|null
      */
     public function getValue($path): ?string
@@ -71,10 +71,10 @@ class StoreConfigHelper extends AbstractHelper
      * Get store config flag
      *
      * @access public
-     * @param mixed $path
-     * @return bool|null
+     * @param string $path
+     * @return bool
      */
-    public function isSetFlag($path): ?bool
+    public function isSetFlag($path): bool
     {
         return $this->scopeConfig->isSetFlag($path, ScopeInterface::SCOPE_STORE);
     }

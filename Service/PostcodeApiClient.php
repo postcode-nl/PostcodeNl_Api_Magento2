@@ -86,7 +86,7 @@ class PostcodeApiClient
      * @param string|null $session
      * @param string $language
      * @return array
-     * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/autocomplete
+     * @see https://developer.postcode.eu/documentation/international/v1/Autocomplete/autocomplete
      */
     public function internationalAutocomplete(
         string $context,
@@ -111,7 +111,7 @@ class PostcodeApiClient
      * @param string $context
      * @param string|null $session
      * @return array
-     * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/getDetails
+     * @see https://developer.postcode.eu/documentation/international/v1/Autocomplete/getDetails
      */
     public function internationalGetDetails(string $context, ?string $session = null): array
     {
@@ -125,7 +125,7 @@ class PostcodeApiClient
      * Get supported countries.
      *
      * @return array
-     * @see https://api.postcode.nl/documentation/international/v1/Autocomplete/getSupportedCountries
+     * @see https://developer.postcode.eu/documentation/international/v1/Autocomplete/getSupportedCountries
      */
     public function internationalGetSupportedCountries(): array
     {
@@ -140,7 +140,7 @@ class PostcodeApiClient
      * @param string|null $houseNumberAddition House number addition, optional
      * @return array
      *
-     * @see https://api.postcode.nl/documentation
+     * @see https://developer.postcode.eu/documentation
      */
     public function dutchAddressByPostcode(
         string $postcode,

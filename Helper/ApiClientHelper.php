@@ -160,12 +160,16 @@ class ApiClientHelper extends AbstractHelper
         $address = null;
         $matches = [];
 
+        if (!preg_match('/^[1-9]\d{3}\s?[a-z]{2}$/i', $zipCode)) {
+            return ['error' => true, 'message' => __('Invalid zip code.')];
+        }
+
         preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
         $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
         $houseNumberAddition = isset($matches[2]) ? trim($matches[2]) : null;
 
         if (null === $houseNumber) {
-            return ['error' => true, 'message_details' => __('Invalid house number.')];
+            return ['error' => true, 'message' => __('Invalid house number.')];
         }
 
         try {
@@ -175,14 +179,14 @@ class ApiClientHelper extends AbstractHelper
             $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
-            if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
-                ||
-                (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
+            if (
+                (strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
+                || (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
             ) {
                 $status = 'houseNumberAdditionIncorrect';
             }
         } catch (NotFoundException $e) {
-            $status = 'notFound';
+            return ['status' => 'notFound', 'address' => null];
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
@@ -221,30 +225,19 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
-        $response = [];
-        $response['error'] = true;
+        $result = ['error' => true, 'message' => __('Something went wrong. Please try again.')];
 
-        // only in this case we actually pass error
-        // to front-end without debug option needed
-        if ($exception instanceof NotFoundException) {
-            $response['message_details'] = __('Combination not found.');
+        if ($this->_storeConfigHelper->isDebugging()) {
+            $result['exception'] = __('Exception %1 occurred.', get_class($exception)) . $exception->getTraceAsString();
+            $result['message'] = __($exception->getMessage());
+            $result['magento_debug_info'] = $this->_getDebugInfo();
+        }
+        else if ($exception instanceof NotFoundException) {
+            // Only in this case we actually pass error to the front-end without debug option needed.
+            $result['message'] = __($exception->getMessage());
         }
 
-        if (!$this->_storeConfigHelper->isDebugging()) {
-            if (empty($response['message_details'])) {
-                $response['message_details'] = __('Something went wrong. Please try again.');
-            }
-
-            return $response;
-        }
-
-        $exceptionClass = get_class($exception);
-        $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass) . $exception->getTraceAsString();
-
-        $response['message_details'] = __($exception->getMessage());
-        $response['magento_debug_info'] = $this->_getDebugInfo();
-
-        return $response;
+        return $result;
     }
 
     /**
