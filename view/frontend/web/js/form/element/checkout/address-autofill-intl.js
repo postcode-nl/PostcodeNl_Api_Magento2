@@ -36,19 +36,19 @@ define([
         },
 
         setInputAddress: function (result) {
-            const addressParts = this.getAddressParts(result.address),
-                streetInputs = this.street().elems();
+            const addressParts = this.getAddressParts(result.address);
+            let streetValues;
 
-            if (streetInputs.length > 2) {
-                streetInputs[0].value(addressParts.street);
-                streetInputs[1].value(addressParts.buildingNumber);
-                streetInputs[2].value(addressParts.buildingNumberAddition);
-            } else if (streetInputs.length > 1) {
-                streetInputs[0].value(addressParts.street);
-                streetInputs[1].value(addressParts.building);
+            if (this.street().initChildCount > 2) {
+                streetValues = [addressParts.street, addressParts.buildingNumber, addressParts.buildingNumberAddition];
+            } else if (this.street().initChildCount > 1) {
+                streetValues = [addressParts.street, addressParts.building];
             } else {
-                streetInputs[0].value(`${addressParts.street} ${addressParts.building}`);
+                streetValues = [addressParts.street + ' ' + addressParts.building];
             }
+
+            // Street children may not yet be available at this point, so value needs to be set asynchronously.
+            streetValues.forEach((v, i) => { Registry.async(`${this.street().name}.${i}`)('value', v); });
 
             this.city().value(addressParts.locality);
             this.postcode().value(addressParts.postcode);
@@ -57,7 +57,7 @@ define([
         resetInputAddress: function () {
             this.city().clear().error(false);
             this.postcode().clear().error(false);
-            this.regionIdInput().clear().error(false);
+            this.regionIdInput()?.clear().error(false);
 
             // Must run last because the checkout data in local storage will not change if the street fields are empty.
             this.street().elems.each((streetInput) => streetInput.clear().error(false));
@@ -70,10 +70,8 @@ define([
 
             switch (this.settings.show_hide_address_fields) {
             case 'disable':
-                let j = 4;
-
-                while (j--) {
-                    Registry.async(`${this.street().name}.${j}`)('disabled', !state);
+                for (let i = 0; i < this.street().initChildCount; i++) {
+                    Registry.async(`${this.street().name}.${i}`)('disabled', !state);
                 }
 
                 this.city((component) => component.disabled(!state));

@@ -28,7 +28,6 @@ define([
                 `${this.parentName}.street`,
                 `${this.parentName}.city`,
                 `${this.parentName}.postcode`,
-                `${this.parentName}.region_id_input`,
             ]);
 
             this.countrySelect((component) => {
@@ -60,29 +59,31 @@ define([
         },
 
         setInputAddress: function (address) {
-            const streetInputs = this.street().elems(),
-                addressParts = this.getAddressParts(address);
+            const addressParts = this.getAddressParts(address);
+            let streetValues;
 
-            if (streetInputs.length > 2) {
-                streetInputs[0].value(addressParts.street);
-                streetInputs[1].value(addressParts.houseNumber);
-                streetInputs[2].value(addressParts.houseNumberAddition);
-            } else if (streetInputs.length > 1) {
-                streetInputs[0].value(addressParts.street);
-                streetInputs[1].value(addressParts.house);
+            if (this.street().initChildCount > 2) {
+                streetValues = [addressParts.street, addressParts.houseNumber, addressParts.houseNumberAddition];
+            } else if (this.street().initChildCount > 1) {
+                streetValues = [addressParts.street, addressParts.house];
             } else {
-                streetInputs[0].value(`${addressParts.street} ${addressParts.house}`);
+                streetValues = [addressParts.street + ' ' + addressParts.house];
             }
+
+            // Street children may not yet be available at this point, so value needs to be set asynchronously.
+            streetValues.forEach((v, i) => { Registry.async(`${this.street().name}.${i}`)('value', v); });
 
             this.city().value(addressParts.city);
             this.postcode().value(addressParts.postcode);
-            this.regionIdInput().value(addressParts.province);
+
+            // Region may not exist, use async.
+            Registry.async(`${this.parentName}.region_id_input`)('value', addressParts.province);
         },
 
         resetInputAddress: function () {
             this.city().clear().error(false);
             this.postcode().clear().error(false);
-            this.regionIdInput().clear().error(false);
+            this.regionIdInput()?.clear().error(false);
             this.street().elems.each((streetInput) => streetInput.clear().error(false));
         },
 
@@ -101,8 +102,8 @@ define([
                     this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
                 }
 
-                for (let j = 0; j < 4; j++) {
-                    Registry.async(`${this.street().name}.${j}`)('disabled', !state);
+                for (let i = 0; i < this.street().initChildCount; i++) {
+                    Registry.async(`${this.street().name}.${i}`)('disabled', !state);
                 }
 
                 break;
