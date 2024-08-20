@@ -21,11 +21,12 @@ define([
             inputs: {
                 street: document.querySelectorAll('.field.street .input-text'),
                 country: document.getElementById('country'),
+                regionId: document.getElementById('region_id'),
                 region: document.getElementById('region'),
                 city: document.getElementById('city'),
                 postcode: document.getElementById('zip'),
                 toArray: function () {
-                    return [...this.street, this.city, this.postcode, this.region];
+                    return [...this.street, this.city, this.postcode, this.regionId, this.region];
                 },
             },
             listens: {
@@ -111,7 +112,12 @@ define([
 
             // Trigger jQuery validator.
             for (const input of this.inputs.toArray()) {
-                this.validatorInstance.element(input);
+                if (input.value === '') {
+                    // Leave empty inputs to be validated later.
+                    this.validatorInstance.resetElements([input]);
+                } else {
+                    this.validatorInstance.element(input);
+                }
             }
 
             // Trigger custom postcode validation (see Magento_Customer/js/addressValidation).

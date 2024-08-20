@@ -60,6 +60,12 @@ define([
 
             this.inputs.city.value = address.locality;
             this.inputs.postcode.value = address.postcode;
+
+            if (this.inputs.regionId.style.display !== 'none') {
+                this.inputs.regionId.value = result.region.id ?? '';
+            } else if (this.inputs.region.style.display !== 'none') {
+                this.inputs.region.value = result.region.name ?? '';
+            }
         },
 
         resetInputAddress: function () {

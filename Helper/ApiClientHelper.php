@@ -7,6 +7,7 @@ use Flekto\Postcode\Helper\StoreConfigHelper;
 use Flekto\Postcode\Service\Exception\NotFoundException;
 use Flekto\Postcode\Service\PostcodeApiClient;
 use Magento\Developer\Helper\Data;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
@@ -32,6 +33,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_countryCodeMap = [];
     protected $_storeConfigHelper;
     protected $_productMetadata;
+    protected $_regionFactory;
 
     /**
      * __construct function.
@@ -46,6 +48,7 @@ class ApiClientHelper extends AbstractHelper
      * @param LocaleResolver $localeResolver
      * @param StoreConfigHelper $storeConfigHelper
      * @param ProductMetadataInterface $productMetadata
+     * @param RegionFactory $regionFactory
      * @return void
      */
     public function __construct(
@@ -57,7 +60,8 @@ class ApiClientHelper extends AbstractHelper
         PostcodeApiClient $client,
         LocaleResolver $localeResolver,
         StoreConfigHelper $storeConfigHelper,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        RegionFactory $regionFactory
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -67,6 +71,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_localeResolver = $localeResolver;
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_productMetadata = $productMetadata;
+        $this->_regionFactory = $regionFactory;
         parent::__construct($context);
     }
 
@@ -123,6 +128,7 @@ class ApiClientHelper extends AbstractHelper
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
+            $response['region'] = $this->_getRegionFromDetails($response);
             $response = $this->_prepareResponse($response, $client);
 
             return $response;
@@ -130,6 +136,52 @@ class ApiClientHelper extends AbstractHelper
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
+    }
+
+    /**
+     * Get region from an address details response.
+     *
+     * @param array $addressDetails
+     * @return array - Region id and name, if found.
+     */
+    public function _getRegionFromDetails(array $addressDetails): array
+    {
+        $countryIso2 = $addressDetails['country']['iso2Code'];
+        switch ($countryIso2)
+        {
+            case 'NL':
+                $region = $addressDetails['details']['nldProvince']['name'];
+            break;
+            case 'BE':
+                if (isset($addressDetails['details']['belProvince'])) {
+                    $region = $addressDetails['details']['belProvince']['primaryName'];
+                } else {
+                    $region = $addressDetails['details']['belRegion']['primaryName'];
+                }
+            break;
+            case 'DE':
+                $region = $addressDetails['details']['deuFederalState']['name'];
+            break;
+            case 'LU':
+                $region = $addressDetails['details']['luxCanton']['name'];
+            break;
+            case 'ES':
+                $region = $addressDetails['details']['espProvince']['name'];
+            break;
+            case 'CH':
+                $region = $addressDetails['details']['cheCanton']['name'];
+            break;
+        }
+
+        if (isset($region)) {
+            $regionFactory = $this->_regionFactory->create()->loadByName($region, $countryIso2);
+            if ($regionFactory->hasData()) {
+                $id = $regionFactory->getId();
+                $name = $regionFactory->getName();
+            }
+        }
+
+        return ['id' => $id ?? null, 'name' => $name ?? $region ?? null];
     }
 
     /**

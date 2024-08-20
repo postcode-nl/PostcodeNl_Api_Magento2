@@ -13,6 +13,7 @@ define([
                 city: '${$.parentName}.city',
                 postcode: '${$.parentName}.postcode',
                 countrySelect: '${$.parentName}.country_id',
+                regionId: '${$.parentName}.region_id',
                 regionIdInput: '${$.parentName}.region_id_input',
             },
             imports: {
@@ -52,6 +53,20 @@ define([
 
             this.city().value(addressParts.locality);
             this.postcode().value(addressParts.postcode);
+
+            if (this.regionId() && this.regionId().visible()) {
+                if (result.region.id) {
+                    this.regionId().value(result.region.id);
+                } else {
+                    this.regionId().reset();
+                }
+            } else if (this.regionIdInput()) {
+                if (result.region.name) {
+                    this.regionIdInput().value(result.region.name);
+                } else {
+                    this.regionIdInput().reset();
+                }
+            }
         },
 
         resetInputAddress: function () {
@@ -74,8 +89,9 @@ define([
                     Registry.async(`${this.street().name}.${i}`)('disabled', !state);
                 }
 
-                this.city((component) => component.disabled(!state));
-                this.postcode((component) => component.disabled(!state));
+                for (const field of ['city', 'postcode', 'regionId', 'regionIdInput']) {
+                    this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
+                }
                 break;
             case 'format':
                 if (!force) {
