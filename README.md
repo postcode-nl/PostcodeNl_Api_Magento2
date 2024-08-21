@@ -55,6 +55,10 @@ Other output options are:
 * Disable address fields until postcode and house number combination is valid.
 * No change; address fields remain visible and editable.
 
+## GraphQL Support
+
+Our module now supports GraphQL, allowing you to query address data via Magento's GraphQL API. This enables integration with headless Magento setups, progressive web applications (PWAs), and other front-end technologies that leverage GraphQL.
+
 ## Compatibility
 
 Although we can't guarantee compatibility with other checkout modules, our module works well with most one-step-checkout modules. If you are having issues and think this may be caused by our module, please [contact Postcode.nl](tech@postcode.nl) and tell us which other module(s) and version(s) are used.
