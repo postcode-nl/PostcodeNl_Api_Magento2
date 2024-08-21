@@ -72,6 +72,7 @@ define([
         resetInputAddress: function () {
             this.city().clear().error(false);
             this.postcode().clear().error(false);
+            this.regionId()?.clear().error(false);
             this.regionIdInput()?.clear().error(false);
 
             // Must run last because the checkout data in local storage will not change if the street fields are empty.
