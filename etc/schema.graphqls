@@ -72,7 +72,7 @@ type IntlAddressDetails {
     language: String! @doc(description: "Language of the matched address, derived from context or falls back to default.")
     address: IntlAddress! @doc(description: "Address information for the contexts address.")
     mailLines: [String]! @doc(description: "List of address lines as they should appear in an address space. The country name is included when a dispatchCountry parameter is provided which does not correspond with the address country.")
-    location: IntlAddressLocation! @doc(description: "WGS-84 coordinates for the address if available, null otherwise.")
+    location: IntlAddressLocation @doc(description: "WGS-84 coordinates for the address if available, null otherwise.")
     isPoBox: Boolean! @doc(description: "Indicates if the address is a Post Office box.")
     country: IntlAddressCountry! @doc(description: "Country information.")
 }
