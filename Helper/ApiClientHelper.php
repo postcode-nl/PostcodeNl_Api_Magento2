@@ -144,7 +144,7 @@ class ApiClientHelper extends AbstractHelper
      * @param array $addressDetails
      * @return array - Region id and name, if found.
      */
-    public function _getRegionFromDetails(array $addressDetails): array
+    protected function _getRegionFromDetails(array $addressDetails): array
     {
         $countryIso2 = $addressDetails['country']['iso2Code'];
         switch ($countryIso2)
@@ -167,6 +167,7 @@ class ApiClientHelper extends AbstractHelper
             break;
             case 'ES':
                 $region = $addressDetails['details']['espProvince']['name'];
+                $regions = explode('/', $region);
             break;
             case 'CH':
                 $region = $addressDetails['details']['cheCanton']['name'];
@@ -174,14 +175,33 @@ class ApiClientHelper extends AbstractHelper
         }
 
         if (isset($region)) {
-            $regionFactory = $this->_regionFactory->create()->loadByName($region, $countryIso2);
-            if ($regionFactory->hasData()) {
-                $id = $regionFactory->getId();
-                $name = $regionFactory->getName();
+            foreach ($regions ?? [$region] as $r) { // Use $regions array to try alternative names.
+                ['id' => $id, 'name' => $name] = $this->_getRegionByName($r, $countryIso2);
+                if (isset($id)) {
+                    break;
+                }
             }
         }
 
         return ['id' => $id ?? null, 'name' => $name ?? $region ?? null];
+    }
+
+    /**
+     * Get region by name.
+     *
+     * @param string $name
+     * @param string $countryIso2
+     * @return array - Region id and name, if found.
+     */
+    protected function _getRegionByName(string $name, string $countryIso2): array
+    {
+        $regionFactory = $this->_regionFactory->create()->loadByName($name, $countryIso2);
+        if ($regionFactory->hasData()) {
+            $id = $regionFactory->getId();
+            $name = $regionFactory->getName();
+        }
+
+        return ['id' => $id ?? null, 'name' => $name ?? null];
     }
 
     /**
