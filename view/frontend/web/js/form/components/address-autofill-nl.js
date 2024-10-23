@@ -132,7 +132,7 @@ define([
                 dataType: 'json',
                 success: (response) => {
                     if (response[0].error) {
-                        return this.childHouseNumber().error(response[0].message_details);
+                        return this.childHouseNumber().error(response[0].message);
                     }
 
                     this.status(response[0].status);

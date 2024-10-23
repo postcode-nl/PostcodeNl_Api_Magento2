@@ -1,0 +1,109 @@
+type Query {
+    dutchAddress(
+        postcode: String! @doc(description: "Dutch postcode in the \"1234AB\" format.")
+        houseNumber: String! @doc(description: "House number. May include an addition.")
+    ): DutchAddressResult! @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\DutchAddress") @doc(description: "Get an address based on its unique combination of postcode, house number and house number addition.")
+    intlAddressMatches(
+        context: String! = "NL" @doc(description: "Initial autocomplete context. E.g. a country code to start searching in that country. The country code is not case sensitive and can be two or three characters. In subsequent requests, the context should be set to the context of the selected match.")
+        term: String! @doc(description: "The address search term. May be a complete or partial address. When a user selects a match, use the exact and unmodified \"value\" field of the selected match for the term parameter. In subsequent requests, the term should be set to the value of the selected match.")
+    ): IntlAddressMatches! @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\IntlAddress\\Matches") @doc(description: "Get a list of autocomplete matches based on a single (partial) address term. Depending on the input different types of matches may be returned, such as streets, postal codes or a specific address. Required session header: Both the autocomplete and getDetails methods require a custom HTTP header named X-Autocomplete-Session to be specified. Its value should identify a single address completion session (for example, a user filling out one checkout address) and remain the same for calls to both methods. The session header should be at least 8 characters and at most 64 characters long. The value must only contain alphanumeric characters (case insensitive), \"-\", \"_\" and/or \".\". Reusing the same session identifier for completing more than one address is not recommended as it may lead to increased costs for your account.")
+    intlAddressDetails(
+        context: String! @doc(description: "Context with precision address to get detailed address information.")
+    ): IntlAddressDetails! @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\IntlAddress\\Details") @doc(description: "Get address information based on the provided autocomplete context. The context must have the precision `address`. A HTTP status 400 response is given when the provided context does not resolve to a single address. This method is intended to provide address information using the result context from the autocomplete method. The result of this method can be used to complete an address in an order form for example. A session header is required, see IntlAddressMatches for details.")
+    addressApiSettings: AddressApiSettings! @doc(description: "Settings for the Postcode.eu Address API.") @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\AddressApiSettings")
+}
+
+type DutchAddressResult {
+    address: DutchAddress @doc(description: "A Dutch address. Make sure to check the status field to see if the address was found and if the house number addition is correct.")
+    status: String! @doc(description: "The status of the address lookup. \"valid\" if found, \"houseNumberAdditionIncorrect\" for an invalid house number addition, \"notFound\" if the address cannot be found.")
+}
+
+type DutchAddress {
+    street: String! @doc(description: "Street name in accordance with the BAG Registry (Dutch: BAG - Basisregistratie Adressen en Gebouwen). In capital and lowercase letters, including punctuation marks and accents. This field is at most 80 characters in length. Filled with \"Postbus\" in case it is a range of PO boxes.")
+    streetNen: String! @doc(description: "Street name in NEN-5825 notation, which has a lower maximum length. In capital and lowercase letters, including punctuation marks and accents. This field is at most 24 characters in length. Filled with \"Postbus\" in case it is a range of PO boxes.")
+    houseNumber: Int! @doc(description: "House number of a perceel. In case of a Postbus match the house number will always be 0. Range: 0-99999")
+    houseNumberAddition: String @doc(description: "Addition of the house number to uniquely define a location. These additions are officially recognized by the municipality. This field is at most 6 characters in length and null if the given addition was not found (see houseNumberAdditions result field). The addition \"\" is returned for an address without an addition.")
+    postcode: String! @doc(description: "Four digit neighborhood code (first part of a postcode). Range: 1000-9999 plus two character letter combination (second part of a postcode). Range: \"AA\"-\"ZZ\"")
+    city: String! @doc(description: "Official city name in accordance with the BAG Registry (Dutch: BAG - Basisregistratie Adressen en Gebouwen). In capital and lowercase letters, including punctuation marks and accents. This field is at most 80 characters in length.")
+    cityShort: String! @doc(description: "City name, shortened to fit a lower maximum length. In capital and lowercase letters, including punctuation marks and accents. This field is at most 24 characters in length.")
+    cityId: String! @doc(description: "Unique identifier for the city (Dutch: \"woonplaatscode\") as defined by the BAG Registry (Dutch: BAG - Basisregistratie Adressen en Gebouwen). Range \"0000\"-\"9999\"")
+    municipality: String! @doc(description: "Municipality name in accordance with the BAG Registry (Dutch: BAG - Basisregistratie Adressen en Gebouwen). In capital and lowercase letters, including punctuation marks and accents. This field is at most 80 characters in length. Examples: \"Baarle-Nassau\", \"'s-Gravenhage\", \"Haarlemmerliede en Spaarnwoude\".")
+    municipalityShort: String! @doc(description: "Municipality name, shortened to fit a lower maximum length. In capital and lowercase letters, including punctuation marks and accents. This field is at most 24 characters in length. Examples: \"Baarle-Nassau\", \"'s-Gravenhage\", \"Haarlemmerliede c.a.\".")
+    municipalityId: String! @doc(description: "Unique identifier for the municipality (Dutch: \"gemeentecode\") as defined by the National Office for Identity Data (Dutch: Rijksdienst voor Indentiteitsgegevens (RvIG)). Range \"0000\"-\"9999\"")
+    province: String! @doc(description: "Official name of the province, correctly cased and with dashes where applicable.")
+    rdX: Int @doc(description: "X coordinate according to Dutch Coordinate system \"(EPSG) 28992 Amersfoort / RD New\" (Dutch: Rijksdriehoeksmeting). Values range from 0 to 300000 meters. Null for PO Boxes.")
+    rdY: Int @doc(description: "Y coordinate according to Dutch Coordinate system \"(EPSG) 28992 Amersfoort / RD New\" (Dutch: Rijksdriehoeksmeting). Values range from 300000 to 620000 meters. Null for PO Boxes.")
+    latitude: Float @doc(description: "Latitude of address. Null for PO Boxes.")
+    longitude: Float @doc(description: "Longitude of address. Null for PO Boxes.")
+    bagNumberDesignationId: String @doc(description: "Unique identifier for address designation. (Dutch: Nummeraanduiding ID)")
+    bagAddressableObjectId: String @doc(description: "Unique identifier for addressable object designation (Dutch: Adresseerbaar object ID). If null no active object is currently registered.")
+    addressType: String! @doc(description: "Type of this address. See reference for possible values.")
+    purposes: [String] @doc(description: "List of all purposes (Dutch: gebruiksdoelen). Null or an array of text values. See reference for possible values.")
+    surfaceArea: Int @doc(description: "Surface in square meters. Null for PO Boxes.")
+    houseNumberAdditions: [DutchHouseNumberAddition]! @doc(description: "List of all house number additions having the postcode and houseNumber which was input. The addition \"\" is returned for an address without an addition.")
+}
+
+type DutchHouseNumberAddition {
+    label: String! @doc(description: "House number and addition.")
+    value: String! @doc(description: "House number and addition.")
+    houseNumberAddition: String! @doc(description: "Just the house number addition.")
+}
+
+type IntlAddressMatches {
+    newContext: String @doc(description: "New context that is required for further autocomplete requests. Null if no context update is required.")
+    matches: [IntlAddressMatch]! @doc(description: "List of matches for the specified context and term.")
+}
+
+type IntlAddressMatch {
+    value: String! @doc(description: "The value represents all matched address information. If the user selects this match the current term input must be replaced with this value. ")
+    label: String! @doc(description: "Label describing this match. For example, a street or municipality name.")
+    description: String! @doc(description: "Additional information relevant to this match, helps with disambiguation between similar labels. For example, a postal code associated with a matched street.")
+    precision: String! @doc(description: "Match precision, used to know what type of address information is available. E.g. \"Locality\", \"PostalCode\", \"Street\", \"PartialAddress\", \"Address\".")
+    context: String! @doc(description: "If the user selects this match, use this as the context parameter in subsequent autocomplete call. Contexts may expire and should not be stored.")
+    highlights: [IntlAddressMatchHighlight]! @doc(description: "List of [start, end] character offsets to highlight in the label in order to indicate what was matched.")
+}
+
+type IntlAddressMatchHighlight {
+    start: Int @doc(description: "Highlight start position.")
+    end: Int @doc(description: "Highlight end position.")
+}
+
+type IntlAddressDetails {
+    language: String! @doc(description: "Language of the matched address, derived from context or falls back to default.")
+    address: IntlAddress! @doc(description: "Address information for the contexts address.")
+    mailLines: [String]! @doc(description: "List of address lines as they should appear in an address space. The country name is included when a dispatchCountry parameter is provided which does not correspond with the address country.")
+    location: IntlAddressLocation @doc(description: "WGS-84 coordinates for the address if available, null otherwise.")
+    isPoBox: Boolean! @doc(description: "Indicates if the address is a Post Office box.")
+    country: IntlAddressCountry! @doc(description: "Country information.")
+}
+
+type IntlAddress {
+    country: String! @doc(description: "Country name of the of postal address in English.")
+    locality: String! @doc(description: "Name of primary locality used in postal address.")
+    street: String! @doc(description: "Name of primary street used in postal address.")
+    postcode: String! @doc(description: "Postcode used in postal address.")
+    building: String! @doc(description: "Number and possible addition of the building in the postal address.")
+    buildingNumber: Int @doc(description: "Building number of the postal address. Or null if not available.")
+    buildingNumberAddition: String @doc(description: "Building number addition of the postal address, if available.")
+}
+
+type IntlAddressLocation {
+    latitude: Float! @doc(description: "Latitude coordinate.")
+    longitude: Float! @doc(description: "Longitude coordinate.")
+    precision: String! @doc(description: "Precision of location. One of \"Address\", \"Street\", \"PostalCode\", \"Locality\".")
+}
+
+type IntlAddressCountry {
+    name: String! @doc(description: "The country name.")
+    iso3Code: String! @doc(description: "The ISO 3166-1 Alpha-3 code for the country.")
+}
+
+type AddressApiSettings {
+    enabled_countries: [String]! @doc(description: "List of ISO2 codes of countries currently supported by the autocomplete API, excluding disabled countries.")
+    nl_input_behavior: String! @doc(description: "How to handle Dutch address. With \"zip_house\", use postcode and house number fields and the Dutch address API. With \"free\" use a single field and the international autocomplete API.")
+    show_hide_address_fields: String! @doc(description: "How to handle the standard address fields. E.g. show, hide or disable. The default is to keep fields hidden and show a formatted address instead.")
+    base_url: String! @doc(description: "Base URL for the current store.")
+    debug: Boolean! @doc(description: "Whether debugging is enabled or not.")
+    fixedCountry: String @doc(description: "Get fixed country (ISO2) if there's only one allowed country.")
+    change_fields_position: Boolean! @doc(description: "If true, address fields should be rearranged so that country selection comes before the autocomplete fields.")
+}

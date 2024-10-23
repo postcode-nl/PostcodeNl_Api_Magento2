@@ -7,6 +7,7 @@ use Flekto\Postcode\Helper\StoreConfigHelper;
 use Flekto\Postcode\Service\Exception\NotFoundException;
 use Flekto\Postcode\Service\PostcodeApiClient;
 use Magento\Developer\Helper\Data;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
@@ -32,6 +33,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_countryCodeMap = [];
     protected $_storeConfigHelper;
     protected $_productMetadata;
+    protected $_regionFactory;
 
     /**
      * __construct function.
@@ -46,6 +48,7 @@ class ApiClientHelper extends AbstractHelper
      * @param LocaleResolver $localeResolver
      * @param StoreConfigHelper $storeConfigHelper
      * @param ProductMetadataInterface $productMetadata
+     * @param RegionFactory $regionFactory
      * @return void
      */
     public function __construct(
@@ -57,7 +60,8 @@ class ApiClientHelper extends AbstractHelper
         PostcodeApiClient $client,
         LocaleResolver $localeResolver,
         StoreConfigHelper $storeConfigHelper,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        RegionFactory $regionFactory
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -67,6 +71,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_localeResolver = $localeResolver;
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_productMetadata = $productMetadata;
+        $this->_regionFactory = $regionFactory;
         parent::__construct($context);
     }
 
@@ -123,6 +128,7 @@ class ApiClientHelper extends AbstractHelper
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
+            $response['region'] = $this->_getRegionFromDetails($response);
             $response = $this->_prepareResponse($response, $client);
 
             return $response;
@@ -130,6 +136,71 @@ class ApiClientHelper extends AbstractHelper
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
+    }
+
+    /**
+     * Get region from an address details response.
+     *
+     * @param array $addressDetails
+     * @return array - Region id and name, if found.
+     */
+    protected function _getRegionFromDetails(array $addressDetails): array
+    {
+        $countryIso2 = $addressDetails['country']['iso2Code'];
+        switch ($countryIso2) {
+            case 'NL':
+                $region = $addressDetails['details']['nldProvince']['name'];
+                break;
+            case 'BE':
+                if (isset($addressDetails['details']['belProvince'])) {
+                    $region = $addressDetails['details']['belProvince']['primaryName'];
+                } else {
+                    $region = $addressDetails['details']['belRegion']['primaryName'];
+                }
+                break;
+            case 'DE':
+                $region = $addressDetails['details']['deuFederalState']['name'];
+                break;
+            case 'LU':
+                $region = $addressDetails['details']['luxCanton']['name'];
+                break;
+            case 'ES':
+                $region = $addressDetails['details']['espProvince']['name'];
+                $regions = explode('/', $region);
+                break;
+            case 'CH':
+                $region = $addressDetails['details']['cheCanton']['name'];
+                break;
+        }
+
+        if (isset($region)) {
+            foreach ($regions ?? [$region] as $r) { // Use $regions array to try alternative names.
+                ['id' => $id, 'name' => $name] = $this->_getRegionByName($r, $countryIso2);
+                if (isset($id)) {
+                    break;
+                }
+            }
+        }
+
+        return ['id' => $id ?? null, 'name' => $name ?? $region ?? null];
+    }
+
+    /**
+     * Get region by name.
+     *
+     * @param string $name
+     * @param string $countryIso2
+     * @return array - Region id and name, if found.
+     */
+    protected function _getRegionByName(string $name, string $countryIso2): array
+    {
+        $regionFactory = $this->_regionFactory->create()->loadByName($name, $countryIso2);
+        if ($regionFactory->hasData()) {
+            $id = $regionFactory->getId();
+            $name = $regionFactory->getName();
+        }
+
+        return ['id' => $id ?? null, 'name' => $name ?? null];
     }
 
     /**
@@ -160,12 +231,16 @@ class ApiClientHelper extends AbstractHelper
         $address = null;
         $matches = [];
 
+        if (!preg_match('/^[1-9]\d{3}\s?[a-z]{2}$/i', $zipCode)) {
+            return ['error' => true, 'message' => __('Invalid zip code.')];
+        }
+
         preg_match('/^(\d{1,5})(\D.*)?$/i', $houseNumber, $matches);
         $houseNumber = isset($matches[1]) ? (int)$matches[1] : null;
         $houseNumberAddition = isset($matches[2]) ? trim($matches[2]) : null;
 
         if (null === $houseNumber) {
-            return ['error' => true, 'message_details' => __('Invalid house number.')];
+            return ['error' => true, 'message' => __('Invalid house number.')];
         }
 
         try {
@@ -176,13 +251,12 @@ class ApiClientHelper extends AbstractHelper
             $status = 'valid';
 
             if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
-                ||
-                (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
+                || (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
             ) {
                 $status = 'houseNumberAdditionIncorrect';
             }
         } catch (NotFoundException $e) {
-            $status = 'notFound';
+            return ['status' => 'notFound', 'address' => null];
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
@@ -221,30 +295,18 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
-        $response = [];
-        $response['error'] = true;
+        $result = ['error' => true, 'message' => __('Something went wrong. Please try again.')];
 
-        // only in this case we actually pass error
-        // to front-end without debug option needed
-        if ($exception instanceof NotFoundException) {
-            $response['message_details'] = __('Combination not found.');
+        if ($this->_storeConfigHelper->isDebugging()) {
+            $result['exception'] = __('Exception %1 occurred.', get_class($exception)) . $exception->getTraceAsString();
+            $result['message'] = __($exception->getMessage());
+            $result['magento_debug_info'] = $this->_getDebugInfo();
+        } elseif ($exception instanceof NotFoundException) {
+            // Only in this case we actually pass error to the front-end without debug option needed.
+            $result['message'] = __($exception->getMessage());
         }
 
-        if (!$this->_storeConfigHelper->isDebugging()) {
-            if (empty($response['message_details'])) {
-                $response['message_details'] = __('Something went wrong. Please try again.');
-            }
-
-            return $response;
-        }
-
-        $exceptionClass = get_class($exception);
-        $response['message'] = sprintf(__('Exception %s occurred'), $exceptionClass) . $exception->getTraceAsString();
-
-        $response['message_details'] = __($exception->getMessage());
-        $response['magento_debug_info'] = $this->_getDebugInfo();
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -321,8 +383,7 @@ class ApiClientHelper extends AbstractHelper
     {
         try {
             return $this->getApiClient()->accountInfo();
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }
