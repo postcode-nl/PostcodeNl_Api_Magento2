@@ -33,8 +33,7 @@ class AddressApiSettings implements ResolverInterface
         ResolveInfo $info,
         array $value = null,
         array $args = null
-    ): array
-    {
+    ): array {
         return $this->_storeConfigHelper->getJsinit();
     }
 }

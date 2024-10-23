@@ -147,31 +147,30 @@ class ApiClientHelper extends AbstractHelper
     protected function _getRegionFromDetails(array $addressDetails): array
     {
         $countryIso2 = $addressDetails['country']['iso2Code'];
-        switch ($countryIso2)
-        {
+        switch ($countryIso2) {
             case 'NL':
                 $region = $addressDetails['details']['nldProvince']['name'];
-            break;
+                break;
             case 'BE':
                 if (isset($addressDetails['details']['belProvince'])) {
                     $region = $addressDetails['details']['belProvince']['primaryName'];
                 } else {
                     $region = $addressDetails['details']['belRegion']['primaryName'];
                 }
-            break;
+                break;
             case 'DE':
                 $region = $addressDetails['details']['deuFederalState']['name'];
-            break;
+                break;
             case 'LU':
                 $region = $addressDetails['details']['luxCanton']['name'];
-            break;
+                break;
             case 'ES':
                 $region = $addressDetails['details']['espProvince']['name'];
                 $regions = explode('/', $region);
-            break;
+                break;
             case 'CH':
                 $region = $addressDetails['details']['cheCanton']['name'];
-            break;
+                break;
         }
 
         if (isset($region)) {
@@ -251,8 +250,7 @@ class ApiClientHelper extends AbstractHelper
             $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
-            if (
-                (strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
+            if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
                 || (!empty($address['houseNumberAdditions']) && null === $address['houseNumberAddition'])
             ) {
                 $status = 'houseNumberAdditionIncorrect';
@@ -303,8 +301,7 @@ class ApiClientHelper extends AbstractHelper
             $result['exception'] = __('Exception %1 occurred.', get_class($exception)) . $exception->getTraceAsString();
             $result['message'] = __($exception->getMessage());
             $result['magento_debug_info'] = $this->_getDebugInfo();
-        }
-        else if ($exception instanceof NotFoundException) {
+        } elseif ($exception instanceof NotFoundException) {
             // Only in this case we actually pass error to the front-end without debug option needed.
             $result['message'] = __($exception->getMessage());
         }
@@ -386,8 +383,7 @@ class ApiClientHelper extends AbstractHelper
     {
         try {
             return $this->getApiClient()->accountInfo();
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }

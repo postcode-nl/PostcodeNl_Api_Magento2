@@ -20,8 +20,7 @@ class Details extends IntlAddress implements ResolverInterface
         ResolveInfo $info,
         array $value = null,
         array $args = null
-    ): array
-    {
+    ): array {
         $this->requireSessionHeader();
 
         $result = $this->_apiClientHelper->getAddressDetails($args['context']);

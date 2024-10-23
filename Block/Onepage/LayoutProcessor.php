@@ -76,8 +76,9 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 'payment', 'children',
                 'payments-list', 'children',
             ]);
+        } catch (LocalizedException $e) {
+
         }
-        catch (LocalizedException $e) { }
 
         if (isset($billingConfiguration)) {
             foreach ($billingConfiguration as $key => &$billingForm) {
@@ -109,8 +110,9 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 'billing-address-form', 'children',
                 'form-fields', 'children',
             ]);
+        } catch (LocalizedException $e) {
+
         }
-        catch (LocalizedException $e) { }
 
         if (isset($billingFields)) {
             $billingFields += $this->_updateCustomScope($autofillFields, 'billingAddressshared');
@@ -128,8 +130,9 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 'billingAddress', 'children',
                 'billing-address-fieldset', 'children',
             ]);
+        } catch (LocalizedException $e) {
+
         }
-        catch (LocalizedException $e) { }
 
         if (isset($magePlazaBillingFields)) {
             $magePlazaBillingFields += $this->_updateCustomScope($autofillFields, 'billingAddress');

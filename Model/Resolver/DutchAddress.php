@@ -34,8 +34,7 @@ class DutchAddress implements ResolverInterface
         ResolveInfo $info,
         array $value = null,
         array $args = null
-    ): array
-    {
+    ): array {
         $result = $this->_apiClientHelper->getNlAddress($args['postcode'], $args['houseNumber']);
         if (!empty($result['error'])) {
             throw new GraphQlInputException(__($result['message'] ?? 'Unknown error'));
