@@ -116,8 +116,12 @@ define([
         },
 
         getAddress: function () {
-            const postcode = AddressNlModel.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, ''),
-                houseNumber = AddressNlModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim(),
+            const postcode = encodeURIComponent(
+                    AddressNlModel.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, '')
+                ),
+                houseNumber = encodeURIComponent(
+                    AddressNlModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim()
+                ),
                 url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
             this.resetInputAddress();
