@@ -47,17 +47,7 @@ define([
         setInputAddress: function (result) {
             const address = this.getAddressParts(result.address);
 
-            if (this.inputs.street.length > 2) {
-                this.inputs.street[0].value = address.street;
-                this.inputs.street[1].value = address.buildingNumber;
-                this.inputs.street[2].value = address.buildingNumberAddition;
-            } else if (this.inputs.street.length > 1) {
-                this.inputs.street[0].value = address.street;
-                this.inputs.street[1].value = address.building;
-            } else {
-                this.inputs.street[0].value = address.street + ' ' + address.building;
-            }
-
+            this.inputs.street[0].value = address.street + ' ' + address.building;
             this.inputs.city.value = address.locality;
             this.inputs.postcode.value = address.postcode;
 

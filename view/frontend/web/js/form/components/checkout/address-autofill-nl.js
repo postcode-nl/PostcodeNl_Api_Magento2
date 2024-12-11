@@ -14,6 +14,9 @@ define([
                 regionIdInput: '${$.parentName}.region_id_input',
                 countrySelect: '${$.parentName}.country_id',
             },
+            imports: {
+                settings: '${ $.provider }:postcodeEuConfig',
+            },
             statefull: {
                 address: true,
                 status: true,
@@ -60,18 +63,13 @@ define([
 
         setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
-            let streetValues;
-
-            if (this.street().initChildCount > 2) {
-                streetValues = [addressParts.street, addressParts.houseNumber, addressParts.houseNumberAddition];
-            } else if (this.street().initChildCount > 1) {
-                streetValues = [addressParts.street, addressParts.house];
-            } else {
-                streetValues = [addressParts.street + ' ' + addressParts.house];
-            }
 
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
-            streetValues.forEach((v, i) => { Registry.async(`${this.street().name}.${i}`)('value', v); });
+            this.street().asyncSetValues(
+                addressParts.street,
+                addressParts.houseNumber,
+                addressParts.houseNumberAddition
+            );
 
             this.city().value(addressParts.city);
             this.postcode().value(addressParts.postcode);
@@ -84,7 +82,7 @@ define([
             this.city().clear().error(false);
             this.postcode().clear().error(false);
             this.regionIdInput()?.clear().error(false);
-            this.street().elems.each((streetInput) => streetInput.clear().error(false));
+            this.street().clearFields().clearErrors();
         },
 
         toggleFields: function (state) {
@@ -98,14 +96,11 @@ define([
 
             switch (this.settings.show_hide_address_fields) {
             case 'disable':
+                this.street().asyncDelegate('disabled', !state);
+
                 for (const field of ['city', 'postcode', 'regionIdInput']) {
                     this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
                 }
-
-                for (let i = 0; i < this.street().initChildCount; i++) {
-                    Registry.async(`${this.street().name}.${i}`)('disabled', !state);
-                }
-
                 break;
             case 'format':
                 if (!this.street().visible()) {

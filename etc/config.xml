@@ -3,7 +3,7 @@
     <default>
         <postcodenl_api>
             <status>
-                <module_version>3.4.0</module_version>
+                <module_version>3.5.0</module_version>
                 <account_status>new</account_status>
             </status>
             <general>
@@ -12,6 +12,7 @@
             </general>
             <advanced_config>
                 <allow_pobox_shipping>1</allow_pobox_shipping>
+                <split_street_values>0</split_street_values>
             </advanced_config>
         </postcodenl_api>
     </default>

@@ -445,13 +445,13 @@ class ApiClientHelper extends AbstractHelper
             'configuration' => [
                 'key' => $credentials['key'],
                 'secret' => substr_replace($credentials['secret'], '***', 3, -3),
-                'debug' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_debug']),
+                'debug' => $this->_storeConfigHelper->getValue('api_debug'),
             ],
             'modules' => $this->_getMagentoModules(),
         ];
 
         // Module version
-        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['module_version']);
+        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue('module_version');
 
         // Magento version
         $version = $this->_productMetadata->getVersion();
