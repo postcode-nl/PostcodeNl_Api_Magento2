@@ -38,17 +38,11 @@ define([
         },
 
         setInputAddress: function (result) {
-            const addressParts = this.getAddressParts(result.address);
-
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
-            this.street().asyncSetValues(
-                addressParts.street,
-                addressParts.buildingNumber,
-                addressParts.buildingNumberAddition
-            );
+            this.street().asyncSetValues(...result.streetLines);
 
-            this.city().value(addressParts.locality);
-            this.postcode().value(addressParts.postcode);
+            this.city().value(result.address.locality);
+            this.postcode().value(result.address.postcode);
 
             if (this.regionId() && this.regionId().visible()) {
                 if (result.region.id) {

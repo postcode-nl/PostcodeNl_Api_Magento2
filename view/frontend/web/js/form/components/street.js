@@ -6,7 +6,6 @@ define([
 
     return Group.extend({
         defaults: {
-            splitValues: false,
             imports: {
                 settings: '${ $.provider }:postcodeEuConfig',
             },
@@ -29,7 +28,7 @@ define([
         },
 
         asyncSetValues: function (...args) {
-            const lastChildIndex = this.settings.split_street_values ? this.initChildCount - 1 : 0,
+            const lastChildIndex = this.initChildCount - 1,
                values = args.slice(0, lastChildIndex);
 
             // Join remaining args for last or single child.

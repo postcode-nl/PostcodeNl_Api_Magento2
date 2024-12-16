@@ -11,6 +11,7 @@ define([
                 countryCode: '${$.parentName}:countryCode',
                 isCountryChanged: '${$.parentName}:isCountryChanged',
                 onChangeCountry: '${$.parentName}:countryCode',
+                settings: '${$.parentName}:settings',
             },
         },
 

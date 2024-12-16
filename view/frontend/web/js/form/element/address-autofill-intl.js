@@ -98,19 +98,5 @@ define([
             return true;
         },
 
-        getAddressParts: function (address) {
-            const buildingNumber = `${address.buildingNumber || ''}`,
-                buildingNumberAddition = `${address.buildingNumberAddition || ''}`;
-
-            return {
-                street: address.street,
-                building: `${buildingNumber} ${buildingNumberAddition}`.trim(),
-                buildingNumber: buildingNumber,
-                buildingNumberAddition: buildingNumberAddition,
-                locality: address.locality,
-                postcode: address.postcode,
-            };
-        },
-
     });
 });

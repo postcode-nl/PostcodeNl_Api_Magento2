@@ -13,6 +13,7 @@ define([
                 countryCode: '${$.parentName}:countryCode',
                 isCountryChanged: '${$.parentName}:isCountryChanged',
                 onChangeCountry: '${$.parentName}:countryCode',
+                settings: '${$.parentName}:settings',
             },
 
             searchInitialValue: true,
@@ -45,11 +46,12 @@ define([
         },
 
         setInputAddress: function (result) {
-            const address = this.getAddressParts(result.address);
+            for (let i = 0; i < result.streetLines.length; i++) {
+                this.inputs.street[i].value = result.streetLines[i];
+            }
 
-            this.inputs.street[0].value = address.street + ' ' + address.building;
-            this.inputs.city.value = address.locality;
-            this.inputs.postcode.value = address.postcode;
+            this.inputs.city.value = result.address.locality;
+            this.inputs.postcode.value = result.address.postcode;
 
             if (this.inputs.regionId.style.display !== 'none') {
                 this.inputs.regionId.value = result.region.id ?? '';

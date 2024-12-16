@@ -182,17 +182,10 @@ define([
         },
 
         getAddressParts: function (address) {
-            const houseNumber = `${address.houseNumber || ''}`,
-                houseNumberAddition = `${address.houseNumberAddition || ''}`.trim();
-
             return {
-                street: address.street,
-                house: `${houseNumber} ${houseNumberAddition}`.trim(),
-                houseNumber: houseNumber,
-                houseNumberAddition: houseNumberAddition,
-                postcode: address.postcode,
-                city: address.city,
-                province: address.province,
+                ...address,
+                houseNumberAddition: address.houseNumberAddition ?? '',
+                house: `${address.houseNumber} ${address.houseNumberAddition ?? ''}`.trim(),
             };
         },
 
