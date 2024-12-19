@@ -5,12 +5,6 @@ define([
     'use strict';
 
     return Group.extend({
-        defaults: {
-            imports: {
-                settings: '${ $.provider }:postcodeEuConfig',
-            },
-        },
-
         clearFields: function () {
             this.delegate('clear');
             return this;
