@@ -25,13 +25,14 @@ define([
             this.visible(this.isEnabledCountry(this.countryCode));
             this.toggleFields(!this.visible());
 
-            if (this.value() === '') {
+            if (this.visible() && this.value() === '') {
                 const postcode = this.inputs.postcode.value,
                     city = this.inputs.city.value,
                     streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
                     prefilledAddressValue = `${postcode} ${city} ${streetAddress}`.trim();
 
                 if (prefilledAddressValue !== '') {
+                    this.resetInputAddress();
                     this.value(prefilledAddressValue);
                 }
             }

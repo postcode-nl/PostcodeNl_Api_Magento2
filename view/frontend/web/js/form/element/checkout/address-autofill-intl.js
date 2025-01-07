@@ -38,20 +38,35 @@ define([
         },
 
         setInputAddress: function (result) {
+            let streetLines = result.streetLines;
+
+            // Result could be an old address from localStorage, without streetLines.
+            if (typeof streetLines === 'undefined') {
+                streetLines = [
+                    result.address.street,
+                    result.address.buildingNumber,
+                    result.address.buildingNumberAddition,
+                ];
+
+                if (!this.settings.split_street_values) {
+                    streetLines = [streetLines.join(' ')];
+                }
+            }
+
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
-            this.street().asyncSetValues(...result.streetLines);
+            this.street().asyncSetValues(...streetLines);
 
             this.city().value(result.address.locality);
             this.postcode().value(result.address.postcode);
 
             if (this.regionId() && this.regionId().visible()) {
-                if (result.region.id) {
+                if (result.region?.id) {
                     this.regionId().value(result.region.id);
                 } else {
                     this.regionId().reset();
                 }
             } else if (this.regionIdInput()) {
-                if (result.region.name) {
+                if (result.region?.name) {
                     this.regionIdInput().value(result.region.name);
                 } else {
                     this.regionIdInput().reset();
