@@ -21,9 +21,12 @@
                                                             <item name="children" xsi:type="array">
                                                                 <item name="address_autofill_nl" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/checkout/address-autofill-nl</item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="deps" xsi:type="array">
+                                                                        <item name="0" xsi:type="string">checkoutProvider</item>
+                                                                    </item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
-                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                     </item>
                                                                     <item name="sortOrder" xsi:type="number">65</item>
                                                                     <item name="children" xsi:type="array">
@@ -61,10 +64,12 @@
                                                                     <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/checkout/address-autofill-intl</item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
-                                                                        <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                                                         <item name="customScope" xsi:type="string">shippingAddress</item>
                                                                     </item>
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="deps" xsi:type="array">
+                                                                        <item name="0" xsi:type="string">checkoutProvider</item>
+                                                                    </item>
                                                                     <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>
                                                                     <item name="sortOrder" xsi:type="string">66</item>
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_intl</item>

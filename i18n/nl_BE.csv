@@ -49,3 +49,5 @@
 "PO box shipping","Postbus verzending"
 "Allow shipping to PO boxes.","Verzenden naar postbussen toestaan."
 "Sorry, we cannot ship to a PO Box address.","Sorry, we versturen niet naar een postbus adres."
+"Split street address values","Straatadreswaarden splitsen"
+"Distribute street address values to available street fields.","Verdeel de straatadreswaarden over de beschikbare straatvelden."

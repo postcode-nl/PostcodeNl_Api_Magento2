@@ -96,7 +96,7 @@ class PostcodeApiClient
     ): array {
         return $this->_fetch(
             sprintf(
-                'international/v1/autocomplete/%s/%s/%s',
+                'international/v1/autocomplete/%s/%s/%s/paged',
                 rawurlencode($context),
                 rawurlencode($term),
                 rawurlencode($language)

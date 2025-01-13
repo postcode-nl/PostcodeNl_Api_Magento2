@@ -8,7 +8,7 @@
  * https://www.tldrlegal.com/license/apple-mit-license-aml
  *
  * @author Postcode.nl
- * @version 1.4.0
+ * @version 1.4.1
  */
 
 (function (global, factory) {
@@ -31,7 +31,7 @@
 	const document = window.document,
 		$ = function (selector) { return document.querySelectorAll(selector); },
 		elementData = new WeakMap(),
-		VERSION = '1.4.0',
+		VERSION = '1.4.1',
 		EVENT_NAMESPACE = 'autocomplete-',
 		PRECISION_ADDRESS = 'Address',
 		KEY_ESC = 'Escape',
@@ -42,6 +42,7 @@
 		KEY_UP_LEGACY = 'Up',
 		KEY_DOWN = 'ArrowDown',
 		KEY_DOWN_LEGACY = 'Down',
+		BUILDING_LIST_MODES = { PAGED: 'paged', SHORT: 'short' },
 
 		/**
 		 * Default options.
@@ -185,6 +186,27 @@
 				writable: true,
 			},
 
+			/**
+			 * Set mode for listing buildings in `Street` context. Supported modes:
+			 *
+			 * - 'paged': get a larger list of building results (actual number determined by API). Includes link to view more buildings.
+			 * - 'short': building results are limited to the first few items, similar to matches in other contexts.
+			 */
+			buildingListMode: {
+				set (mode) {
+					if (Object.values(BUILDING_LIST_MODES).includes(mode))
+					{
+						this.mode = mode;
+					}
+					else
+					{
+						console.error('Invalid mode for option buildingListMode:', mode);
+					}
+				},
+				get () {
+					return this.mode || BUILDING_LIST_MODES.SHORT;
+				},
+			},
 		});
 
 	/**
@@ -235,8 +257,6 @@
 					return;
 				}
 
-				removeItemFocus();
-
 				setValue = setValue || false;
 				isRelative = isRelative || false;
 
@@ -265,24 +285,13 @@
 					&& (index > 0 && toIndex < fromIndex || index < 0 && toIndex > fromIndex) // Wrapping
 				)
 				{
-					item = null;
+					setActiveItem(null);
 					inputElement.value = inputValue;
 					elementData.get(inputElement).context = inputContext;
 					return;
 				}
 
-				item = ul.children[toIndex];
-				item.classList.add(classNames.itemFocus);
-
-				// Scroll the menu item into view if needed.
-				if (ul.scrollTop > item.offsetTop)
-				{
-					ul.scrollTop = item.offsetTop;
-				}
-				else if ((item.offsetHeight + item.offsetTop) > ul.clientHeight)
-				{
-					ul.scrollTop = (item.offsetHeight + item.offsetTop) - ul.clientHeight;
-				}
+				setActiveItem(ul.children[toIndex]);
 
 				const data = elementData.get(item);
 
@@ -297,6 +306,16 @@
 					inputElement.value = data.value;
 					elementData.get(inputElement).context = data.context;
 					selectedIndex = toIndex;
+
+					// Scroll the menu item into view if needed.
+					if (ul.scrollTop > item.offsetTop)
+					{
+						ul.scrollTop = item.offsetTop;
+					}
+					else if (item.offsetTop >= (ul.clientHeight + ul.scrollTop))
+					{
+						ul.scrollTop = (item.offsetHeight + item.offsetTop) - ul.clientHeight;
+					}
 				}
 			},
 
@@ -306,6 +325,20 @@
 			indexOf = function (element)
 			{
 				return Array.prototype.indexOf.call(ul.children, element);
+			},
+
+			/**
+			 * Set and focus active item. Removes focus from previous item.
+			 */
+			setActiveItem = function (newItem)
+			{
+				removeItemFocus();
+
+				item = newItem;
+				if (item)
+				{
+					item.classList.add(classNames.itemFocus);
+				}
 			},
 
 			/**
@@ -391,8 +424,6 @@
 				return;
 			}
 
-			removeItemFocus();
-
 			let target = e.target;
 
 			while (target.parentElement !== ul)
@@ -400,17 +431,8 @@
 				target = target.parentElement;
 			}
 
-			item = target;
-			item.classList.add(classNames.itemFocus);
-		});
-
-		ul.addEventListener('mouseout', function () {
-			self.blur();
-
-			if (selectedIndex !== null)
-			{
-				moveItemFocus(selectedIndex);
-			}
+			setActiveItem(target);
+			moveItemFocus(indexOf(target));
 		});
 
 		wrapper.addEventListener('mousedown', function () {
@@ -448,7 +470,6 @@
 		this.setItems = function (matches, renderItem)
 		{
 			ul.innerHTML = '';
-			ul.scrollTop = 0;
 
 			for (let i = 0, li, match; (match = matches[i++]);)
 			{
@@ -456,8 +477,9 @@
 				elementData.set(li, match);
 			}
 
-			item = null;
+			setActiveItem(null);
 			selectedIndex = null;
+			ul.scrollTop = 0;
 		}
 
 		/**
@@ -533,8 +555,7 @@
 		 */
 		this.blur = function ()
 		{
-			removeItemFocus();
-			item = null;
+			setActiveItem(null);
 		}
 
 		/**
@@ -572,8 +593,7 @@
 		 */
 		this.clear = function ()
 		{
-			removeItemFocus();
-			item = null;
+			setActiveItem(null);
 			selectedIndex = null;
 			ul.innerHTML = '';
 		}
@@ -878,14 +898,23 @@
 		 */
 		this.getSuggestions = function (context, term, response)
 		{
-			let url = this.options.autocompleteUrl + '/' + encodeURIComponent(context) + '/' + encodeURIComponent(term);
+			const url = [
+				this.options.autocompleteUrl,
+				encodeURIComponent(context),
+				encodeURIComponent(term),
+				options.language || '',
+			];
 
-			if (typeof options.language !== 'undefined')
+			if (options.buildingListMode !== BUILDING_LIST_MODES.SHORT)
 			{
-				url += '/' + options.language;
+				// Only specify when not the API default, for better compatibility with client proxies
+				url.push(options.buildingListMode);
 			}
 
-			return this.xhrGet(url, response);
+			return this.xhrGet(
+				url.join('/').replace(/\/+$/, ''),
+				response
+			);
 		}
 
 		/**

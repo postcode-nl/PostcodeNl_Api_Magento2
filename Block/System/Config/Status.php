@@ -102,8 +102,8 @@ class Status extends Template implements RendererInterface
             'enabled' => $this->_storeConfigHelper->isEnabled(),
             'module_version' => $this->_storeConfigHelper->getModuleVersion(),
             'supported_countries' => $this->_storeConfigHelper->getSupportedCountries(),
-            'account_name' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_name']),
-            'account_status' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']), // Defaults to "new", see etc/config.xml.
+            'account_name' => $this->_storeConfigHelper->getValue('account_name'),
+            'account_status' => $this->_storeConfigHelper->getValue('account_status'), // Defaults to "new", see etc/config.xml.
             'has_credentials' => $this->_storeConfigHelper->hasCredentials(),
         ];
     }
@@ -135,7 +135,7 @@ class Status extends Template implements RendererInterface
      */
     public function getApiStatusDescription(): string
     {
-        $status = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
+        $status = $this->_storeConfigHelper->getValue('account_status');
 
         switch ($status) {
             case \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_NEW:
@@ -179,7 +179,7 @@ class Status extends Template implements RendererInterface
      */
     private function _getAccountInfo(): array
     {
-        $status = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
+        $status = $this->_storeConfigHelper->getValue('account_status');
         if ($status === \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE) {
             return $this->_apiClientHelper->getAccountInfo();
         }
