@@ -223,7 +223,7 @@ class ApiClientHelper extends AbstractHelper
         $countryIso2 = $addressDetails['country']['iso2Code'];
         $lastLineIndex = $this->_addressHelper->getStreetLines() - 1;
 
-        if ($this->_storeConfigHelper->isSetFlag('split_street_values' )) {
+        if ($this->_storeConfigHelper->isSetFlag('split_street_values')) {
             // Assume fields are fixed street parts, independent of country.
             $parts = [
                 $address['street'],
