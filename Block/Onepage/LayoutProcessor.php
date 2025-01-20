@@ -239,7 +239,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             $name = $data['addressfield'];
             if($name == 'postcode_nl'){
                 foreach($flektoFields as $i => $field){
-                    if(isset($addressFields[$field])) $addressFields[$field]['sortOrder'] = $data['position']+$i*10;
+                    if(isset($addressFields[$field])) $addressFields[$field]['sortOrder'] = $data['position']+$i;
                 }
             }
             if(isset($addressFields[$name])) $addressFields[$name]['sortOrder'] = $data['position'];
