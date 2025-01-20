@@ -52,6 +52,22 @@
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="address_fields_extra" type="textarea" sortOrder="90" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Address extra fields</label>
+                    <comment>The fields must be saved in order to be used for sorting bellow. Use one field per line</comment>
+                    <depends>
+                        <field id="change_fields_position">1</field> <!-- Show this field if 'change_fields_position' is set to "Yes" -->
+                    </depends>
+                </field>
+                <field id="address_fields_positions" type="select" sortOrder="100" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Address fields positions</label>
+                    <comment/>
+                    <frontend_model>Flekto\Postcode\Block\Adminhtml\Form\Field\AddressColumns</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <depends>
+                        <field id="change_fields_position">1</field> <!-- Show this field if 'change_fields_position' is set to "Yes" -->
+                    </depends>
+                </field>
             </group>
 
             <group id="advanced_config" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label">

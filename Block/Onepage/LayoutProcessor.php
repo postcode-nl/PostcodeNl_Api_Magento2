@@ -6,11 +6,13 @@ use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {
     protected $scopeConfig;
     protected $jsLayout;
+    protected $serializer;
 
     /**
      * Constructor
@@ -20,10 +22,10 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      * @param array $data (default: [])
      * @return void
      */
-    public function __construct(Context $context, array $data = [])
+    public function __construct(Context $context, SerializerInterface $serializer, array $data = [])
     {
         $this->scopeConfig = $context->getScopeConfig();
-
+        $this->serializer = $serializer;
         parent::__construct($context, $data);
     }
 
@@ -224,25 +226,25 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
         if ($this->scopeConfig->getValue('postcodenl_api/general/change_fields_position') != '1') {
             return $addressFields;
         }
+        $fieldsPositions = $this->serializer->unserialize($this->scopeConfig->getValue('postcodenl_api/general/address_fields_positions'));
 
-        $fieldToSortOrder = [
-            'country_id' => '900',
-            'address_autofill_intl' => '910',
-            'address_autofill_nl' => '920',
-            'address_autofill_formatted_output' => '930',
-            'address_autofill_bypass' => '935',
-            'street' => '940',
-            'postcode' => '950',
-            'city' => '960',
-            'region' => '970',
-            'region_id' => '975',
+        $flektoFields = [
+            'address_autofill_intl',
+            'address_autofill_nl',
+            'address_autofill_formatted_output',
+            'address_autofill_bypass'
         ];
 
-        foreach ($fieldToSortOrder as $name => $sortOrder) {
-            if (isset($addressFields[$name])) {
-                $addressFields[$name]['sortOrder'] = $sortOrder;
+        foreach($fieldsPositions as $data){
+            $name = $data['addressfield'];
+            if($name == 'postcode_nl'){
+                foreach($flektoFields as $i => $field){
+                    if(isset($addressFields[$field])) $addressFields[$field]['sortOrder'] = $data['position']+$i*10;
+                }
             }
+            if(isset($addressFields[$name])) $addressFields[$name]['sortOrder'] = $data['position'];
         }
+
 
         return $addressFields;
     }
