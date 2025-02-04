@@ -73,7 +73,7 @@ class Data extends AbstractHelper
     {
         return
             $this->isDisabled()
-            || ShowHideAddressFields::FORMAT != $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields']);
+            || ShowHideAddressFields::FORMAT != $this->_storeConfigHelper->getValue('show_hide_address_fields');
     }
 
     /**
@@ -87,7 +87,7 @@ class Data extends AbstractHelper
         return
             $this->isDisabled()
             || false === in_array('NL', $this->_storeConfigHelper->getEnabledCountries())
-            || NlInputBehavior::ZIP_HOUSE != $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['nl_input_behavior']);
+            || NlInputBehavior::ZIP_HOUSE != $this->_storeConfigHelper->getValue('nl_input_behavior');
     }
 
     /**
@@ -99,8 +99,8 @@ class Data extends AbstractHelper
     public function isDisabled(): bool
     {
         return
-            false === $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['enabled'])
-            || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']);
+            false === $this->_storeConfigHelper->isSetFlag('enabled')
+            || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->_storeConfigHelper->getValue('account_status');
     }
 
     /**
@@ -113,8 +113,8 @@ class Data extends AbstractHelper
     {
         return
             $this->isDisabled()
-            || ShowHideAddressFields::SHOW == $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['show_hide_address_fields'])
-            || $this->_storeConfigHelper->isSetFlag(StoreConfigHelper::PATH['allow_autofill_bypass']) === false;
+            || ShowHideAddressFields::SHOW == $this->_storeConfigHelper->getValue('show_hide_address_fields')
+            || $this->_storeConfigHelper->isSetFlag('allow_autofill_bypass') === false;
     }
 
     /**

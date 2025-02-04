@@ -11,6 +11,7 @@ define([
                 countryCode: '${$.parentName}:countryCode',
                 isCountryChanged: '${$.parentName}:isCountryChanged',
                 onChangeCountry: '${$.parentName}:countryCode',
+                settings: '${$.parentName}:settings',
             },
         },
 
@@ -68,17 +69,7 @@ define([
         setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
 
-            if (this.inputs.street.length > 2) {
-                this.inputs.street[0].value = addressParts.street;
-                this.inputs.street[1].value = addressParts.houseNumber;
-                this.inputs.street[2].value = addressParts.houseNumberAddition;
-            } else if (this.inputs.street.length > 1) {
-                this.inputs.street[0].value = addressParts.street;
-                this.inputs.street[1].value = addressParts.house;
-            } else {
-                this.inputs.street[0].value = addressParts.street + ' ' + addressParts.house;
-            }
-
+            this.inputs.street[0].value = addressParts.street + ' ' + addressParts.house;
             this.inputs.city.value = addressParts.city;
             this.inputs.postcode.value = addressParts.postcode;
             this.inputs.region.value = addressParts.province;

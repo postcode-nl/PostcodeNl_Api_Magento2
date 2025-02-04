@@ -13,6 +13,7 @@ define([
                 countryCode: '${$.parentName}:countryCode',
                 isCountryChanged: '${$.parentName}:isCountryChanged',
                 onChangeCountry: '${$.parentName}:countryCode',
+                settings: '${$.parentName}:settings',
             },
 
             searchInitialValue: true,
@@ -24,13 +25,14 @@ define([
             this.visible(this.isEnabledCountry(this.countryCode));
             this.toggleFields(!this.visible());
 
-            if (this.value() === '') {
+            if (this.visible() && this.value() === '') {
                 const postcode = this.inputs.postcode.value,
                     city = this.inputs.city.value,
                     streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
                     prefilledAddressValue = `${postcode} ${city} ${streetAddress}`.trim();
 
                 if (prefilledAddressValue !== '') {
+                    this.resetInputAddress();
                     this.value(prefilledAddressValue);
                 }
             }
@@ -45,21 +47,12 @@ define([
         },
 
         setInputAddress: function (result) {
-            const address = this.getAddressParts(result.address);
-
-            if (this.inputs.street.length > 2) {
-                this.inputs.street[0].value = address.street;
-                this.inputs.street[1].value = address.buildingNumber;
-                this.inputs.street[2].value = address.buildingNumberAddition;
-            } else if (this.inputs.street.length > 1) {
-                this.inputs.street[0].value = address.street;
-                this.inputs.street[1].value = address.building;
-            } else {
-                this.inputs.street[0].value = address.street + ' ' + address.building;
+            for (let i = 0; i < result.streetLines.length; i++) {
+                this.inputs.street[i].value = result.streetLines[i];
             }
 
-            this.inputs.city.value = address.locality;
-            this.inputs.postcode.value = address.postcode;
+            this.inputs.city.value = result.address.locality;
+            this.inputs.postcode.value = result.address.postcode;
 
             if (this.inputs.regionId.style.display !== 'none') {
                 this.inputs.regionId.value = result.region.id ?? '';

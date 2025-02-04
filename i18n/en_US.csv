@@ -49,3 +49,5 @@
 "PO box shipping","PO box shipping"
 "Allow shipping to PO boxes.","Allow shipping to PO boxes."
 "Sorry, we cannot ship to a PO Box address.","Sorry, we cannot ship to a PO Box address."
+"Split street address values","Split street address values"
+"Distribute street address values to available street fields.","Distribute street address values to available street fields."

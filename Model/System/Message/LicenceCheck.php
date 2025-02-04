@@ -53,7 +53,7 @@ class LicenceCheck implements MessageInterface
      */
     public function isDisplayed(): bool
     {
-        return $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['account_status']) != \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
+        return $this->_storeConfigHelper->getValue('account_status') != \Flekto\Postcode\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
 
     /**

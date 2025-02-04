@@ -116,8 +116,12 @@ define([
         },
 
         getAddress: function () {
-            const postcode = AddressNlModel.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, ''),
-                houseNumber = AddressNlModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim(),
+            const postcode = encodeURIComponent(
+                    AddressNlModel.postcodeRegex.exec(this.childPostcode().value())[0].replace(/\s/g, '')
+                ),
+                houseNumber = encodeURIComponent(
+                    AddressNlModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim()
+                ),
                 url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
 
             this.resetInputAddress();
@@ -178,17 +182,10 @@ define([
         },
 
         getAddressParts: function (address) {
-            const houseNumber = `${address.houseNumber || ''}`,
-                houseNumberAddition = `${address.houseNumberAddition || ''}`.trim();
-
             return {
-                street: address.street,
-                house: `${houseNumber} ${houseNumberAddition}`.trim(),
-                houseNumber: houseNumber,
-                houseNumberAddition: houseNumberAddition,
-                postcode: address.postcode,
-                city: address.city,
-                province: address.province,
+                ...address,
+                houseNumberAddition: address.houseNumberAddition ?? '',
+                house: `${address.houseNumber} ${address.houseNumberAddition ?? ''}`.trim(),
             };
         },
 
