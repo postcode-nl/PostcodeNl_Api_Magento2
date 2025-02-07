@@ -23,7 +23,6 @@
                                         <item name="component" xsi:type="string">Flekto_Postcode/js/form/components/customer/address/address-autofill-nl</item>
                                         <item name="config" xsi:type="array">
                                             <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isNlComponentDisabled"/>
-                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                         </item>
                                         <item name="sortOrder" xsi:type="number">65</item>
                                         <item name="children" xsi:type="array">
@@ -48,7 +47,6 @@
                                     <item name="address_autofill_intl" xsi:type="array">
                                         <item name="component" xsi:type="string">Flekto_Postcode/js/form/element/customer/address/address-autofill-intl</item>
                                         <item name="config" xsi:type="array">
-                                            <item name="settings" xsi:type="helper" helper="Flekto\Postcode\Helper\StoreConfigHelper::getJsinit"/>
                                             <item name="componentDisabled" xsi:type="helper" helper="Flekto\Postcode\Helper\Data::isDisabled"/>
                                         </item>
                                         <item name="label" xsi:type="string" translate="true">Start typing your address or zip/postal code</item>

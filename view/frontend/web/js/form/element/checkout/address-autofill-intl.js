@@ -18,6 +18,7 @@ define([
             },
             imports: {
                 countryCode: '${$.parentName}.country_id:value',
+                settings: '${ $.provider }:postcodeEuConfig',
             },
             statefull: {
                 address: true,
@@ -37,31 +38,35 @@ define([
         },
 
         setInputAddress: function (result) {
-            const addressParts = this.getAddressParts(result.address);
-            let streetValues;
+            let streetLines = result.streetLines;
 
-            if (this.street().initChildCount > 2) {
-                streetValues = [addressParts.street, addressParts.buildingNumber, addressParts.buildingNumberAddition];
-            } else if (this.street().initChildCount > 1) {
-                streetValues = [addressParts.street, addressParts.building];
-            } else {
-                streetValues = [addressParts.street + ' ' + addressParts.building];
+            // Result could be an old address from localStorage, without streetLines.
+            if (typeof streetLines === 'undefined') {
+                streetLines = [
+                    result.address.street,
+                    result.address.buildingNumber,
+                    result.address.buildingNumberAddition,
+                ];
+
+                if (!this.settings.split_street_values) {
+                    streetLines = [streetLines.join(' ')];
+                }
             }
 
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
-            streetValues.forEach((v, i) => { Registry.async(`${this.street().name}.${i}`)('value', v); });
+            this.street().asyncSetValues(...streetLines);
 
-            this.city().value(addressParts.locality);
-            this.postcode().value(addressParts.postcode);
+            this.city().value(result.address.locality);
+            this.postcode().value(result.address.postcode);
 
             if (this.regionId() && this.regionId().visible()) {
-                if (result.region.id) {
+                if (result.region?.id) {
                     this.regionId().value(result.region.id);
                 } else {
                     this.regionId().reset();
                 }
             } else if (this.regionIdInput()) {
-                if (result.region.name) {
+                if (result.region?.name) {
                     this.regionIdInput().value(result.region.name);
                 } else {
                     this.regionIdInput().reset();
@@ -76,7 +81,7 @@ define([
             this.regionIdInput()?.clear().error(false);
 
             // Must run last because the checkout data in local storage will not change if the street fields are empty.
-            this.street().elems.each((streetInput) => streetInput.clear().error(false));
+            this.street().clearFields().clearErrors();
         },
 
         toggleFields: function (state, force) {
@@ -86,9 +91,7 @@ define([
 
             switch (this.settings.show_hide_address_fields) {
             case 'disable':
-                for (let i = 0; i < this.street().initChildCount; i++) {
-                    Registry.async(`${this.street().name}.${i}`)('disabled', !state);
-                }
+                this.street().asyncDelegate('disabled', !state);
 
                 for (const field of ['city', 'postcode', 'regionId', 'regionIdInput']) {
                     this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func

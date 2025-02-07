@@ -4,13 +4,14 @@
     <preference for="Flekto\Postcode\Api\Data\UpdateNotificationInterface" type="Flekto\Postcode\Model\UpdateNotification" />
     <preference for="Flekto\Postcode\Api\UpdateNotificationRepositoryInterface" type="Flekto\Postcode\Model\UpdateNotificationRepository" />
     <preference for="Magento\Framework\Filesystem\DriverInterface" type="Magento\Framework\Filesystem\Driver\File" />
+    <preference for="Magento\Checkout\Block\Checkout\AttributeMerger" type="Flekto\Postcode\Block\Checkout\AttributeMerger" />
 
     <type name="Magento\Framework\App\AreaList">
         <arguments>
             <argument name="areas" xsi:type="array">
                 <item name="postcode_eu" xsi:type="array">
-                     <item name="frontName" xsi:type="string">postcode-eu</item>
-                 </item>
+                    <item name="frontName" xsi:type="string">postcode-eu</item>
+                </item>
             </argument>
         </arguments>
     </type>

@@ -6,24 +6,36 @@ use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
+use Flekto\Postcode\Helper\StoreConfigHelper;
 use Magento\Framework\Serialize\SerializerInterface;
 
 class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {
-    protected $scopeConfig;
+    /**
+     * JS layout configuration
+     *
+     * @var array
+     */
     protected $jsLayout;
     protected $serializer;
+
+    /**
+     * @var StoreConfigHelper
+     */
+    private $storeConfigHelper;
 
     /**
      * Constructor
      *
      * @access public
      * @param Context $context
+     * @param StoreConfigHelper $storeConfigHelper
      * @param array $data (default: [])
      * @return void
      */
-    public function __construct(Context $context, SerializerInterface $serializer, array $data = [])
+    public function __construct(Context $context, StoreConfigHelper $storeConfigHelper, SerializerInterface $serializer, array $data = [])
     {
+        $this->storeConfigHelper = $storeConfigHelper;
         $this->scopeConfig = $context->getScopeConfig();
         $this->serializer = $serializer;
         parent::__construct($context, $data);
@@ -38,13 +50,14 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     public function process($jsLayout): array
     {
-        $moduleEnabled = $this->scopeConfig->getValue('postcodenl_api/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-
-        if (!$moduleEnabled) {
+        if (!$this->storeConfigHelper->isEnabled()) {
             return $jsLayout;
         }
 
         $this->jsLayout = $jsLayout;
+
+        // Settings accessible via checkoutProvider.
+        $this->jsLayout['components']['checkoutProvider']['postcodeEuConfig'] = $this->storeConfigHelper->getJsInit();
 
         // Shipping fields
         $shippingFields = &$this->_getJsLayoutRef([
@@ -223,7 +236,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     private function _changeAddressFieldsPosition($addressFields): array
     {
-        if ($this->scopeConfig->getValue('postcodenl_api/general/change_fields_position') != '1') {
+        if (!$this->storeConfigHelper->isSetFlag('change_fields_position')) {
             return $addressFields;
         }
         $fieldsPositions = $this->serializer->unserialize($this->scopeConfig->getValue('postcodenl_api/general/address_fields_positions'));

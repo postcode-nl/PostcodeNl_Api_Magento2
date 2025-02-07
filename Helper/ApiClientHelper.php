@@ -6,6 +6,7 @@ use Exception;
 use Flekto\Postcode\Helper\StoreConfigHelper;
 use Flekto\Postcode\Service\Exception\NotFoundException;
 use Flekto\Postcode\Service\PostcodeApiClient;
+use Magento\Customer\Helper\Address as AddressHelper;
 use Magento\Developer\Helper\Data;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -34,6 +35,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_storeConfigHelper;
     protected $_productMetadata;
     protected $_regionFactory;
+    protected $_addressHelper;
 
     /**
      * __construct function.
@@ -49,6 +51,7 @@ class ApiClientHelper extends AbstractHelper
      * @param StoreConfigHelper $storeConfigHelper
      * @param ProductMetadataInterface $productMetadata
      * @param RegionFactory $regionFactory
+     * @param AddressHelper $addressHelper
      * @return void
      */
     public function __construct(
@@ -61,7 +64,8 @@ class ApiClientHelper extends AbstractHelper
         LocaleResolver $localeResolver,
         StoreConfigHelper $storeConfigHelper,
         ProductMetadataInterface $productMetadata,
-        RegionFactory $regionFactory
+        RegionFactory $regionFactory,
+        AddressHelper $addressHelper
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -72,6 +76,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_productMetadata = $productMetadata;
         $this->_regionFactory = $regionFactory;
+        $this->_addressHelper = $addressHelper;
         parent::__construct($context);
     }
 
@@ -129,6 +134,7 @@ class ApiClientHelper extends AbstractHelper
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
             $response['region'] = $this->_getRegionFromDetails($response);
+            $response['streetLines'] = $this->_getStreetLines($response);
             $response = $this->_prepareResponse($response, $client);
 
             return $response;
@@ -201,6 +207,54 @@ class ApiClientHelper extends AbstractHelper
         }
 
         return ['id' => $id ?? null, 'name' => $name ?? null];
+    }
+
+    /**
+     * Get street lines from an address details response.
+     *
+     * The amount of lines is limited by the configured number of lines in a street address.
+     *
+     * @param array $addressDetails
+     * @return array - Street lines formatted according to country and config.
+     */
+    protected function _getStreetLines(array $addressDetails): array
+    {
+        $address = $addressDetails['address'];
+        $countryIso2 = $addressDetails['country']['iso2Code'];
+        $lastLineIndex = $this->_addressHelper->getStreetLines() - 1;
+
+        if ($this->_storeConfigHelper->isSetFlag('split_street_values')) {
+            // Assume fields are fixed street parts, independent of country.
+            $parts = [
+                $address['street'],
+                $address['buildingNumber'] ?? '',
+                $address['buildingNumberAddition'] ?? '',
+            ];
+            $lines = array_slice($parts, 0, $lastLineIndex);
+            $lines[] = implode(' ', array_slice($parts, $lastLineIndex));
+        } elseif ($countryIso2 === 'LU') {
+            $lines = [$address['building'] . ', ' . $address['street']];
+        } elseif ($countryIso2 === 'FR') {
+            $lines = [trim($address['building'] . ' ' . $address['street'])];
+        } elseif ($countryIso2 === 'GB') {
+            $building = $addressDetails['details']['gbrBuilding'];
+            if ($address['street'] === '') {
+                $separator = '';
+            } elseif ($building['number'] === null && $building['addition'] === null) {
+                $separator = ', ';
+            } else {
+                $separator = ' ';
+            }
+
+            // Support multiple lines in British address.
+            $parts = explode(', ', $address['building'] . $separator . $address['street']);
+            $lines = array_slice($parts, 0, $lastLineIndex);
+            $lines[] = implode(', ', array_slice($parts, $lastLineIndex));
+        } else {
+            $lines = [trim($address['street'] . ' ' . $address['building'])];
+        }
+
+        return $lines;
     }
 
     /**
@@ -445,13 +499,13 @@ class ApiClientHelper extends AbstractHelper
             'configuration' => [
                 'key' => $credentials['key'],
                 'secret' => substr_replace($credentials['secret'], '***', 3, -3),
-                'debug' => $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['api_debug']),
+                'debug' => $this->_storeConfigHelper->getValue('api_debug'),
             ],
             'modules' => $this->_getMagentoModules(),
         ];
 
         // Module version
-        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue(StoreConfigHelper::PATH['module_version']);
+        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue('module_version');
 
         // Magento version
         $version = $this->_productMetadata->getVersion();

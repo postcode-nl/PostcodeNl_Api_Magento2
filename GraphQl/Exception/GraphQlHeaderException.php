@@ -27,7 +27,7 @@ class GraphQlHeaderException extends LocalizedException implements ClientAware
      * @param int $code
      * @param boolean $isSafe
      */
-    public function __construct(Phrase $phrase, \Exception $cause = null, $code = 0, $isSafe = true)
+    public function __construct(Phrase $phrase, ?\Exception $cause = null, $code = 0, $isSafe = true)
     {
         $this->isSafe = $isSafe;
         parent::__construct($phrase, $cause, $code);

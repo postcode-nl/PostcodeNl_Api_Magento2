@@ -83,7 +83,12 @@
                     <comment>Allow shipping to PO boxes.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="110" translate="label" type="select" canRestore="1">
+                <field id="split_street_values" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="110" translate="label" type="select" canRestore="1">
+                    <label>Split street address values</label>
+                    <comment>Distribute street address values to available street fields.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_debug" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="120" translate="label" type="select" canRestore="1">
                     <label>Debug</label>
                     <comment/>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
