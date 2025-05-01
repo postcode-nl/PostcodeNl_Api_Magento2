@@ -18,12 +18,13 @@ class AttributeMerger extends BaseAttributeMerger
      * @param string $dataScopePrefix
      * @return array
      */
-    protected function getMultilineFieldConfig($attributeCode, array $attributeConfig, $providerName, $dataScopePrefix)
+    protected function getMultilineFieldConfig($attributeCode, array $attributeConfig, $providerName, $dataScopePrefix): array
     {
         $config = parent::getMultilineFieldConfig($attributeCode, $attributeConfig, $providerName, $dataScopePrefix);
 
         if ($attributeCode === 'street') {
-            $config['component'] = 'Flekto_Postcode/js/form/components/street';
+            // NB. collection component must end in '/group' or Magento's shipping rates validator will break.
+            $config['component'] = 'Flekto_Postcode/js/form/components/street/group';
             $config['config']['template'] = 'Flekto_Postcode/group/street';
         }
 

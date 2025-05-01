@@ -23,7 +23,7 @@ define([
 
         asyncSetValues: function (...args) {
             const lastChildIndex = this.initChildCount - 1,
-               values = args.slice(0, lastChildIndex);
+                values = args.slice(0, lastChildIndex);
 
             // Join remaining args for last or single child.
             values.push(args.slice(lastChildIndex).join(' ').trim());
