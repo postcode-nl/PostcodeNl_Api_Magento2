@@ -61,7 +61,7 @@ Our module now supports GraphQL, allowing you to query address data via Magento'
 
 ## Compatibility
 
-Although we can't guarantee compatibility with other checkout modules, our module works well with most one-step-checkout modules. If you are having issues and think this may be caused by our module, please [contact Postcode.nl](tech@postcode.nl) and tell us which other module(s) and version(s) are used.
+Although we can't guarantee compatibility with other checkout modules, our module works well with most one-step-checkout modules. If you are having issues and think this may be caused by our module, please [contact Postcode.nl](mailto:tech@postcode.nl) and tell us which other module(s) and version(s) are used.
 
 If you found the solution already and have some code to contribute, feel free to open a pull request in this repository.
 
