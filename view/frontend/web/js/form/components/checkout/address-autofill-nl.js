@@ -98,26 +98,18 @@ define([
                 return; // Toggle will be handled by international component.
             }
 
+            const fields = ['street', 'city', 'postcode', 'regionIdInput'],
+                setProperty = (name, value) => fields.forEach((f) => this[f]((component) => component[name](value)));
+
             switch (this.settings.show_hide_address_fields) {
             case 'disable':
-                this.street().asyncDelegate('disabled', !state);
-
-                for (const field of ['city', 'postcode', 'regionIdInput']) {
-                    this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
-                }
+                setProperty('disabled', !state);
                 break;
             case 'format':
-                if (!this.street().visible()) {
-                    return;
-                }
-
-                state = false;
-
-            /* falls through */
+                setProperty('visible', false);
+                break;
             case 'hide':
-                for (const field of ['street', 'city', 'postcode', 'regionIdInput']) {
-                    this[field](component => component.visible(state));
-                }
+                setProperty('visible', state);
                 break;
             }
         },
