@@ -5,19 +5,19 @@ namespace Flekto\Postcode\Service;
 use Flekto\Postcode\Helper\StoreConfigHelper;
 
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\App\Request\Http as HttpRequest;
 
+use Flekto\Postcode\HTTP\Client\Curl;
 use Flekto\Postcode\Service\Exception\AuthenticationException;
 use Flekto\Postcode\Service\Exception\BadRequestException;
 use Flekto\Postcode\Service\Exception\CurlException;
 use Flekto\Postcode\Service\Exception\ForbiddenException;
 use Flekto\Postcode\Service\Exception\InvalidJsonResponseException;
 use Flekto\Postcode\Service\Exception\InvalidPostcodeException;
+use Flekto\Postcode\Service\Exception\NotFoundException;
 use Flekto\Postcode\Service\Exception\ServerUnavailableException;
 use Flekto\Postcode\Service\Exception\TooManyRequestsException;
 use Flekto\Postcode\Service\Exception\UnexpectedException;
-use Flekto\Postcode\Service\Exception\NotFoundException;
 
 class PostcodeApiClient
 {
