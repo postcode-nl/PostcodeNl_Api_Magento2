@@ -140,7 +140,7 @@ class PostcodeApiClient
      * @param string|null $houseNumberAddition House number addition, optional
      * @return array
      *
-     * @see https://developer.postcode.eu/documentation
+     * @see https://developer.postcode.eu/documentation/nl/v1/Address/viewByPostcode
      */
     public function dutchAddressByPostcode(
         string $postcode,
@@ -170,6 +170,46 @@ class PostcodeApiClient
     public function accountInfo(): array
     {
         return $this->_fetch('account/v1/info', null);
+    }
+
+	/**
+     * Validate a full address, correcting and completing all parts of the address.
+     *
+     * @param string $country
+     * @param string|null $postcode
+     * @param string|null $locality
+     * @param string|null $street
+     * @param string|null $building
+     * @param string|null $region
+     * @param string|null $streetAndBuilding
+	 * @return array
+	 *
+	 * @see https://developer.postcode.eu/documentation/international/v1/Validate/validate
+	 */
+	public function validateAddress(
+		string $country,
+		?string $postcode = null,
+		?string $locality = null,
+		?string $street = null,
+		?string $building = null,
+		?string $region = null,
+		?string $streetAndBuilding = null
+	): array
+	{
+        $params = [];
+        foreach (['postcode', 'locality', 'street', 'building', 'region', 'streetAndBuilding'] as $name) {
+            if ($$name !== null) {
+                $params[] = sprintf('%s=%s', $name, rawurlencode($$name));
+            }
+        }
+
+        return $this->_fetch(
+            sprintf(
+                'international/v1/validate/%s?%s',
+                rawurlencode(strtolower($country)),
+                implode('&', $params)
+            )
+        );
     }
 
     /**

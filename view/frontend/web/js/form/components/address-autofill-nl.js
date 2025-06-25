@@ -122,7 +122,7 @@ define([
                 houseNumber = encodeURIComponent(
                     AddressNlModel.houseNumberRegex.exec(this.childHouseNumber().value())[0].trim()
                 ),
-                url = `${this.settings.base_url}postcode-eu/V1/nl/address/${postcode}/${houseNumber}`;
+                url = `${this.settings.api_actions.dutchAddressLookup}/${postcode}/${houseNumber}`;
 
             this.resetInputAddress();
             this.address(null);
@@ -134,24 +134,24 @@ define([
                 url: url,
                 cache: true,
                 dataType: 'json',
-                success: (response) => {
-                    if (response[0].error) {
-                        return this.childHouseNumber().error(response[0].message);
+                success: ([response]) => {
+                    if (response.error) {
+                        return this.childHouseNumber().error(response.message);
                     }
 
-                    this.status(response[0].status);
+                    this.status(response.status);
 
                     if (
                         this.status() === AddressNlModel.status.NOT_FOUND
-                        || !this.validateAddress(response[0].address)
+                        || !this.validateAddress(response.address)
                     ) {
                         return;
                     }
 
-                    this.address(response[0].address);
+                    this.address(response.address);
 
                     if (this.status() === AddressNlModel.status.ADDITION_INCORRECT) {
-                        this.childHouseNumberSelect().setOptions(response[0].address.houseNumberAdditions);
+                        this.childHouseNumberSelect().setOptions(response.address.houseNumberAdditions);
                     } else {
                         this.toggleFields(true);
                     }

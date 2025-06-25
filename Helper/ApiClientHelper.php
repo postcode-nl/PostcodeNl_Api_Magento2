@@ -411,6 +411,40 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
+     * Validate a full address, correcting and completing all parts of the address.
+     *
+     * @access public
+     * @see \Flekto\Postcode\Service\PostcodeApiClient::validateAddress()
+     * @return array
+     */
+    public function validateAddress(): array
+    {
+        $args = func_get_args();
+        if (strlen($args[0]) === 2) {
+            $args[0] = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
+        }
+
+        try {
+            $client = $this->getApiClient();
+            $response = $client->validateAddress(...$args);
+
+            foreach ($response['matches'] as &$m)
+            {
+                if (in_array($m['status']['validationLevel'], ['Building', 'BuildingPartial'], true))
+                {
+                    $m['region'] = $this->_getRegionFromDetails($m);
+                    $m['streetLines'] = $this->_getStreetLines($m);
+                }
+            }
+
+            return $response;
+
+        } catch (\Exception $e) {
+            return $this->_handleClientException($e);
+        }
+    }
+
+    /**
      * Get country ISO3 code from ISO2 code, or NULL if not found.
      *
      * @access public

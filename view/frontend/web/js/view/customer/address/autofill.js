@@ -28,6 +28,9 @@ define([
                 toArray: function () {
                     return [...this.street, this.city, this.postcode, this.regionId, this.region];
                 },
+                getStreetValue: function () {
+                    return [...this.street].map((input) => input.value).join(' ').trim();
+                },
             },
             listens: {
                 '${$.name}.address_autofill_intl:address': 'validateInputs',
