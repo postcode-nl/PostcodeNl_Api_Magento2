@@ -73,9 +73,9 @@ define([
             this.inputs.city.value = result.address.locality;
             this.inputs.postcode.value = result.address.postcode;
 
-            if (this.inputs.regionId.style.display !== 'none') {
+            if (this.inputs.regionId && this.inputs.regionId.style.display !== 'none') {
                 this.inputs.regionId.value = result.region.id ?? '';
-            } else if (this.inputs.region.style.display !== 'none') {
+            } else if (this.inputs.region && this.inputs.region.style.display !== 'none') {
                 this.inputs.region.value = result.region.name ?? '';
             }
         },

@@ -126,7 +126,10 @@ define([
             this.inputs.street[0].value = addressParts.street + ' ' + addressParts.house;
             this.inputs.city.value = addressParts.city;
             this.inputs.postcode.value = addressParts.postcode;
-            this.inputs.region.value = addressParts.province;
+
+            if (this.inputs.region) {
+                this.inputs.region.value = addressParts.province;
+            }
         },
 
         resetInputAddress: function () {
@@ -152,7 +155,9 @@ define([
             /* falls through */
             case 'hide':
                 for (const name of ['street', 'city', 'postcode', 'region']) {
-                    this.fields[name].style.display = state ? '' : 'none';
+                    if (this.fields[name]) {
+                        this.fields[name].style.display = state ? '' : 'none';
+                    }
                 }
                 break;
             }
