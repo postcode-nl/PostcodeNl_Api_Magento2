@@ -505,7 +505,7 @@ class ApiClientHelper extends AbstractHelper
         ];
 
         // Module version
-        $debug['moduleVersion'] = $this->_storeConfigHelper->getValue('module_version');
+        $debug['moduleVersion'] = $this->_storeConfigHelper->getModuleVersion();
 
         // Magento version
         $version = $this->_productMetadata->getVersion();
