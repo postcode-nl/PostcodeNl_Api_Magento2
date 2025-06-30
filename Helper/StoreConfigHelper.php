@@ -164,7 +164,7 @@ class StoreConfigHelper extends AbstractHelper
      */
     public function getModuleVersion(): string
     {
-        return $this->getValue('module_version');
+        return $this->getValue('module_version') ?? 'UNKNOWN';
     }
 
     /**
