@@ -39,6 +39,13 @@ class PostcodeApiClient
      */
     protected $_secret;
 
+    /**
+     * The user agent string
+     *
+     * @var string
+     */
+    protected $_userAgent;
+
     protected $_curl;
     protected $_storeConfigHelper;
     protected $_productMetadata;
@@ -52,12 +59,10 @@ class PostcodeApiClient
         $this->_curl = $curl;
         $this->_productMetadata = $productMetadata;
         $this->_storeConfigHelper = $storeConfigHelper;
-        ['key' => $this->_key, 'secret' => $this->_secret] = $storeConfigHelper->getCredentials();
 
         $curl->setOptions([
             CURLOPT_CONNECTTIMEOUT => 2,
             CURLOPT_TIMEOUT => 5,
-            CURLOPT_USERAGENT => $this->getUserAgent(),
         ]);
 
         if (null !== $request->getServer('HTTP_REFERER')) {
@@ -67,15 +72,19 @@ class PostcodeApiClient
 
     public function getUserAgent(): string
     {
-        return sprintf(
-            '%s/%s %s/%s/%s PHP/%s',
-            \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
-            $this->_storeConfigHelper->getModuleVersion(),
-            $this->_productMetadata->getName(),
-            $this->_productMetadata->getEdition(),
-            $this->_productMetadata->getVersion(),
-            PHP_VERSION
-        );
+        if ($this->_userAgent === null) {
+            $this->_userAgent = sprintf(
+                '%s/%s %s/%s/%s PHP/%s',
+                \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
+                $this->_storeConfigHelper->getModuleVersion(),
+                $this->_productMetadata->getName(),
+                $this->_productMetadata->getEdition(),
+                $this->_productMetadata->getVersion(),
+                PHP_VERSION
+            );
+        }
+
+        return $this->_userAgent;
     }
 
     /**
@@ -252,10 +261,15 @@ class PostcodeApiClient
 
     protected function _fetch(string $path, ?string $session = null): array
     {
+        if ($this->_key === null || $this->_secret === null) {
+            ['key' => $this->_key, 'secret' => $this->_secret] = $this->_storeConfigHelper->getCredentials();
+        }
+
         if ($session !== null) {
             $this->_curl->setHeaders([static::SESSION_HEADER_KEY => $session]);
         }
 
+        $this->_curl->setOption(CURLOPT_USERAGENT, $this->getUserAgent());
         $this->_curl->setCredentials($this->_key, $this->_secret);
         $url = static::SERVER_URL . $path;
 
