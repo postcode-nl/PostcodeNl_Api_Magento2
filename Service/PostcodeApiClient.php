@@ -218,7 +218,7 @@ class PostcodeApiClient
             sprintf(
                 'international/v1/validate/%s?%s',
                 rawurlencode(strtolower($country)),
-                http_build_query($params)
+                http_build_query($params, '', null, PHP_QUERY_RFC3986)
             )
         );
     }
