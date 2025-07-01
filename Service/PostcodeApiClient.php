@@ -205,18 +205,20 @@ class PostcodeApiClient
 		?string $streetAndBuilding = null
 	): array
 	{
-        $params = [];
-        foreach (['postcode', 'locality', 'street', 'building', 'region', 'streetAndBuilding'] as $name) {
-            if ($$name !== null) {
-                $params[] = sprintf('%s=%s', $name, rawurlencode($$name));
-            }
-        }
+        $params = array_filter([
+            'postcode' => $postcode,
+            'locality' => $locality,
+            'street' => $street,
+            'building' => $building,
+            'region' => $region,
+            'streetAndBuilding' => $streetAndBuilding,
+        ], fn($value) => $value !== null);
 
         return $this->_fetch(
             sprintf(
                 'international/v1/validate/%s?%s',
                 rawurlencode(strtolower($country)),
-                implode('&', $params)
+                http_build_query($params)
             )
         );
     }
