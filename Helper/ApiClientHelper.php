@@ -437,7 +437,7 @@ class ApiClientHelper extends AbstractHelper
                 }
             }
 
-            return $response;
+            return $this->_prepareResponse($response, $client);
 
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
@@ -502,19 +502,11 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _getMagentoModules(): array
     {
-        if (isset($this->_modules)) {
-            return $this->_modules;
-        }
-
-        $this->_modules = [];
-
-        foreach ($this->_moduleList->getAll() as $name => $module) {
-            $this->_modules[$name] = [];
-            foreach ($module as $key => $value) {
-                if (in_array((string) $key, ['setup_version', 'name'])) {
-                    $this->_modules[$name][$key] = (string) $value;
-                }
-            }
+        if (!isset($this->_modules)) {
+            $this->_modules = array_map(
+                fn ($module) => ['name' => $module['name'], 'setup_version' => $module['setup_version'] ?? ''],
+                $this->_moduleList->getAll()
+            );
         }
 
         return $this->_modules;
@@ -533,7 +525,6 @@ class ApiClientHelper extends AbstractHelper
             'configuration' => [
                 'key' => $credentials['key'],
                 'secret' => substr_replace($credentials['secret'], '***', 3, -3),
-                'debug' => $this->_storeConfigHelper->getValue('api_debug'),
             ],
             'modules' => $this->_getMagentoModules(),
         ];

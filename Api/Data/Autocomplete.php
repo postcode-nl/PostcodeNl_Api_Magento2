@@ -10,16 +10,40 @@ class Autocomplete implements AutocompleteInterface
     public $matches = [];
 
     /**
-     * __construct function.
-     *
-     * @access public
+     * @var string|null
+     */
+    public $error;
+
+    /**
+     * @var string|null
+     */
+    public $message;
+
+    /**
+     * @var string|null
+     */
+    public $exception;
+
+    /**
+     * @var MagentoDebugInfoInterface|null
+     */
+    public $magentoDebugInfo = null;
+
+    /**
      * @param array $response
-     * @return void
      */
     public function __construct(array $response)
     {
         foreach ($response['matches'] ?? [] as $match) {
             $this->matches[] = new Autocomplete\AutocompleteMatch($match);
+        }
+
+        $this->error = $response['error'] ?? null;
+        $this->message = $response['message'] ?? null;
+        $this->exception = $response['exception'] ?? null;
+
+        if (isset($response['magento_debug_info'])) {
+            $this->magentoDebugInfo = new MagentoDebugInfo($response['magento_debug_info']);
         }
     }
 
@@ -29,5 +53,37 @@ class Autocomplete implements AutocompleteInterface
     public function getMatches(): array
     {
         return $this->matches;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getError(): ?string
+    {
+        return $this->error;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getException(): ?string
+    {
+        return $this->exception;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMagentoDebugInfo(): ?MagentoDebugInfoInterface
+    {
+        return $this->magentoDebugInfo;
     }
 }
