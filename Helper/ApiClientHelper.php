@@ -306,7 +306,6 @@ class ApiClientHelper extends AbstractHelper
 
             $client = $this->getApiClient();
             $address = $client->dutchAddressByPostcode($zipCode, $houseNumber, $houseNumberAddition);
-            $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
             if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
@@ -333,16 +332,16 @@ class ApiClientHelper extends AbstractHelper
 
         $address['houseNumberAdditions'] = $formattedHouseNumberAdditions;
 
-        $out = ['address' => $address, 'status' => $status];
-
         if ($this->_storeConfigHelper->isDebugging()) {
-            $out['debug'] = [
+            $address['debug'] = [
                 'parsedHouseNumber' => $houseNumber,
                 'parsedHouseNumberAddition' => $houseNumberAddition,
             ];
         }
 
-        return $out;
+        $result = ['address' => $address, 'status' => $status];
+
+        return $this->_prepareResponse($result, $client);
     }
 
     /**
