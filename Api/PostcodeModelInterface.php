@@ -47,13 +47,13 @@ interface PostcodeModelInterface
      * @param string|null $streetAndBuilding
      * @return string[][]
      */
-	public function validateAddress(
-		string $country,
-		?string $postcode = null,
-		?string $locality = null,
-		?string $street = null,
-		?string $building = null,
-		?string $region = null,
-		?string $streetAndBuilding = null
-	): array;
+    public function validateAddress(
+        string $country,
+        ?string $postcode = null,
+        ?string $locality = null,
+        ?string $street = null,
+        ?string $building = null,
+        ?string $region = null,
+        ?string $streetAndBuilding = null
+    ): array;
 }

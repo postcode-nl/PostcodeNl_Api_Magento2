@@ -181,7 +181,7 @@ class PostcodeApiClient
         return $this->_fetch('account/v1/info', null);
     }
 
-	/**
+    /**
      * Validate a full address, correcting and completing all parts of the address.
      *
      * @param string $country
@@ -191,20 +191,19 @@ class PostcodeApiClient
      * @param string|null $building
      * @param string|null $region
      * @param string|null $streetAndBuilding
-	 * @return array
-	 *
-	 * @see https://developer.postcode.eu/documentation/international/v1/Validate/validate
-	 */
-	public function validateAddress(
-		string $country,
-		?string $postcode = null,
-		?string $locality = null,
-		?string $street = null,
-		?string $building = null,
-		?string $region = null,
-		?string $streetAndBuilding = null
-	): array
-	{
+     * @return array
+     *
+     * @see https://developer.postcode.eu/documentation/international/v1/Validate/validate
+     */
+    public function validateAddress(
+        string $country,
+        ?string $postcode = null,
+        ?string $locality = null,
+        ?string $street = null,
+        ?string $building = null,
+        ?string $region = null,
+        ?string $streetAndBuilding = null
+    ): array {
         $params = array_filter([
             'postcode' => $postcode,
             'locality' => $locality,

@@ -66,16 +66,15 @@ class PostcodeModel implements PostcodeModelInterface
     /**
      * @inheritdoc
      */
-	public function validateAddress(
-		string $country,
-		?string $postcode = null,
-		?string $locality = null,
-		?string $street = null,
-		?string $building = null,
-		?string $region = null,
-		?string $streetAndBuilding = null
-    ): array
-    {
+    public function validateAddress(
+        string $country,
+        ?string $postcode = null,
+        ?string $locality = null,
+        ?string $street = null,
+        ?string $building = null,
+        ?string $region = null,
+        ?string $streetAndBuilding = null
+    ): array {
         $result = $this->apiClientHelper->validateAddress(...func_get_args());
         return [$result];
     }

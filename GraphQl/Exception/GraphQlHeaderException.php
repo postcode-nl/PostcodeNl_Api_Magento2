@@ -14,7 +14,7 @@ class GraphQlHeaderException extends LocalizedException implements ClientAware
     /**
      * Describing a category of the error
      */
-    const EXCEPTION_CATEGORY = 'graphql-header';
+    public const EXCEPTION_CATEGORY = 'graphql-header';
 
     /**
      * @var boolean

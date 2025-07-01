@@ -436,10 +436,8 @@ class ApiClientHelper extends AbstractHelper
             $client = $this->getApiClient();
             $response = $client->validateAddress(...$args);
 
-            foreach ($response['matches'] as &$m)
-            {
-                if (in_array($m['status']['validationLevel'], ['Building', 'BuildingPartial'], true))
-                {
+            foreach ($response['matches'] as &$m) {
+                if (in_array($m['status']['validationLevel'], ['Building', 'BuildingPartial'], true)) {
                     $m['region'] = $this->_getRegionFromDetails($m);
                     $m['streetLines'] = $this->_getStreetLines($m);
                 }
