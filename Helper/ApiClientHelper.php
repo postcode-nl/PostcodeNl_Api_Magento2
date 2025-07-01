@@ -16,6 +16,7 @@ use Magento\Framework\Locale\Resolver as LocaleResolver;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
+use Psr\Log\LoggerInterface;
 
 class ApiClientHelper extends AbstractHelper
 {
@@ -36,6 +37,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_productMetadata;
     protected $_regionFactory;
     protected $_addressHelper;
+    protected $_logger;
 
     /**
      * __construct function.
@@ -52,6 +54,7 @@ class ApiClientHelper extends AbstractHelper
      * @param ProductMetadataInterface $productMetadata
      * @param RegionFactory $regionFactory
      * @param AddressHelper $addressHelper
+     * @param LoggerInterface $logger
      * @return void
      */
     public function __construct(
@@ -65,7 +68,8 @@ class ApiClientHelper extends AbstractHelper
         StoreConfigHelper $storeConfigHelper,
         ProductMetadataInterface $productMetadata,
         RegionFactory $regionFactory,
-        AddressHelper $addressHelper
+        AddressHelper $addressHelper,
+        LoggerInterface $logger
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -77,6 +81,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_productMetadata = $productMetadata;
         $this->_regionFactory = $regionFactory;
         $this->_addressHelper = $addressHelper;
+        $this->_logger = $logger;
         parent::__construct($context);
     }
 
@@ -349,6 +354,10 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
+        if (!$exception instanceof \Flekto\Postcode\Service\Exception\NotFoundException) {
+            $this->_logger->error($exception->getMessage(), ['exception' => $exception]);
+        }
+
         $result = ['error' => true, 'message' => __('Something went wrong. Please try again.')];
 
         if ($this->_storeConfigHelper->isDebugging()) {
