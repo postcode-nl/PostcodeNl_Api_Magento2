@@ -5,19 +5,19 @@ namespace Flekto\Postcode\Service;
 use Flekto\Postcode\Helper\StoreConfigHelper;
 
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\App\Request\Http as HttpRequest;
 
+use Flekto\Postcode\HTTP\Client\Curl;
 use Flekto\Postcode\Service\Exception\AuthenticationException;
 use Flekto\Postcode\Service\Exception\BadRequestException;
 use Flekto\Postcode\Service\Exception\CurlException;
 use Flekto\Postcode\Service\Exception\ForbiddenException;
 use Flekto\Postcode\Service\Exception\InvalidJsonResponseException;
 use Flekto\Postcode\Service\Exception\InvalidPostcodeException;
+use Flekto\Postcode\Service\Exception\NotFoundException;
 use Flekto\Postcode\Service\Exception\ServerUnavailableException;
 use Flekto\Postcode\Service\Exception\TooManyRequestsException;
 use Flekto\Postcode\Service\Exception\UnexpectedException;
-use Flekto\Postcode\Service\Exception\NotFoundException;
 
 class PostcodeApiClient
 {
@@ -39,6 +39,13 @@ class PostcodeApiClient
      */
     protected $_secret;
 
+    /**
+     * The user agent string
+     *
+     * @var string
+     */
+    protected $_userAgent;
+
     protected $_curl;
     protected $_storeConfigHelper;
     protected $_productMetadata;
@@ -52,12 +59,10 @@ class PostcodeApiClient
         $this->_curl = $curl;
         $this->_productMetadata = $productMetadata;
         $this->_storeConfigHelper = $storeConfigHelper;
-        ['key' => $this->_key, 'secret' => $this->_secret] = $storeConfigHelper->getCredentials();
 
         $curl->setOptions([
             CURLOPT_CONNECTTIMEOUT => 2,
             CURLOPT_TIMEOUT => 5,
-            CURLOPT_USERAGENT => $this->getUserAgent(),
         ]);
 
         if (null !== $request->getServer('HTTP_REFERER')) {
@@ -67,15 +72,19 @@ class PostcodeApiClient
 
     public function getUserAgent(): string
     {
-        return sprintf(
-            '%s/%s %s/%s/%s PHP/%s',
-            \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
-            $this->_storeConfigHelper->getModuleVersion(),
-            $this->_productMetadata->getName(),
-            $this->_productMetadata->getEdition(),
-            $this->_productMetadata->getVersion(),
-            PHP_VERSION
-        );
+        if ($this->_userAgent === null) {
+            $this->_userAgent = sprintf(
+                '%s/%s %s/%s/%s PHP/%s',
+                \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
+                $this->_storeConfigHelper->getModuleVersion(),
+                $this->_productMetadata->getName(),
+                $this->_productMetadata->getEdition(),
+                $this->_productMetadata->getVersion(),
+                PHP_VERSION
+            );
+        }
+
+        return $this->_userAgent;
     }
 
     /**
@@ -140,7 +149,7 @@ class PostcodeApiClient
      * @param string|null $houseNumberAddition House number addition, optional
      * @return array
      *
-     * @see https://developer.postcode.eu/documentation
+     * @see https://developer.postcode.eu/documentation/nl/v1/Address/viewByPostcode
      */
     public function dutchAddressByPostcode(
         string $postcode,
@@ -170,6 +179,47 @@ class PostcodeApiClient
     public function accountInfo(): array
     {
         return $this->_fetch('account/v1/info', null);
+    }
+
+    /**
+     * Validate a full address, correcting and completing all parts of the address.
+     *
+     * @param string $country
+     * @param string|null $postcode
+     * @param string|null $locality
+     * @param string|null $street
+     * @param string|null $building
+     * @param string|null $region
+     * @param string|null $streetAndBuilding
+     * @return array
+     *
+     * @see https://developer.postcode.eu/documentation/international/v1/Validate/validate
+     */
+    public function validateAddress(
+        string $country,
+        ?string $postcode = null,
+        ?string $locality = null,
+        ?string $street = null,
+        ?string $building = null,
+        ?string $region = null,
+        ?string $streetAndBuilding = null
+    ): array {
+        $params = array_filter([
+            'postcode' => $postcode,
+            'locality' => $locality,
+            'street' => $street,
+            'building' => $building,
+            'region' => $region,
+            'streetAndBuilding' => $streetAndBuilding,
+        ], fn($value) => $value !== null);
+
+        return $this->_fetch(
+            sprintf(
+                'international/v1/validate/%s?%s',
+                rawurlencode(strtolower($country)),
+                http_build_query($params, '', null, PHP_QUERY_RFC3986)
+            )
+        );
     }
 
     /**
@@ -212,10 +262,15 @@ class PostcodeApiClient
 
     protected function _fetch(string $path, ?string $session = null): array
     {
+        if ($this->_key === null || $this->_secret === null) {
+            ['key' => $this->_key, 'secret' => $this->_secret] = $this->_storeConfigHelper->getCredentials();
+        }
+
         if ($session !== null) {
             $this->_curl->setHeaders([static::SESSION_HEADER_KEY => $session]);
         }
 
+        $this->_curl->setOption(CURLOPT_USERAGENT, $this->getUserAgent());
         $this->_curl->setCredentials($this->_key, $this->_secret);
         $url = static::SERVER_URL . $path;
 

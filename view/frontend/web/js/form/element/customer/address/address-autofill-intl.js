@@ -1,8 +1,9 @@
 define([
     'Flekto_Postcode/js/form/element/address-autofill-intl',
+    'Flekto_Postcode/js/action/customer/address/get-validated-address',
     'uiRegistry',
     'mageUtils',
-], function (AddressAutofillIntl, Registry, Utils) {
+], function (AddressAutofillIntl, getValidatedAddress, Registry, Utils) {
     'use strict';
 
     return AddressAutofillIntl.extend({
@@ -15,8 +16,6 @@ define([
                 onChangeCountry: '${$.parentName}:countryCode',
                 settings: '${$.parentName}:settings',
             },
-
-            searchInitialValue: true,
         },
 
         initialize: function () {
@@ -28,11 +27,31 @@ define([
             if (this.visible() && this.value() === '') {
                 const postcode = this.inputs.postcode.value,
                     city = this.inputs.city.value,
-                    streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
-                    prefilledAddressValue = `${postcode} ${city} ${streetAddress}`.trim();
+                    streetAndBuilding = this.inputs.getStreetValue(),
+                    prefilledAddressValue = `${postcode} ${city} ${streetAndBuilding}`.trim();
 
-                if (prefilledAddressValue !== '') {
-                    this.resetInputAddress();
+                if (prefilledAddressValue === '') {
+                    return;
+                }
+
+                this.resetInputAddress();
+
+                if (streetAndBuilding && postcode && city) {
+                    this.loading(true);
+
+                    getValidatedAddress(this.countryCode, streetAndBuilding, postcode, city)
+                        .then((result) => {
+                            if (result !== null) {
+                                this.address(result);
+                            }
+                        })
+                        .finally(() => {
+                            this.loading(false);
+                            this.value(prefilledAddressValue);
+                            this.inputElement.classList.remove('postcodenl-autocomplete-address-input-blank');
+                        });
+                } else {
+                    // Set incomplete value to trigger validation and show error message.
                     this.value(prefilledAddressValue);
                 }
             }
@@ -54,9 +73,9 @@ define([
             this.inputs.city.value = result.address.locality;
             this.inputs.postcode.value = result.address.postcode;
 
-            if (this.inputs.regionId.style.display !== 'none') {
+            if (this.inputs.regionId && this.inputs.regionId.style.display !== 'none') {
                 this.inputs.regionId.value = result.region.id ?? '';
-            } else if (this.inputs.region.style.display !== 'none') {
+            } else if (this.inputs.region && this.inputs.region.style.display !== 'none') {
                 this.inputs.region.value = result.region.name ?? '';
             }
         },

@@ -15,10 +15,12 @@ define([
             }
 
             viewModel.intlAutocompleteInstance = new AutocompleteAddress(element, {
-                autocompleteUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/autocomplete',
-                addressDetailsUrl: viewModel.settings.base_url + 'postcode-eu/V1/international/address',
+                autocompleteUrl: viewModel.settings.api_actions.autocomplete,
+                addressDetailsUrl: viewModel.settings.api_actions.addressDetails,
                 context: viewModel.countryCode || 'NL',
             });
+
+            viewModel.inputElement = element;
 
             function getAddressDetails(context, callback) {
                 if (addressDetailsCache.has(context)) {
@@ -43,23 +45,6 @@ define([
                     viewModel.toggleFields(isValidAddress);
                     isValidAddress && viewModel.validate();
                 });
-            }
-
-            // If initialized with a value that leads to exactly one address, select it.
-            if (viewModel.searchInitialValue && viewModel.value() !== '') {
-                element.addEventListener(
-                    'autocomplete-response',
-                    (response) => {
-                        const matches = response.detail.matches;
-
-                        if (matches.length === 1 && matches[0].precision === 'Address') {
-                            selectAddress(matches[0]);
-                        }
-                    },
-                    { once: true }
-                );
-
-                viewModel.intlAutocompleteInstance.search(element, { term: viewModel.value(), showMenu: false });
             }
 
             element.addEventListener('autocomplete-select', (e) => {

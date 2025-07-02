@@ -175,11 +175,20 @@ class StoreConfigHelper extends AbstractHelper
      */
     public function getJsinit(): array
     {
+        $baseUrl = $this->getCurrentStoreBaseUrl();
+        $apiBaseUrl = $baseUrl . 'postcode-eu/V1/';
+
         return [
             'enabled_countries' => $this->getEnabledCountries(),
             'nl_input_behavior' => $this->getValue('nl_input_behavior') ?? NlInputBehavior::ZIP_HOUSE,
             'show_hide_address_fields' => $this->getValue('show_hide_address_fields') ?? ShowHideAddressFields::SHOW,
-            'base_url' => $this->getCurrentStoreBaseUrl(),
+            'base_url' => $baseUrl,
+            'api_actions' => [
+                'dutchAddressLookup' => $apiBaseUrl . 'nl/address',
+                'autocomplete' => $apiBaseUrl . 'international/autocomplete',
+                'addressDetails' => $apiBaseUrl . 'international/address',
+                'validate' => $apiBaseUrl . 'international/validate',
+            ],
             'debug' => $this->isDebugging(),
             'change_fields_position' => $this->isSetFlag('change_fields_position'),
             'allow_pobox_shipping' => $this->isSetFlag('allow_pobox_shipping'),

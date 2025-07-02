@@ -91,22 +91,17 @@ define([
 
             switch (this.settings.show_hide_address_fields) {
             case 'disable':
-                this.street().asyncDelegate('disabled', !state);
-
-                for (const field of ['city', 'postcode', 'regionId', 'regionIdInput']) {
-                    this[field](component => component.disabled(!state)); // eslint-disable-line no-loop-func
+                for (const field of ['street', 'city', 'postcode', 'regionId', 'regionIdInput']) {
+                    this[field](component => component.disabled(!state));
                 }
                 break;
             case 'format':
                 if (!force) {
-                    if (!this.street().visible()) {
-                        return; // Assume fields are already hidden, nothing more to do.
+                    for (const field of ['street', 'city', 'postcode']) {
+                        this[field](component => component.visible(false));
                     }
-
-                    state = false; // To hide fields.
                 }
-
-            /* falls through */
+                break;
             case 'hide':
                 for (const field of ['street', 'city', 'postcode']) {
                     this[field](component => component.visible(state));

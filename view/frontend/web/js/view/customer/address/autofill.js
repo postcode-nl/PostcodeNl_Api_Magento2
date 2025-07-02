@@ -26,7 +26,10 @@ define([
                 city: document.getElementById('city'),
                 postcode: document.getElementById('zip'),
                 toArray: function () {
-                    return [...this.street, this.city, this.postcode, this.regionId, this.region];
+                    return [...this.street, this.city, this.postcode, this.regionId, this.region].filter((el) => el);
+                },
+                getStreetValue: function () {
+                    return [...this.street].map((input) => input.value).join(' ').trim();
                 },
             },
             listens: {
@@ -59,9 +62,8 @@ define([
         },
 
         changeFieldsPosition: function () {
-            this.fieldset.insertBefore(this.fields.country, this.fields.street);
-            this.fieldset.insertBefore(this.fields.postcode, this.fields.region);
-            this.fieldset.insertBefore(this.fields.city, this.fields.region);
+            this.fields.street.before(this.fields.country);
+            this.fields.street.after(this.fields.postcode, this.fields.city);
         },
 
         moveToForm: function () {

@@ -11,6 +11,15 @@ type Query {
         context: String! @doc(description: "Context with precision address to get detailed address information.")
     ): IntlAddressDetails! @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\IntlAddress\\Details") @doc(description: "Get address information based on the provided autocomplete context. The context must have the precision `address`. A HTTP status 400 response is given when the provided context does not resolve to a single address. This method is intended to provide address information using the result context from the autocomplete method. The result of this method can be used to complete an address in an order form for example. A session header is required, see IntlAddressMatches for details.")
     addressApiSettings: AddressApiSettings! @doc(description: "Settings for the Postcode.eu Address API.") @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\AddressApiSettings")
+    validateAddress(
+        country: String! @doc(description: "ISO country code.")
+        postcode: String @doc(description: "The postcode.")
+        locality: String @doc(description: "The locality name.")
+        street: String @doc(description: "The street name, without building number or name.")
+        building: String @doc(description: "The full building number, including any additions.")
+        region: String @doc(description: "The region name. Depending on the country this can be a province, a state or another type of administrative region. This is not typically needed to find matches, but can sometimes be useful to distinguish between otherwise similar matches.")
+        streetAndBuilding: String @doc(description: "The street name and building number. Use this parameter if you do not have separate street and building data. This parameter is not allowed in combination with the street or building parameter.")
+    ): ValidatedAddressResult @resolver(class: "Flekto\\Postcode\\Model\\Resolver\\ValidatedAddress")
 }
 
 type DutchAddressResult {
@@ -72,6 +81,8 @@ type IntlAddressDetails {
     language: String! @doc(description: "Language of the matched address, derived from context or falls back to default.")
     address: IntlAddress! @doc(description: "Address information for the contexts address.")
     mailLines: [String]! @doc(description: "List of address lines as they should appear in an address space. The country name is included when a dispatchCountry parameter is provided which does not correspond with the address country.")
+    streetLines: [String!]! @doc(description: "Formatted street lines. The amount of lines is limited by the configured number of lines in a street address.")
+    region: DirectoryRegion @doc(description: "Region id and name from Magento Directory, if found.")
     location: IntlAddressLocation @doc(description: "WGS-84 coordinates for the address if available, null otherwise.")
     isPoBox: Boolean! @doc(description: "Indicates if the address is a Post Office box.")
     country: IntlAddressCountry! @doc(description: "Country information.")
@@ -95,7 +106,47 @@ type IntlAddressLocation {
 
 type IntlAddressCountry {
     name: String! @doc(description: "The country name.")
+    iso2Code: String! @doc(description: "The ISO 3166-1 Alpha-2 code for the country.")
     iso3Code: String! @doc(description: "The ISO 3166-1 Alpha-3 code for the country.")
+}
+
+type ValidatedAddressResult {
+    country: IntlAddressCountry! @doc(description: "Country information.")
+    matches: [ValidatedAddressMatch!]! @doc(description: "A list of matches to the input address. Matches are ordered from best to worst match to the input parameters. For use-cases without user interaction you typically only need to consider the top match.")
+}
+
+type ValidatedAddressMatch {
+    status: ValidatedAddressMatchStatus! @doc(description: "Status of the match.")
+    language: String! @doc(description: "Language code for the language used in the results.")
+    address: ValidatedAddress! @doc(description: "Address parts. Only validated elements are set.")
+    mailLines: [String!]! @doc(description: "Postal mail lines as used to address letters or packages to the address.")
+    streetLines: [String!]! @doc(description: "Formatted street lines. The amount of lines is limited by the configured number of lines in a street address.")
+    region: DirectoryRegion @doc(description: "Region id and name from Magento Directory, if found.")
+    location: IntlAddressLocation @doc(description: "WGS-84 coordinates for the address if available, null otherwise.")
+    isPoBox: Boolean! @doc(description: "Indicates if the address is a Post Office box.")
+    country: IntlAddressCountry! @doc(description: "Country information.")
+}
+
+type ValidatedAddressMatchStatus {
+    grade: String! @doc(description: "Grade indicating how well the match corresponds to the input address: A - F, A indicating a perfect match, and F indicating an extremely poor match.")
+    validationLevel: String! @doc(description: "Indicates up to which address element the match is validated. Possible values: Building, BuildingPartial, Street, Locality, None.")
+    isAmbiguous: Boolean! @doc(description: "Indicates if this match is too similar in quality to other matches to be considered an unambiguous match to the input. This means there was not enough input data to decide between these matches.")
+}
+
+type ValidatedAddress {
+    country: String! @doc(description: "Country name of the of postal address in English.")
+    locality: String @doc(description: "Name of primary locality used in postal address.")
+    street: String @doc(description: "Name of primary street used in postal address.")
+    postcode: String @doc(description: "Postcode used in postal address.")
+    building: String @doc(description: "The formatted building number of the postal address, including possible additions for the location. (United Kingdom: multiple lines are comma separated.)")
+    buildingNumber: Int @doc(description: "Building number of the postal address, or null if not available.")
+    buildingNumberAddition: String @doc(description: "Building number addition of the postal address, if available. (United Kingdom: multiple lines are comma separated)")
+    region: String @doc(description: "The region the address resides in. Depending on the country this can be a province, a state or another type of administrative region.")
+}
+
+type DirectoryRegion {
+    id: Int @doc(description: "The region id if found in the directory.")
+    name: String @doc(description: "The name of the region as found in the directory. If not found, use region from address details if available.")
 }
 
 type AddressApiSettings {
@@ -103,7 +154,17 @@ type AddressApiSettings {
     nl_input_behavior: String! @doc(description: "How to handle Dutch address. With \"zip_house\", use postcode and house number fields and the Dutch address API. With \"free\" use a single field and the international autocomplete API.")
     show_hide_address_fields: String! @doc(description: "How to handle the standard address fields. E.g. show, hide or disable. The default is to keep fields hidden and show a formatted address instead.")
     base_url: String! @doc(description: "Base URL for the current store.")
+    api_actions: ApiBaseUrls! @doc(description: "Base URL's to use for API requests.")
     debug: Boolean! @doc(description: "Whether debugging is enabled or not.")
     fixedCountry: String @doc(description: "Get fixed country (ISO2) if there's only one allowed country.")
     change_fields_position: Boolean! @doc(description: "If true, address fields should be rearranged so that country selection comes before the autocomplete fields.")
+    allow_pobox_shipping: Boolean! @doc(description: "Allow shipping to PO boxes.")
+    split_street_values: Boolean! @doc(description: "Distribute street address values to available street fields.")
+}
+
+type ApiBaseUrls {
+    dutchAddressLookup: String! @doc(description: "Dutch address lookup.")
+    autocomplete: String! @doc(description: "Autocomplete an address.")
+    addressDetails: String! @doc(description: "Get address details.")
+    validate: String! @doc(description: "Validate an address.")
 }

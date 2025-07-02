@@ -1,6 +1,9 @@
 define([
     'Flekto_Postcode/js/form/components/address-autofill-nl',
-], function (Collection) {
+    'Flekto_Postcode/js/action/customer/address/get-validated-address',
+    'Flekto_Postcode/js/model/address-nl',
+    'mage/translate',
+], function (Collection, getValidatedAddress, AddressNlModel, $t) {
     'use strict';
 
     return Collection.extend({
@@ -21,7 +24,14 @@ define([
             if (this.countryCode === 'NL') {
                 Promise.all([this.prefillPostcode(), this.prefillHouseNumber()])
                     .then(this.getAddress.bind(this))
-                    .catch(() => { /* ignore */ });
+                    .catch(() => {
+                        if (AddressNlModel.houseNumberRegex.test(this.inputs.getStreetValue())) {
+                            // Fall back to Validate API for ambiguous house number cases.
+                            // Because when a street line contains multiple numbers, the
+                            // house number can't easily be determined via pattern matching.
+                            this._getValidatedAddress();
+                        }
+                    });
 
                 this.visible(true);
             }
@@ -45,19 +55,63 @@ define([
             return new Promise((resolve, reject) => {
                 this.childHouseNumber((component) => {
                     if (component.value() === '') {
-                        const streetAddress = [...this.inputs.street].map((input) => input.value).join(' '),
-                            matches = streetAddress.match(/(?<houseNumber>\d+)(?<addition>\D.*)?$/);
+                        const houseNumberAndAddition = this.extractHouseNumber(this.inputs.getStreetValue());
 
-                        if (matches !== null) {
-                            const { houseNumber = '', addition = '' } = matches.groups;
-
-                            component.value(`${houseNumber} ${addition}`.trim());
+                        if (houseNumberAndAddition !== null) {
+                            component.value(houseNumberAndAddition);
                         }
                     }
 
                     this.isHouseNumberValid() ? resolve() : reject();
                 });
             });
+        },
+
+        extractHouseNumber: function (streetAndHouseNumber) {
+            const matches = [...streetAndHouseNumber.matchAll(/[1-9]\d{0,4}\D*/g)];
+
+            if (matches[0]?.index === 0) {
+                matches.shift(); // Discard leading number as a valid house number.
+            }
+
+            if (matches.length === 1) {
+                return matches[0][0].trim(); // Single match is most likely the house number.
+            }
+
+            return null; // No match or ambiguous (i.e. multiple numbers found).
+        },
+
+        _getValidatedAddress: function () {
+            const {postcode, city} = this.inputs;
+
+            this.loading(true);
+            getValidatedAddress('nl', this.inputs.getStreetValue(), postcode.value, city.value)
+                .then((result) => {
+                    if (result === null) {
+                        this.childHouseNumber().error($t('Address not found.'));
+                        return;
+                    }
+
+                    const {address} = result;
+
+                    this.childPostcode().value(address.postcode);
+                    this.childHouseNumber().value(address.building);
+                    this.address({
+                        street: address.street,
+                        houseNumber: address.buildingNumber,
+                        houseNumberAddition: address.buildingNumberAddition,
+                        city: address.locality,
+                        postcode: address.postcode,
+                        province: result.region.name,
+                    });
+                    this.status(AddressNlModel.status.VALID);
+                    this.toggleFields(true);
+                })
+                .finally(() => {
+                    this.loading(false);
+                });
+
+            this.resetInputAddress();
         },
 
         onChangeCountry: function (countryCode) {
@@ -72,7 +126,10 @@ define([
             this.inputs.street[0].value = addressParts.street + ' ' + addressParts.house;
             this.inputs.city.value = addressParts.city;
             this.inputs.postcode.value = addressParts.postcode;
-            this.inputs.region.value = addressParts.province;
+
+            if (this.inputs.region) {
+                this.inputs.region.value = addressParts.province;
+            }
         },
 
         resetInputAddress: function () {
@@ -98,7 +155,9 @@ define([
             /* falls through */
             case 'hide':
                 for (const name of ['street', 'city', 'postcode', 'region']) {
-                    this.fields[name].style.display = state ? '' : 'none';
+                    if (this.fields[name]) {
+                        this.fields[name].style.display = state ? '' : 'none';
+                    }
                 }
                 break;
             }

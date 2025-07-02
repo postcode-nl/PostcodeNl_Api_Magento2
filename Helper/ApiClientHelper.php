@@ -16,6 +16,7 @@ use Magento\Framework\Locale\Resolver as LocaleResolver;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Framework\Webapi\Rest\Response;
+use Psr\Log\LoggerInterface;
 
 class ApiClientHelper extends AbstractHelper
 {
@@ -36,6 +37,7 @@ class ApiClientHelper extends AbstractHelper
     protected $_productMetadata;
     protected $_regionFactory;
     protected $_addressHelper;
+    protected $_logger;
 
     /**
      * __construct function.
@@ -52,6 +54,7 @@ class ApiClientHelper extends AbstractHelper
      * @param ProductMetadataInterface $productMetadata
      * @param RegionFactory $regionFactory
      * @param AddressHelper $addressHelper
+     * @param LoggerInterface $logger
      * @return void
      */
     public function __construct(
@@ -65,7 +68,8 @@ class ApiClientHelper extends AbstractHelper
         StoreConfigHelper $storeConfigHelper,
         ProductMetadataInterface $productMetadata,
         RegionFactory $regionFactory,
-        AddressHelper $addressHelper
+        AddressHelper $addressHelper,
+        LoggerInterface $logger
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -77,6 +81,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_productMetadata = $productMetadata;
         $this->_regionFactory = $regionFactory;
         $this->_addressHelper = $addressHelper;
+        $this->_logger = $logger;
         parent::__construct($context);
     }
 
@@ -301,7 +306,6 @@ class ApiClientHelper extends AbstractHelper
 
             $client = $this->getApiClient();
             $address = $client->dutchAddressByPostcode($zipCode, $houseNumber, $houseNumberAddition);
-            $address = $this->_prepareResponse($address, $client);
             $status = 'valid';
 
             if ((strcasecmp($address['houseNumberAddition'] ?? '', $houseNumberAddition ?? '') != 0)
@@ -328,16 +332,16 @@ class ApiClientHelper extends AbstractHelper
 
         $address['houseNumberAdditions'] = $formattedHouseNumberAdditions;
 
-        $out = ['address' => $address, 'status' => $status];
-
         if ($this->_storeConfigHelper->isDebugging()) {
-            $out['debug'] = [
+            $address['debug'] = [
                 'parsedHouseNumber' => $houseNumber,
                 'parsedHouseNumberAddition' => $houseNumberAddition,
             ];
         }
 
-        return $out;
+        $result = ['address' => $address, 'status' => $status];
+
+        return $this->_prepareResponse($result, $client);
     }
 
     /**
@@ -349,6 +353,10 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
+        if (!$exception instanceof \Flekto\Postcode\Service\Exception\NotFoundException) {
+            $this->_logger->error($exception->getMessage(), ['exception' => $exception]);
+        }
+
         $result = ['error' => true, 'message' => __('Something went wrong. Please try again.')];
 
         if ($this->_storeConfigHelper->isDebugging()) {
@@ -411,6 +419,38 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
+     * Validate a full address, correcting and completing all parts of the address.
+     *
+     * @access public
+     * @see \Flekto\Postcode\Service\PostcodeApiClient::validateAddress()
+     * @return array
+     */
+    public function validateAddress(): array
+    {
+        $args = func_get_args();
+        if (strlen($args[0]) === 2) {
+            $args[0] = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
+        }
+
+        try {
+            $client = $this->getApiClient();
+            $response = $client->validateAddress(...$args);
+
+            foreach ($response['matches'] as &$m) {
+                if (in_array($m['status']['validationLevel'], ['Building', 'BuildingPartial'], true)) {
+                    $m['region'] = $this->_getRegionFromDetails($m);
+                    $m['streetLines'] = $this->_getStreetLines($m);
+                }
+            }
+
+            return $this->_prepareResponse($response, $client);
+
+        } catch (\Exception $e) {
+            return $this->_handleClientException($e);
+        }
+    }
+
+    /**
      * Get country ISO3 code from ISO2 code, or NULL if not found.
      *
      * @access public
@@ -468,19 +508,11 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _getMagentoModules(): array
     {
-        if (isset($this->_modules)) {
-            return $this->_modules;
-        }
-
-        $this->_modules = [];
-
-        foreach ($this->_moduleList->getAll() as $name => $module) {
-            $this->_modules[$name] = [];
-            foreach ($module as $key => $value) {
-                if (in_array((string) $key, ['setup_version', 'name'])) {
-                    $this->_modules[$name][$key] = (string) $value;
-                }
-            }
+        if (!isset($this->_modules)) {
+            $this->_modules = array_map(
+                fn ($module) => ['name' => $module['name'], 'setup_version' => $module['setup_version'] ?? ''],
+                $this->_moduleList->getAll()
+            );
         }
 
         return $this->_modules;
@@ -499,7 +531,6 @@ class ApiClientHelper extends AbstractHelper
             'configuration' => [
                 'key' => $credentials['key'],
                 'secret' => substr_replace($credentials['secret'], '***', 3, -3),
-                'debug' => $this->_storeConfigHelper->getValue('api_debug'),
             ],
             'modules' => $this->_getMagentoModules(),
         ];

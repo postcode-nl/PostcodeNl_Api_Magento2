@@ -27,4 +27,11 @@
            <resource ref="anonymous" />
         </resources>
     </route>
+
+    <route url="/V1/international/validate/:country" method="GET">
+        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="validateAddress"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
 </routes>

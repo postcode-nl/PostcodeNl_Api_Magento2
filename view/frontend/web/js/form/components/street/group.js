@@ -1,10 +1,22 @@
 define([
     'Magento_Ui/js/form/components/group',
     'uiRegistry',
-], function (Group, Registry) {
+    'ko',
+], function (Group, Registry, ko) {
     'use strict';
 
     return Group.extend({
+        initObservable: function () {
+            this._super();
+
+            this.disabled = ko.pureComputed({
+                read: () => this.elems.first()?.disabled() ?? false,
+                write: (val) => this.elems.map((elem) => elem.disabled(val)),
+            });
+
+            return this;
+        },
+
         clearFields: function () {
             this.delegate('clear');
             return this;
@@ -13,12 +25,6 @@ define([
         clearErrors: function () {
             this.delegate('error', false);
             return this;
-        },
-
-        asyncDelegate: function (method, ...args) {
-            for (let i = 0; i < this.initChildCount; i++) {
-                Registry.async(`${this.name}.${i}`)(method, ...args);
-            }
         },
 
         asyncSetValues: function (...args) {
