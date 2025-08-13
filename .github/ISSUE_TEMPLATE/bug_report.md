@@ -9,7 +9,6 @@ assignees: ''
 
 ⚠️ **Before submitting**:
 * Verify the issue persists in the *most recent* module version.
-* Consider [contacting Postcode.nl](mailto:tech@postcode.nl). Especially if you have a staging or testing environment to share.
 * Make sure the issue isn't already reported to avoid duplicates.
 
 🪲 **Describe the bug**
@@ -32,4 +31,5 @@ If applicable, add screenshots to help explain your problem.
 * PHP version (if it's a backend issue).
 
 💡 **Additional context**
-Add any other context that may be helpful.
+* Add any other context that may be helpful.
+* If you have a staging or testing environment to share, you can also [contact Postcode.nl](mailto:tech@postcode.nl) directly.
