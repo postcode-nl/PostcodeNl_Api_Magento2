@@ -123,7 +123,10 @@ define([
         setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
 
-            this.inputs.street[0].value = addressParts.street + ' ' + addressParts.house;
+            for (let i = 0; i < address.streetLines.length; i++) {
+                this.inputs.street[i].value = address.streetLines[i];
+            }
+
             this.inputs.city.value = addressParts.city;
             this.inputs.postcode.value = addressParts.postcode;
 
