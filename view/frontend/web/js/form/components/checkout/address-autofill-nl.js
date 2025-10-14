@@ -64,6 +64,19 @@ define([
         setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
 
+            // Result could be an old address from localStorage, without streetLines.
+            if (typeof addressParts.streetLines === 'undefined') {
+                addressParts.streetLines = [
+                    addressParts.street,
+                    addressParts.houseNumber,
+                    addressParts.houseNumberAddition,
+                ];
+
+                if (!this.settings.split_street_values) {
+                    addressParts.streetLines = [addressParts.streetLines.join(' ')];
+                }
+            }
+
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
             this.street().asyncSetValues(...addressParts.streetLines);
 
