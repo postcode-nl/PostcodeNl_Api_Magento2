@@ -339,6 +339,20 @@ class ApiClientHelper extends AbstractHelper
             ];
         }
 
+        $streetParts = [
+            $address['street'],
+            $address['houseNumber'],
+            $address['houseNumberAddition'] ?? '',
+        ];
+
+        if ($this->_storeConfigHelper->isSetFlag('split_street_values')) {
+            $lastLineIndex = $this->_addressHelper->getStreetLines() - 1;
+            $address['streetLines'] = array_slice($streetParts, 0, $lastLineIndex);
+            $address['streetLines'][] = implode(' ', array_slice($streetParts, $lastLineIndex));
+        } else {
+            $address['streetLines'] = [rtrim(implode(' ', $streetParts))];
+        }
+
         $result = ['address' => $address, 'status' => $status];
 
         return $this->_prepareResponse($result, $client);

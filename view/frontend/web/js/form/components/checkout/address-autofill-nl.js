@@ -64,16 +64,21 @@ define([
         setInputAddress: function (address) {
             const addressParts = this.getAddressParts(address);
 
-            if (this.settings.split_street_values) {
-                // Street children may not yet be available at this point, so value needs to be set asynchronously.
-                this.street().asyncSetValues(
+            // Result could be an old address from localStorage, without streetLines.
+            if (typeof addressParts.streetLines === 'undefined') {
+                addressParts.streetLines = [
                     addressParts.street,
                     addressParts.houseNumber,
-                    addressParts.houseNumberAddition
-                );
-            } else {
-                this.street().asyncSetValues(`${addressParts.street} ${addressParts.house}`);
+                    addressParts.houseNumberAddition,
+                ];
+
+                if (!this.settings.split_street_values) {
+                    addressParts.streetLines = [addressParts.streetLines.join(' ')];
+                }
             }
+
+            // Street children may not yet be available at this point, so value needs to be set asynchronously.
+            this.street().asyncSetValues(...addressParts.streetLines);
 
             this.city().value(addressParts.city);
             this.postcode().value(addressParts.postcode);
