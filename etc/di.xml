@@ -5,7 +5,10 @@
     <preference for="Flekto\Postcode\Api\UpdateNotificationRepositoryInterface" type="Flekto\Postcode\Model\UpdateNotificationRepository" />
     <preference for="Magento\Framework\Filesystem\DriverInterface" type="Magento\Framework\Filesystem\Driver\File" />
     <preference for="Magento\Checkout\Block\Checkout\AttributeMerger" type="Flekto\Postcode\Block\Checkout\AttributeMerger" />
-    <preference for="Magento\Customer\Model\Validator\City" type="Flekto\Postcode\Model\Validator\City" />
+
+    <type name="Magento\Framework\Validator">
+        <plugin name="flekto_postcode_city_validation" type="Flekto\Postcode\Plugin\ValidatorPlugin"/>
+    </type>
 
     <type name="Magento\Framework\App\AreaList">
         <arguments>
