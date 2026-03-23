@@ -1,11 +1,11 @@
 <?php
 
-namespace Flekto\Postcode\Helper;
+namespace PostcodeEu\AddressValidation\Helper;
 
 use Exception;
-use Flekto\Postcode\Helper\StoreConfigHelper;
-use Flekto\Postcode\Service\Exception\NotFoundException;
-use Flekto\Postcode\Service\PostcodeApiClient;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Service\Exception\NotFoundException;
+use PostcodeEu\AddressValidation\Service\PostcodeApiClient;
 use Magento\Customer\Helper\Address as AddressHelper;
 use Magento\Developer\Helper\Data;
 use Magento\Directory\Model\RegionFactory;
@@ -353,7 +353,7 @@ class ApiClientHelper extends AbstractHelper
      */
     private function _handleClientException(\Exception $exception): array
     {
-        if (!$exception instanceof \Flekto\Postcode\Service\Exception\NotFoundException) {
+        if (!$exception instanceof \PostcodeEu\AddressValidation\Service\Exception\NotFoundException) {
             $this->_logger->error($exception->getMessage(), ['exception' => $exception]);
         }
 
@@ -422,7 +422,7 @@ class ApiClientHelper extends AbstractHelper
      * Validate a full address, correcting and completing all parts of the address.
      *
      * @access public
-     * @see \Flekto\Postcode\Service\PostcodeApiClient::validateAddress()
+     * @see \PostcodeEu\AddressValidation\Service\PostcodeApiClient::validateAddress()
      * @return array
      */
     public function validateAddress(): array

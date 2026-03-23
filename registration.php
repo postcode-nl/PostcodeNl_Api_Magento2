@@ -2,6 +2,6 @@
 
 \Magento\Framework\Component\ComponentRegistrar::register(
     \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'Flekto_Postcode',
+    'PostcodeEu_AddressValidation',
     __DIR__
 );

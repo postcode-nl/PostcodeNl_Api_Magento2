@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Model\Config\Source;
+namespace PostcodeEu\AddressValidation\Model\Config\Source;
 
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 class DisabledCountries implements \Magento\Framework\Data\OptionSourceInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Model;
+namespace PostcodeEu\AddressValidation\Model;
 
-use Flekto\Postcode\Api\Data\UpdateNotificationInterface;
+use PostcodeEu\AddressValidation\Api\Data\UpdateNotificationInterface;
 use Magento\Framework\Model\AbstractModel;
 
 class UpdateNotification extends AbstractModel implements UpdateNotificationInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Block\Checkout;
+namespace PostcodeEu\AddressValidation\Block\Checkout;
 
 use Magento\Checkout\Block\Checkout\AttributeMerger as BaseAttributeMerger;
 
@@ -24,8 +24,8 @@ class AttributeMerger extends BaseAttributeMerger
 
         if ($attributeCode === 'street') {
             // NB. collection component must end in '/group' or Magento's shipping rates validator will break.
-            $config['component'] = 'Flekto_Postcode/js/form/components/street/group';
-            $config['config']['template'] = 'Flekto_Postcode/group/street';
+            $config['component'] = 'PostcodeEu_AddressValidation/js/form/components/street/group';
+            $config['config']['template'] = 'PostcodeEu_AddressValidation/group/street';
         }
 
         return $config;

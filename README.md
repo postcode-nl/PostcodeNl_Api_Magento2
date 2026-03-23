@@ -2,13 +2,13 @@
 
 ## International Address API module for Magento 2
 
-Adds autocompletion for addresses to the checkout page. [Multiple countries](https://www.postcode.nl/services/adresdata/internationaal) are supported using official postal data via the [Postcode.eu](https://postcode.eu) API.
+Adds autocompletion for addresses to the checkout page. [Multiple countries](https://www.postcode.eu/products/address-api/international) are supported using official postal data via the [Postcode.eu](https://postcode.eu) API.
 
-This module is maintained by [Postcode.nl](https://postcode.nl) since version 3.0.0. Earlier versions were developed by [Flekto](https://www.flekto.nl).
+This module is maintained by [Postcode.eu](https://postcode.eu).
 
 ## Postcode.eu account
 
-A [Postcode.eu account](https://www.postcode.nl/en/services/adresdata/producten-overzicht) is required.
+A [Postcode.eu account](https://account.postcode.eu) is required.
 Testing is free. After testing you can choose to purchase a subscription.
 
 ## Installation instructions
@@ -61,7 +61,7 @@ Our module now supports GraphQL, allowing you to query address data via Magento'
 
 ## Compatibility
 
-Although we can't guarantee compatibility with other checkout modules, our module works well with most one-step-checkout modules. If you are having issues and think this may be caused by our module, please [contact Postcode.nl](mailto:tech@postcode.nl) and tell us which other module(s) and version(s) are used.
+Although we can't guarantee compatibility with other checkout modules, our module works well with most one-step-checkout modules. If you are having issues and think this may be caused by our module, please [contact Postcode.eu](mailto:tech@postcode.nl) and tell us which other module(s) and version(s) are used.
 
 If you found the solution already and have some code to contribute, feel free to open a pull request in this repository.
 
@@ -76,7 +76,7 @@ Instructions for additional configuration and customization can be found on the 
 ## FAQ and Knowledge Base
 
 * View Frequently Asked Questions at https://www.postcode.eu/#faq.
-* For more questions and answers, see https://kb.postcode.nl/help
+* For more questions and answers, see https://kb.postcode.eu
 * If the above didn't answer your question, [contact us](https://www.postcode.eu/contact).
 
 ## License

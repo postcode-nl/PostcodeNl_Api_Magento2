@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
-        <job name="flekto_postcode_update_api_data" instance="Flekto\Postcode\Cron\UpdateApiData" method="execute">
+        <job name="postcode_eu_update_api_data" instance="PostcodeEu\AddressValidation\Cron\UpdateApiData" method="execute">
             <schedule>3 3 * * *</schedule>
         </job>
-        <job name="flekto_postcode_notify_module_update" instance="Flekto\Postcode\Cron\NotifyModuleUpdate" method="execute">
+        <job name="postcode_eu_notify_module_update" instance="PostcodeEu\AddressValidation\Cron\NotifyModuleUpdate" method="execute">
             <schedule>3 3 * * *</schedule>
         </job>
     </group>

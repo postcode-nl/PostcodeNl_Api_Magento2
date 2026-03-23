@@ -1,9 +1,9 @@
 <?php
 
-namespace Flekto\Postcode\Setup\Patch\Data;
+namespace PostcodeEu\AddressValidation\Setup\Patch\Data;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -44,7 +44,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
      */
     public function getAliases(): array
     {
-        return [];
+        return ['Flekto\Postcode\Setup\Patch\Data\UpdateApiStatusConfig'];
     }
 
     /**
@@ -80,8 +80,20 @@ class UpdateApiStatusConfig implements DataPatchInterface
 
         foreach ($scopeValues as $scope => $scopeIdValues) {
             foreach ($scopeIdValues as $scopeId => $credentials) {
-
                 if (empty($credentials[StoreConfigHelper::PATH['api_key']]) || empty($credentials[StoreConfigHelper::PATH['api_secret']])) {
+                    continue;
+                }
+
+                // Skip if already migrated
+                $existingStatus = $connection->fetchOne(
+                    $connection->select()
+                        ->from($this->_resourceConfig->getTable('core_config_data'), ['value'])
+                        ->where('path = ?', StoreConfigHelper::PATH['account_status'])
+                        ->where('scope = ?', $scope)
+                        ->where('scope_id = ?', $scopeId)
+                );
+
+                if ($existingStatus !== false) {
                     continue;
                 }
 
@@ -104,7 +116,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
                         $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE, $scope, $scopeId);
                     }
 
-                } catch (\Flekto\Postcode\Service\Exception\AuthenticationException $e) {
+                } catch (\PostcodeEu\AddressValidation\Service\Exception\AuthenticationException $e) {
 
                     $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS, $scope, $scopeId);
                 }

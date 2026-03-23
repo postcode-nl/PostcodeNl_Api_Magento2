@@ -3,7 +3,7 @@
     <type name="Magento\Checkout\Block\Onepage">
         <arguments>
             <argument name="layoutProcessors" xsi:type="array">
-                <item name="flekto_postcode_layoutprocessor" xsi:type="object" sortOrder="1">Flekto\Postcode\Block\Onepage\LayoutProcessor</item>
+                <item name="postcode_eu_layoutprocessor" xsi:type="object" sortOrder="1">PostcodeEu\AddressValidation\Block\Onepage\LayoutProcessor</item>
             </argument>
         </arguments>
     </type>

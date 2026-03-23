@@ -1,9 +1,9 @@
 <?php
 
-namespace Flekto\Postcode\Model\Resolver;
+namespace PostcodeEu\AddressValidation\Model\Resolver;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\GraphQl\Exception\GraphQlHeaderException;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\GraphQl\Exception\GraphQlHeaderException;
 
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\Webapi\Rest\Request as HttpRequest;
@@ -37,7 +37,7 @@ abstract class IntlAddress implements ResolverInterface
      */
     protected function requireSessionHeader(): void
     {
-        $headerName = \Flekto\Postcode\Service\PostcodeApiClient::SESSION_HEADER_KEY;
+        $headerName = \PostcodeEu\AddressValidation\Service\PostcodeApiClient::SESSION_HEADER_KEY;
         $headerValue = $this->_httpRequest->getHeader($headerName);
         if (empty($headerValue)) {
             throw new GraphQlHeaderException(__('%1 header not found.', $headerName));

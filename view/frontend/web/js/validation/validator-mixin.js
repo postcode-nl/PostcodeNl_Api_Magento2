@@ -4,7 +4,7 @@
 
 define([
     'mage/translate',
-    'Flekto_Postcode/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/model/address-nl',
 ], function ($t, addressNlModel) {
     'use strict';
 

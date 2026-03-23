@@ -1,11 +1,11 @@
 <?php
 
-namespace Flekto\Postcode\Block\System\Config;
+namespace PostcodeEu\AddressValidation\Block\System\Config;
 
-use Flekto\Postcode\Helper\StoreConfigHelper;
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\Helper\Data as DataHelper;
-use Flekto\Postcode\Model\UpdateNotification\UpdateNotifier;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
+use PostcodeEu\AddressValidation\Model\UpdateNotification\UpdateNotifier;
 use Magento\Backend\Block\Template;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Data\Form\Element\Renderer\RendererInterface;
@@ -19,7 +19,7 @@ class Status extends Template implements RendererInterface
     public const CACHE_ID = 'postcode-eu-status';
     public const CACHE_LIFETIME_SECONDS = 3600;
 
-    protected $_template = 'Flekto_Postcode::system/config/status.phtml';
+    protected $_template = 'PostcodeEu_AddressValidation::system/config/status.phtml';
     protected $_scopeConfig;
     protected $_storeConfigHelper;
     protected $_apiClientHelper;

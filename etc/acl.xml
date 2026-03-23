@@ -6,7 +6,7 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Flekto_Postcode::config_flekto_postcode" title="Postcode.eu API Autocomplete" sortOrder="10"/>
+                            <resource id="PostcodeEu_AddressValidation::config_postcode_eu" title="Postcode.eu API Autocomplete" sortOrder="10"/>
                         </resource>
                     </resource>
                 </resource>

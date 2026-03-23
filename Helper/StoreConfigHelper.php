@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Helper;
+namespace PostcodeEu\AddressValidation\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
@@ -10,8 +10,8 @@ use Magento\Developer\Helper\Data as DeveloperHelperData;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Directory\Model\ResourceModel\Country\CollectionFactory as CountryCollectionFactory;
 use Magento\Framework\Locale\ResolverInterface;
-use Flekto\Postcode\Model\Config\Source\NlInputBehavior;
-use Flekto\Postcode\Model\Config\Source\ShowHideAddressFields;
+use PostcodeEu\AddressValidation\Model\Config\Source\NlInputBehavior;
+use PostcodeEu\AddressValidation\Model\Config\Source\ShowHideAddressFields;
 
 class StoreConfigHelper extends AbstractHelper
 {

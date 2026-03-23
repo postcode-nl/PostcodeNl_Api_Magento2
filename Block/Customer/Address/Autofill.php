@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Block\Customer\Address;
+namespace PostcodeEu\AddressValidation\Block\Customer\Address;
 
 class Autofill extends \Magento\Framework\View\Element\Template
 {

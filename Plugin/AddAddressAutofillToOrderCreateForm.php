@@ -1,10 +1,10 @@
 <?php
 
-namespace Flekto\Postcode\Plugin;
+namespace PostcodeEu\AddressValidation\Plugin;
 
-use Flekto\Postcode\Helper\Data as DataHelper;
-use Flekto\Postcode\Helper\StoreConfigHelper;
-use Flekto\Postcode\Model\Config\Source\AdminAddressAutocompleteBehavior;
+use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Model\Config\Source\AdminAddressAutocompleteBehavior;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Data\Form;
 use Magento\Sales\Block\Adminhtml\Order\Create\Form\Address as AddressBlock;
@@ -65,7 +65,7 @@ class AddAddressAutofillToOrderCreateForm
 
         $fieldset->addType(
             'postcode-eu-address-autofill',
-            \Flekto\Postcode\Data\Form\Element\AddressAutofill::class,
+            \PostcodeEu\AddressValidation\Data\Form\Element\AddressAutofill::class,
         );
         $addressType = $subject->getIsShipping() ? 'shipping' : 'billing';
         $fieldId = $addressType . '_address_autofill';

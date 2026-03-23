@@ -1,9 +1,9 @@
 <?php
 
-namespace Flekto\Postcode\Cron;
+namespace PostcodeEu\AddressValidation\Cron;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Psr\Log\LoggerInterface;
 

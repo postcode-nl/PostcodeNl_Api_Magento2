@@ -1,6 +1,6 @@
 define([
-    'Flekto_Postcode/js/form/element/address-autofill-intl',
-    'Flekto_Postcode/js/action/customer/address/get-validated-address',
+    'PostcodeEu_AddressValidation/js/form/element/address-autofill-intl',
+    'PostcodeEu_AddressValidation/js/action/customer/address/get-validated-address',
     'uiRegistry',
     'mageUtils',
 ], function (AddressAutofillIntl, getValidatedAddress, Registry, Utils) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var $block \Flekto\Postcode\Block\Customer\Address\Autofill
+ * @var $block \PostcodeEu\AddressValidation\Block\Customer\Address\Autofill
  * @var \Magento\Framework\Escaper $escaper
  */
 ?>
@@ -29,7 +29,7 @@
 <script type="text/x-magento-init">
     {
         "#block-loader-customer-address": {
-            "Flekto_Postcode/js/block-loader": {}
+            "PostcodeEu_AddressValidation/js/block-loader": {}
         },
         ".address-autofill-fieldset": {
             "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout();?>

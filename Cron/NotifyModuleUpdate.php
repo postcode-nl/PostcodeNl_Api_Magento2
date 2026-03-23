@@ -1,10 +1,10 @@
 <?php
 
-namespace Flekto\Postcode\Cron;
+namespace PostcodeEu\AddressValidation\Cron;
 
 use Psr\Log\LoggerInterface;
-use Flekto\Postcode\Helper\Data as DataHelper;
-use Flekto\Postcode\Model\UpdateNotification\UpdateNotifier;
+use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
+use PostcodeEu\AddressValidation\Model\UpdateNotification\UpdateNotifier;
 
 class NotifyModuleUpdate
 {
@@ -43,7 +43,7 @@ class NotifyModuleUpdate
         if (($moduleInfo['has_update'] ?? false)
             && $this->_updateNotifier->notifyVersion($moduleInfo['latest_version'])
         ) {
-            $this->_logger->info(__('Added notification for Postcode.eu Address API %1 update.', $moduleInfo['latest_version']));
+            $this->_logger->info(__('Added notification for Postcode.eu Address Validation %1 update.', $moduleInfo['latest_version']));
         }
     }
 }

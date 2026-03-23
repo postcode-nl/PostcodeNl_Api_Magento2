@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Model\Config\Source;
+namespace PostcodeEu\AddressValidation\Model\Config\Source;
 
 class ShowHideAddressFields implements \Magento\Framework\Data\OptionSourceInterface
 {

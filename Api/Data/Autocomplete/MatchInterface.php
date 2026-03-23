@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data\Autocomplete;
+namespace PostcodeEu\AddressValidation\Api\Data\Autocomplete;
 
 interface MatchInterface
 {
@@ -30,7 +30,7 @@ interface MatchInterface
     public function getContext(): string;
 
     /**
-     * @return Flekto\Postcode\Api\Data\Autocomplete\AutocompleteMatch\HighlightInterface[]
+     * @return PostcodeEu\AddressValidation\Api\Data\Autocomplete\AutocompleteMatch\HighlightInterface[]
      */
     public function getHighlights(): array;
 }

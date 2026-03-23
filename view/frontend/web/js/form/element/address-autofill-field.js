@@ -11,7 +11,7 @@ define([
                 visible: '${ $.parentName }:visible',
             },
             template: 'ui/form/field',
-            elementTmpl: 'Flekto_Postcode/form/element/address-autofill-field',
+            elementTmpl: 'PostcodeEu_AddressValidation/form/element/address-autofill-field',
             visible: false,
         },
 

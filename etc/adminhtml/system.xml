@@ -2,13 +2,13 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="postcodenl_api" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="999" translate="label">
-            <label>Postcode.eu Address API</label>
+            <label>Postcode.eu Address Validation</label>
             <tab>sales</tab>
             <class>postcode-eu-api-section</class>
-            <resource>Flekto_Postcode::config_flekto_postcode</resource>
+            <resource>PostcodeEu_AddressValidation::config_postcode_eu</resource>
 
             <group id="status" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
-                <frontend_model>Flekto\Postcode\Block\System\Config\Status</frontend_model>
+                <frontend_model>PostcodeEu\AddressValidation\Block\System\Config\Status</frontend_model>
             </group>
 
             <group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label">
@@ -32,12 +32,12 @@
                 <field id="nl_input_behavior" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="select">
                     <label>Dutch address fields behavior</label>
                     <comment/>
-                    <source_model>Flekto\Postcode\Model\Config\Source\NlInputBehavior</source_model>
+                    <source_model>PostcodeEu\AddressValidation\Model\Config\Source\NlInputBehavior</source_model>
                 </field>
                 <field id="show_hide_address_fields" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="select">
                     <label>Address fields behavior in autocomplete</label>
                     <comment/>
-                    <source_model>Flekto\Postcode\Model\Config\Source\ShowHideAddressFields</source_model>
+                    <source_model>PostcodeEu\AddressValidation\Model\Config\Source\ShowHideAddressFields</source_model>
                 </field>
                 <field id="allow_autofill_bypass" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="select" canRestore="1">
                     <label>Add manual entry link</label>
@@ -60,7 +60,7 @@
                 <field id="disabled_countries" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="90" translate="label" type="multiselect" canRestore="1">
                     <label>Countries to exclude</label>
                     <comment>Selected countries will have Address API disabled.</comment>
-                    <source_model>Flekto\Postcode\Model\Config\Source\DisabledCountries</source_model>
+                    <source_model>PostcodeEu\AddressValidation\Model\Config\Source\DisabledCountries</source_model>
                 </field>
                 <field id="allow_pobox_shipping" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="100" translate="label" type="select" canRestore="1">
                     <label>PO box shipping</label>
@@ -70,7 +70,7 @@
                 <field id="admin_address_autocomplete_behavior" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="110" translate="label" type="select" canRestore="1">
                     <label>Address autocomplete in admin</label>
                     <comment>Control address autocomplete behavior for the admin order form.</comment>
-                    <source_model>Flekto\Postcode\Model\Config\Source\AdminAddressAutocompleteBehavior</source_model>
+                    <source_model>PostcodeEu\AddressValidation\Model\Config\Source\AdminAddressAutocompleteBehavior</source_model>
                 </field>
                 <field id="split_street_values" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="120" translate="label" type="select" canRestore="1">
                     <label>Split street address values</label>

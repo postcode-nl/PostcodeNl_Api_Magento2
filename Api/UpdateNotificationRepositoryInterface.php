@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Api;
+namespace PostcodeEu\AddressValidation\Api;
 
-use Flekto\Postcode\Api\Data\UpdateNotificationInterface;
+use PostcodeEu\AddressValidation\Api\Data\UpdateNotificationInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 

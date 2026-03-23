@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Model\Validator;
+namespace PostcodeEu\AddressValidation\Model\Validator;
 
 use Magento\Customer\Model\Customer;
 use Magento\Framework\Validator\AbstractValidator;

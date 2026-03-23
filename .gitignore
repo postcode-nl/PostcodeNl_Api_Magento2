@@ -1,4 +1,3 @@
-# .gitignore for M2-Postcode.nl module by Flekto
 .DS_Store
 vendor
 composer.lock

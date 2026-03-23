@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Data\Form\Element;
+namespace PostcodeEu\AddressValidation\Data\Form\Element;
 
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Data\Form\Element\CollectionFactory;
@@ -47,7 +47,7 @@ class AddressAutofill extends AbstractElement
             $this->getId(),
             [
                 'data' => [
-                    'template' => 'Flekto_Postcode::form/element/address-autofill.phtml',
+                    'template' => 'PostcodeEu_AddressValidation::form/element/address-autofill.phtml',
                     'jsLayout' => $this->getJsLayout(),
                 ],
             ],
@@ -66,7 +66,7 @@ class AddressAutofill extends AbstractElement
         return [
             'components' => [
                 $this->getId() => [
-                    'component' => 'Flekto_Postcode/js/view/address/autofill',
+                    'component' => 'PostcodeEu_AddressValidation/js/view/address/autofill',
                     'config' => [
                         'settings' => $this->getData('settings'),
                         'htmlIdPrefix' => $this->getData('htmlIdPrefix'),
@@ -76,7 +76,7 @@ class AddressAutofill extends AbstractElement
                     ],
                     'children' => [
                         'address_autofill_nl' => [
-                            'component' => 'Flekto_Postcode/js/view/form/sales/order_create/address-autofill-nl',
+                            'component' => 'PostcodeEu_AddressValidation/js/view/form/sales/order_create/address-autofill-nl',
                             'config' => [
                                 'componentDisabled' => $this->getData('isNlComponentDisabled'),
                             ],
@@ -86,7 +86,7 @@ class AddressAutofill extends AbstractElement
                                     'label' => __('Zip/Postal Code'),
                                     'config' => [
                                         'template' => 'ui/form/field',
-                                        'elementTmpl' => 'Flekto_Postcode/form/element/address-autofill-field',
+                                        'elementTmpl' => 'PostcodeEu_AddressValidation/form/element/address-autofill-field',
                                         'placeholder' => '1234 AB',
                                         'imports' => [
                                             'visible' => '${ $.parentName }:visible',
@@ -101,7 +101,7 @@ class AddressAutofill extends AbstractElement
                                     ],
                                     'config' => [
                                         'template' => 'ui/form/field',
-                                        'elementTmpl' => 'Flekto_Postcode/form/element/address-autofill-field',
+                                        'elementTmpl' => 'PostcodeEu_AddressValidation/form/element/address-autofill-field',
                                         'imports' => [
                                             'visible' => '${ $.parentName }:visible',
                                         ],
@@ -119,7 +119,7 @@ class AddressAutofill extends AbstractElement
                             ],
                         ],
                         'address_autofill_intl' => [
-                            'component' => 'Flekto_Postcode/js/view/form/sales/order_create/address-autofill-intl',
+                            'component' => 'PostcodeEu_AddressValidation/js/view/form/sales/order_create/address-autofill-intl',
                             'label' => __('Find an address'),
                             'placeholder' => __('City, street or postcode')
                         ],

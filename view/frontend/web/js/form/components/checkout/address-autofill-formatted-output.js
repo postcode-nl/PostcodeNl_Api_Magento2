@@ -1,5 +1,5 @@
 define([
-    'Flekto_Postcode/js/form/components/address-autofill-formatted-output',
+    'PostcodeEu_AddressValidation/js/form/components/address-autofill-formatted-output',
 ], function (Html) {
     'use strict';
 

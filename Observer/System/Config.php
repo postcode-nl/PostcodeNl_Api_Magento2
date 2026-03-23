@@ -1,9 +1,9 @@
 <?php
 
-namespace Flekto\Postcode\Observer\System;
+namespace PostcodeEu\AddressValidation\Observer\System;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Cache\Frontend\Pool as CacheFrontendPool;
 use Magento\Framework\App\Config\Storage\WriterInterface;
@@ -89,12 +89,12 @@ class Config implements ObserverInterface
                 $this->_configWriter->save(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE);
             }
 
-        } catch (\Flekto\Postcode\Service\Exception\AuthenticationException $e) {
+        } catch (\PostcodeEu\AddressValidation\Service\Exception\AuthenticationException $e) {
 
             $this->_configWriter->save(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS);
             $this->_configWriter->delete(StoreConfigHelper::PATH['account_name']);
 
-        } catch (\Flekto\Postcode\Service\Exception\ClientException $e) {
+        } catch (\PostcodeEu\AddressValidation\Service\Exception\ClientException $e) {
 
             $this->_configWriter->delete(StoreConfigHelper::PATH['account_name']);
             $this->_configWriter->delete(StoreConfigHelper::PATH['account_status']);
@@ -140,6 +140,6 @@ class Config implements ObserverInterface
     {
         $this->_cleanConfigCache();
         $cache = $this->_cacheFrontendPool->get(\Magento\Framework\App\Cache\Type\Config::TYPE_IDENTIFIER);
-        $cache->remove(\Flekto\Postcode\Block\System\Config\Status::CACHE_ID);
+        $cache->remove(\PostcodeEu\AddressValidation\Block\System\Config\Status::CACHE_ID);
     }
 }

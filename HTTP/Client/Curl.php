@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\HTTP\Client;
+namespace PostcodeEu\AddressValidation\HTTP\Client;
 
 /**
  * Extend Curl class to isolate configured curl options from the rest of the application.

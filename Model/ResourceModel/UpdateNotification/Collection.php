@@ -1,9 +1,9 @@
 <?php
 
-namespace Flekto\Postcode\Model\ResourceModel\UpdateNotification;
+namespace PostcodeEu\AddressValidation\Model\ResourceModel\UpdateNotification;
 
-use Flekto\Postcode\Model\UpdateNotification;
-use Flekto\Postcode\Model\ResourceModel\UpdateNotification as UpdateNotificationResourceModel;
+use PostcodeEu\AddressValidation\Model\UpdateNotification;
+use PostcodeEu\AddressValidation\Model\ResourceModel\UpdateNotification as UpdateNotificationResourceModel;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 class Collection extends AbstractCollection

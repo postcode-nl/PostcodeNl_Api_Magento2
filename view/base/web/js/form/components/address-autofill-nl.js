@@ -1,7 +1,7 @@
 define([
     'uiCollection',
     'jquery',
-    'Flekto_Postcode/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/model/address-nl',
 ], function (Collection, $, AddressNlModel) {
     'use strict';
 

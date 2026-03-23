@@ -1,12 +1,12 @@
 <?php
 
-namespace Flekto\Postcode\Block\Onepage;
+namespace PostcodeEu\AddressValidation\Block\Onepage;
 
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {

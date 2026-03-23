@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\GraphQl\Exception;
+namespace PostcodeEu\AddressValidation\GraphQl\Exception;
 
 use GraphQL\Error\ClientAware;
 use Magento\Framework\Exception\LocalizedException;

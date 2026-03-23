@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Model\Resolver;
+namespace PostcodeEu\AddressValidation\Model\Resolver;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;

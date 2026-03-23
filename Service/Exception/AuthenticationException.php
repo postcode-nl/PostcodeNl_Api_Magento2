@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Service\Exception;
+namespace PostcodeEu\AddressValidation\Service\Exception;
 
 class AuthenticationException extends ClientException
 {

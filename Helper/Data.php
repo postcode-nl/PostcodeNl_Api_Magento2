@@ -1,17 +1,17 @@
 <?php
 
-namespace Flekto\Postcode\Helper;
+namespace PostcodeEu\AddressValidation\Helper;
 
-use Flekto\Postcode\Helper\StoreConfigHelper;
-use Flekto\Postcode\Model\Config\Source\NlInputBehavior;
-use Flekto\Postcode\Model\Config\Source\ShowHideAddressFields;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Model\Config\Source\NlInputBehavior;
+use PostcodeEu\AddressValidation\Model\Config\Source\ShowHideAddressFields;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\DriverInterface;
-use Flekto\Postcode\HTTP\Client\Curl;
-use Flekto\Postcode\Service\Exception\CurlException;
+use PostcodeEu\AddressValidation\HTTP\Client\Curl;
+use PostcodeEu\AddressValidation\Service\Exception\CurlException;
 
 class Data extends AbstractHelper
 {
@@ -153,7 +153,7 @@ class Data extends AbstractHelper
      */
     private function _getPackageData(): array
     {
-        $path = $this->_dir->getPath('var') . '/Flekto_Postcode';
+        $path = $this->_dir->getPath(DirectoryList::VAR_DIR) . '/PostcodeEu_AddressValidation';
         if (!$this->_fs->isDirectory($path)) {
             $this->_fs->createDirectory($path, 0755);
         }

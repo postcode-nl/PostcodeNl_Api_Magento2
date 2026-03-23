@@ -1,11 +1,11 @@
 <?php
 
-namespace Flekto\Postcode\Model;
+namespace PostcodeEu\AddressValidation\Model;
 
-use Flekto\Postcode\Helper\ApiClientHelper;
-use Flekto\Postcode\Api\PostcodeModelInterface;
-use Flekto\Postcode\Api\Data\Autocomplete as AutocompleteData;
-use Flekto\Postcode\Api\Data\AutocompleteInterface as AutocompleteDataInterface;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Api\PostcodeModelInterface;
+use PostcodeEu\AddressValidation\Api\Data\Autocomplete as AutocompleteData;
+use PostcodeEu\AddressValidation\Api\Data\AutocompleteInterface as AutocompleteDataInterface;
 
 class PostcodeModel implements PostcodeModelInterface
 {

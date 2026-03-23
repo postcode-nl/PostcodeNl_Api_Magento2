@@ -1,11 +1,11 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data;
+namespace PostcodeEu\AddressValidation\Api\Data;
 
 interface AutocompleteInterface
 {
     /**
-     * @return Flekto\Postcode\Api\Data\Autocomplete\MatchInterface[]
+     * @return PostcodeEu\AddressValidation\Api\Data\Autocomplete\MatchInterface[]
      */
     public function getMatches(): array;
 
@@ -25,7 +25,7 @@ interface AutocompleteInterface
     public function getException(): ?string;
 
     /**
-     * @return Flekto\Postcode\Api\Data\MagentoDebugInfoInterface|null
+     * @return PostcodeEu\AddressValidation\Api\Data\MagentoDebugInfoInterface|null
      */
     public function getMagentoDebugInfo(): ?MagentoDebugInfoInterface;
 }

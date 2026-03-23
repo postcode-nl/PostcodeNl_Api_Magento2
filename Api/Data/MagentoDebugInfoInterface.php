@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data;
+namespace PostcodeEu\AddressValidation\Api\Data;
 
 interface MagentoDebugInfoInterface
 {
@@ -25,12 +25,12 @@ interface MagentoDebugInfoInterface
     public function getSession(): string;
 
     /**
-     * @return Flekto\Postcode\Api\Data\MagentoDebugInfo\ConfigurationInterface
+     * @return PostcodeEu\AddressValidation\Api\Data\MagentoDebugInfo\ConfigurationInterface
      */
     public function getConfiguration(): MagentoDebugInfo\ConfigurationInterface;
 
     /**
-     * @return Flekto\Postcode\Api\Data\MagentoDebugInfo\MagentoModuleInterface[]
+     * @return PostcodeEu\AddressValidation\Api\Data\MagentoDebugInfo\MagentoModuleInterface[]
      */
     public function getModules(): array;
 }

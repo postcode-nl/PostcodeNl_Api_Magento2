@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Plugin;
+namespace PostcodeEu\AddressValidation\Plugin;
 
 use Magento\Framework\Validator;
 use Magento\Framework\Validator\ValidatorInterface;
@@ -40,7 +40,7 @@ class ValidatorPlugin
             && method_exists($validator, 'getAlias')
             && $validator->getAlias() === 'city_validator'
         ) {
-            return [new \Flekto\Postcode\Model\Validator\City(), $breakChainOnFailure];
+            return [new \PostcodeEu\AddressValidation\Model\Validator\City(), $breakChainOnFailure];
         }
 
         // Return null if not changing arguments, see

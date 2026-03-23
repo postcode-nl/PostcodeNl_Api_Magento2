@@ -1,6 +1,6 @@
 define([
-    'Flekto_Postcode/js/form/components/address-autofill-nl',
-    'Flekto_Postcode/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/form/components/address-autofill-nl',
+    'PostcodeEu_AddressValidation/js/model/address-nl',
     'mage/translate',
 ], function (Collection, AddressNlModel, $t) {
     'use strict';

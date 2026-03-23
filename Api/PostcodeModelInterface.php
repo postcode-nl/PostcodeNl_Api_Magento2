@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api;
+namespace PostcodeEu\AddressValidation\Api;
 
 interface PostcodeModelInterface
 {
@@ -9,9 +9,9 @@ interface PostcodeModelInterface
      * @access public
      * @param string $context
      * @param string $term
-     * @return \Flekto\Postcode\Api\Data\AutocompleteInterface
+     * @return \PostcodeEu\AddressValidation\Api\Data\AutocompleteInterface
      */
-    public function getAddressAutocomplete(string $context, string $term): \Flekto\Postcode\Api\Data\AutocompleteInterface;
+    public function getAddressAutocomplete(string $context, string $term): \PostcodeEu\AddressValidation\Api\Data\AutocompleteInterface;
 
     /**
      * @access public

@@ -1,35 +1,35 @@
 <?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
     <route url="/V1/international/autocomplete/:context/:term" method="GET">
-        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="getAddressAutocomplete"/>
+        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getAddressAutocomplete"/>
         <resources>
            <resource ref="anonymous" />
         </resources>
     </route>
 
     <route url="/V1/international/address/:context" method="GET">
-        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="getAddressDetails"/>
+        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getAddressDetails"/>
         <resources>
            <resource ref="anonymous" />
         </resources>
     </route>
 
     <route url="/V1/international/address/:context/:dispatchCountry" method="GET">
-        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="getAddressDetailsCountry"/>
+        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getAddressDetailsCountry"/>
         <resources>
            <resource ref="anonymous" />
         </resources>
     </route>
 
     <route url="/V1/nl/address/:zipCode/:houseNumber" method="GET">
-        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="getNlAddress"/>
+        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getNlAddress"/>
         <resources>
            <resource ref="anonymous" />
         </resources>
     </route>
 
     <route url="/V1/international/validate/:country" method="GET">
-        <service class="Flekto\Postcode\Api\PostcodeModelInterface" method="validateAddress"/>
+        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="validateAddress"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

@@ -1,10 +1,10 @@
 <?php
 
-namespace Flekto\Postcode\Plugin;
+namespace PostcodeEu\AddressValidation\Plugin;
 
 use Magento\Customer\Model\Metadata\Form;
 use Magento\Framework\App\RequestInterface;
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 class SortSalesOrderAddressFields
 {

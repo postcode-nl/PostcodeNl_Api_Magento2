@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data;
+namespace PostcodeEu\AddressValidation\Api\Data;
 
 /**
  * @api

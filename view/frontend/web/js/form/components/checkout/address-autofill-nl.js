@@ -1,7 +1,7 @@
 define([
-    'Flekto_Postcode/js/form/components/address-autofill-nl',
+    'PostcodeEu_AddressValidation/js/form/components/address-autofill-nl',
     'uiRegistry',
-    'Flekto_Postcode/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/model/address-nl',
 ], function (AddressAutofillNl, Registry, AddressNlModel) {
     'use strict';
 

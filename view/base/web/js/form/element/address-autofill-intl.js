@@ -2,7 +2,7 @@ define([
     'Magento_Ui/js/form/element/abstract',
     'mage/translate',
     'uiRegistry',
-    'Flekto_Postcode/js/ko/bindings/init-intl-autocomplete',
+    'PostcodeEu_AddressValidation/js/ko/bindings/init-intl-autocomplete',
 ], function (Abstract, $t, Registry) {
     'use strict';
 
@@ -13,7 +13,7 @@ define([
             intlAutocompleteInstance: null,
             settings: {},
             template: 'ui/form/field',
-            elementTmpl: 'Flekto_Postcode/form/element/address-autofill-intl',
+            elementTmpl: 'PostcodeEu_AddressValidation/form/element/address-autofill-intl',
             visible: false,
             additionalClasses: {
                 'address-autofill-intl-input': true,

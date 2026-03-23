@@ -1,7 +1,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="admin">
-        <route id="flekto_postcode" frontName="flekto_postcode">
-            <module name="Flekto_Postcode" before="Magento_Backend" />
+        <route id="postcode_eu" frontName="postcode_eu">
+            <module name="PostcodeEu_AddressValidation" before="Magento_Backend" />
         </route>
     </router>
 </config>

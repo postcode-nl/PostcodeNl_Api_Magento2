@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Model\Resolver;
+namespace PostcodeEu\AddressValidation\Model\Resolver;
 
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\ResolverInterface;

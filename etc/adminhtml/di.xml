@@ -3,16 +3,17 @@
     <type name="Magento\Framework\Notification\MessageList">
         <arguments>
             <argument name="messages" xsi:type="array">
-                <item name="licenceCheck" xsi:type="string">Flekto\Postcode\Model\System\Message\LicenceCheck</item>
+                <item name="licenceCheck" xsi:type="string">PostcodeEu\AddressValidation\Model\System\Message\LicenceCheck</item>
+                <item name="rebrandNotice" xsi:type="string">PostcodeEu\AddressValidation\Model\System\Message\RebrandNotice</item>
             </argument>
         </arguments>
     </type>
 
     <type name="Magento\Customer\Model\Metadata\Form">
-        <plugin name="flekto_postcode_sort_sales_order_address_fields" type="Flekto\Postcode\Plugin\SortSalesOrderAddressFields" sortOrder="10"/>
+        <plugin name="postcode_eu_sort_sales_order_address_fields" type="PostcodeEu\AddressValidation\Plugin\SortSalesOrderAddressFields" sortOrder="10"/>
     </type>
 
     <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Address">
-        <plugin name="flekto_postcode_add_address_autofill_to_sales_order_form" type="Flekto\Postcode\Plugin\AddAddressAutofillToOrderCreateForm" sortOrder="10"/>
+        <plugin name="postcode_eu_add_address_autofill_to_sales_order_form" type="PostcodeEu\AddressValidation\Plugin\AddAddressAutofillToOrderCreateForm" sortOrder="10"/>
     </type>
 </config>

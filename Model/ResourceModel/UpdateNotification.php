@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Model\ResourceModel;
+namespace PostcodeEu\AddressValidation\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 

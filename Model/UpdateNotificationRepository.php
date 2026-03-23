@@ -1,11 +1,11 @@
 <?php
 
-namespace Flekto\Postcode\Model;
+namespace PostcodeEu\AddressValidation\Model;
 
-use Flekto\Postcode\Api\UpdateNotificationRepositoryInterface;
-use Flekto\Postcode\Api\Data\UpdateNotificationInterface;
-use Flekto\Postcode\Model\ResourceModel\UpdateNotification as UpdateNotificationResource;
-use Flekto\Postcode\Model\UpdateNotificationFactory;
+use PostcodeEu\AddressValidation\Api\UpdateNotificationRepositoryInterface;
+use PostcodeEu\AddressValidation\Api\Data\UpdateNotificationInterface;
+use PostcodeEu\AddressValidation\Model\ResourceModel\UpdateNotification as UpdateNotificationResource;
+use PostcodeEu\AddressValidation\Model\UpdateNotificationFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;

@@ -1,5 +1,5 @@
 define([
-    'Flekto_Postcode/js/form/components/address-autofill-bypass',
+    'PostcodeEu_AddressValidation/js/form/components/address-autofill-bypass',
 ], function (Html) {
     'use strict';
 

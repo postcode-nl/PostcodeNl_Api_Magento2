@@ -1,7 +1,7 @@
 define([
     'ko',
     'Magento_Ui/js/lib/knockout/template/renderer',
-    'Flekto_Postcode/js/lib/postcode-eu-autocomplete-address',
+    'PostcodeEu_AddressValidation/js/lib/postcode-eu-autocomplete-address',
     'mage/translate',
 ], function (ko, renderer, AutocompleteAddress, $t) {
     'use strict';

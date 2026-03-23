@@ -1,8 +1,8 @@
 <?php
 
-namespace Flekto\Postcode\Model\UpdateNotification;
+namespace PostcodeEu\AddressValidation\Model\UpdateNotification;
 
-use Flekto\Postcode\Api\UpdateNotificationRepositoryInterface;
+use PostcodeEu\AddressValidation\Api\UpdateNotificationRepositoryInterface;
 use Magento\Framework\Notification\NotifierInterface;
 
 class UpdateNotifier
@@ -44,10 +44,10 @@ class UpdateNotifier
         }
 
         $this->_notifier->addNotice(
-            __('Postcode.eu Address API update available'),
+            __('Postcode.eu Address Validation update available'),
             __('Stay ahead with our latest update.
                 Get the newest features and improvements for our Postcode.eu address validation module.'),
-            \Flekto\Postcode\Helper\Data::MODULE_RELEASE_URL
+            \PostcodeEu\AddressValidation\Helper\Data::MODULE_RELEASE_URL
         );
         $this->_updateNotification->setVersionNotified($version);
         return $this->_updateNotification->isVersionNotified($version);

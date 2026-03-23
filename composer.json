@@ -1,7 +1,7 @@
 {
     "name": "postcode-nl/api-magento2-module",
-    "version": "3.7.1",
-    "description": "Postcode.eu International Address API module for Magento 2. Adds autocompletion for addresses in multiple countries using official postal data.",
+    "version": "4.0.0",
+    "description": "Postcode.eu Address Validation module for Magento 2. Adds autocompletion for addresses in multiple countries using official postal data.",
     "require": {
       "php": "^7.4 || ^8.0 || ^8.1 || ^8.2 || ^8.3 || ^8.4 || ^8.5",
       "magento/module-checkout": "~100.4"
@@ -12,8 +12,7 @@
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
-            "Flekto\\Postcode\\": "",
-            "PostcodeNl\\InternationalAutocomplete\\": "app/code/Flekto/Postcode/lib/InternationalAutocomplete/"
+            "PostcodeEu\\AddressValidation\\": ""
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data\MagentoDebugInfo;
+namespace PostcodeEu\AddressValidation\Api\Data\MagentoDebugInfo;
 
 interface ConfigurationInterface
 {

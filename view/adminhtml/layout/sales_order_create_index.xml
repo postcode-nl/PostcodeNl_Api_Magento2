@@ -2,6 +2,6 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="Flekto_Postcode::css/lib/postcode-eu-autocomplete-address.css"/>
+        <css src="PostcodeEu_AddressValidation::css/lib/postcode-eu-autocomplete-address.css"/>
     </head>
 </page>

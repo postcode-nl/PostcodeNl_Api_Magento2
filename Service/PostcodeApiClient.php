@@ -1,23 +1,23 @@
 <?php
 
-namespace Flekto\Postcode\Service;
+namespace PostcodeEu\AddressValidation\Service;
 
-use Flekto\Postcode\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\App\Request\Http as HttpRequest;
 
-use Flekto\Postcode\HTTP\Client\Curl;
-use Flekto\Postcode\Service\Exception\AuthenticationException;
-use Flekto\Postcode\Service\Exception\BadRequestException;
-use Flekto\Postcode\Service\Exception\CurlException;
-use Flekto\Postcode\Service\Exception\ForbiddenException;
-use Flekto\Postcode\Service\Exception\InvalidJsonResponseException;
-use Flekto\Postcode\Service\Exception\InvalidPostcodeException;
-use Flekto\Postcode\Service\Exception\NotFoundException;
-use Flekto\Postcode\Service\Exception\ServerUnavailableException;
-use Flekto\Postcode\Service\Exception\TooManyRequestsException;
-use Flekto\Postcode\Service\Exception\UnexpectedException;
+use PostcodeEu\AddressValidation\HTTP\Client\Curl;
+use PostcodeEu\AddressValidation\Service\Exception\AuthenticationException;
+use PostcodeEu\AddressValidation\Service\Exception\BadRequestException;
+use PostcodeEu\AddressValidation\Service\Exception\CurlException;
+use PostcodeEu\AddressValidation\Service\Exception\ForbiddenException;
+use PostcodeEu\AddressValidation\Service\Exception\InvalidJsonResponseException;
+use PostcodeEu\AddressValidation\Service\Exception\InvalidPostcodeException;
+use PostcodeEu\AddressValidation\Service\Exception\NotFoundException;
+use PostcodeEu\AddressValidation\Service\Exception\ServerUnavailableException;
+use PostcodeEu\AddressValidation\Service\Exception\TooManyRequestsException;
+use PostcodeEu\AddressValidation\Service\Exception\UnexpectedException;
 
 class PostcodeApiClient
 {
@@ -75,7 +75,7 @@ class PostcodeApiClient
         if ($this->_userAgent === null) {
             $this->_userAgent = sprintf(
                 '%s/%s %s/%s/%s PHP/%s',
-                \Flekto\Postcode\Helper\Data::VENDOR_PACKAGE,
+                \PostcodeEu\AddressValidation\Helper\Data::VENDOR_PACKAGE,
                 $this->_storeConfigHelper->getModuleVersion(),
                 $this->_productMetadata->getName(),
                 $this->_productMetadata->getEdition(),

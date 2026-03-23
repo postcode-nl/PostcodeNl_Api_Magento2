@@ -1,6 +1,6 @@
 define([
     'Magento_Ui/js/form/components/html',
-    'Flekto_Postcode/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/model/address-nl',
 ], function (Html, AddressNlModel) {
     'use strict';
 
@@ -14,7 +14,7 @@ define([
                 addressAutofillIntl: '${$.parentName}.address_autofill_intl',
                 addressAutofillNl: '${$.parentName}.address_autofill_nl',
             },
-            template: 'Flekto_Postcode/content/address-autofill-formatted-output',
+            template: 'PostcodeEu_AddressValidation/content/address-autofill-formatted-output',
             visible: false,
             additionalClasses: {
                 'address-autofill-formatted-output': true,

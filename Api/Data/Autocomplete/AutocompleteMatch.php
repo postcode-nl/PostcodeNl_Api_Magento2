@@ -1,6 +1,6 @@
 <?php
 
-namespace Flekto\Postcode\Api\Data\Autocomplete;
+namespace PostcodeEu\AddressValidation\Api\Data\Autocomplete;
 
 class AutocompleteMatch implements MatchInterface
 {
