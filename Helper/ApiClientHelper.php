@@ -372,7 +372,7 @@ class ApiClientHelper extends AbstractHelper
      * @param string $labelSuffix - Additional text to append to the label.
      * @return array
      */
-    private function _formatHouseNumberAdditionOption(int $houseNumber, string $addition, string $labelSuffix = null): array
+    private function _formatHouseNumberAdditionOption(int $houseNumber, string $addition, ?string $labelSuffix = null): array
     {
         $houseNumberWithAddition = rtrim($houseNumber . ' ' . $addition);
         return [
