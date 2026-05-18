@@ -65,10 +65,6 @@ Although we can't guarantee compatibility with other checkout modules, our modul
 
 If you found the solution already and have some code to contribute, feel free to open a pull request in this repository.
 
-### Hÿva Theme
-
-We also provide a [compatibility module for the Hÿva Theme](https://github.com/postcode-nl/PostcodeEu_Api_Hyva).
-
 ## Address API documentation
 
 You can find our API documentation at https://developer.postcode.eu/documentation.
