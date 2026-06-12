@@ -61,8 +61,23 @@ class Api extends Action implements HttpGetActionInterface
                     throw new \Exception('Invalid service method');
             }
 
-            $values = array_filter($request->getParams(), fn($key) => in_array($key, $params), ARRAY_FILTER_USE_KEY);
-            $result = $this->_postcodeModel->$serviceMethod(...array_values($values));
+            $values = [];
+
+            foreach ($params as $param) {
+                $value = $request->getParam($param);
+
+                if ($value === null) {
+                    throw new \InvalidArgumentException(sprintf('Missing required parameter `%s`.', $param));
+                }
+
+                if (!is_scalar($value)) {
+                    throw new \InvalidArgumentException(sprintf('Invalid parameter `%s`.', $param));
+                }
+
+                $values[] = (string) $value;
+            }
+
+            $result = $this->_postcodeModel->$serviceMethod(...$values);
             $result = $this->_serviceOutputProcessor->process($result, PostcodeModelInterface::class, $serviceMethod);
             return $resultJson->setData($result);
         } catch (\Exception $e) {

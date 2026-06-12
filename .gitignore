@@ -3,3 +3,5 @@ vendor
 composer.lock
 .idea/
 .eslintrc
+CODE_QUALITY_SCAN.md
+SECURITY_SCAN.md
