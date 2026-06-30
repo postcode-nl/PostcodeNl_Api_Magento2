@@ -2,17 +2,17 @@
 
 namespace PostcodeEu\AddressValidation\Block\System\Config;
 
-use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
-use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
-use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
-use PostcodeEu\AddressValidation\Model\UpdateNotification\UpdateNotifier;
 use Magento\Backend\Block\Template;
+use Magento\Framework\App\Cache\Frontend\Pool as CacheFrontendPool;
+use Magento\Framework\App\Cache\TypeListInterface as CacheTypeList;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Data\Form\Element\Renderer\RendererInterface;
-use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
-use Magento\Framework\App\Cache\TypeListInterface as CacheTypeList;
-use Magento\Framework\App\Cache\Frontend\Pool as CacheFrontendPool;
 use Magento\Framework\Serialize\SerializerInterface;
+use PostcodeEu\AddressValidation\Helper\ApiClientHelper;
+use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Model\UpdateNotification\UpdateNotifier;
 
 class Status extends Template implements RendererInterface
 {
@@ -194,6 +194,17 @@ class Status extends Template implements RendererInterface
     public function isStatusActive(): bool
     {
         return $this->_storeConfigHelper->getValue('account_status') === ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
+    }
+
+
+    /**
+     * Check if API is available.
+     *
+     * @return bool
+     */
+    public function isApiAvailable(): bool
+    {
+        return $this->_apiClientHelper->isApiAvailable();
     }
 
     /**

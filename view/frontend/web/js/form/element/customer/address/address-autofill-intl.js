@@ -1,9 +1,11 @@
 define([
     'PostcodeEu_AddressValidation/js/form/element/address-autofill-intl',
     'PostcodeEu_AddressValidation/js/action/customer/address/get-validated-address',
+    'PostcodeEu_AddressValidation/js/model/service-status',
+    'Magento_Customer/js/customer-data',
     'uiRegistry',
     'mageUtils',
-], function (AddressAutofillIntl, getValidatedAddress, Registry, Utils) {
+], function (AddressAutofillIntl, getValidatedAddress, ServiceStatus, CustomerData, Registry, Utils) {
     'use strict';
 
     return AddressAutofillIntl.extend({
@@ -43,6 +45,11 @@ define([
                         .then((result) => {
                             if (result !== null) {
                                 this.address(result);
+                            }
+                        })
+                        .catch((error) => {
+                            if (error.cause?.status === 503) {
+                                this.setServiceUnavailable();
                             }
                         })
                         .finally(() => {
@@ -94,6 +101,11 @@ define([
                 }
                 break;
             }
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            this._super(message);
+            CustomerData.set('messages', {messages: [{type: 'error', text: message}]});
         },
 
     });

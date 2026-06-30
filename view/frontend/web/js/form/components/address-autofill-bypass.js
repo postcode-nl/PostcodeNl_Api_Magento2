@@ -21,8 +21,7 @@ define([
 
         editAddress: function () {
             this.visible(false);
-            this.autofillIntl().visible(false);
-            this.autofillIntl().toggleFields(true, true);
+            this.autofillIntl().destruct();
         },
 
     });

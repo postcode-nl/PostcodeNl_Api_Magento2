@@ -5,6 +5,7 @@ namespace PostcodeEu\AddressValidation\Helper;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use PostcodeEu\AddressValidation\Model\Config\Source\NlInputBehavior;
 use PostcodeEu\AddressValidation\Model\Config\Source\ShowHideAddressFields;
+use PostcodeEu\AddressValidation\Service\ApiAvailabilityMonitor;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\LocalizedException;
@@ -19,25 +20,20 @@ class Data extends AbstractHelper
     public const PACKAGIST_URL = 'https://repo.packagist.org/p2/postcode-nl/api-magento2-module.json';
     public const VENDOR_PACKAGE = 'postcode-nl/api-magento2-module';
 
-    /**
-     * @var StoreConfigHelper
-     */
+    /** @var StoreConfigHelper */
     private $_storeConfigHelper;
 
-    /**
-     * @var DirectoryList
-     */
+    /** @var DirectoryList */
     private $_dir;
 
-    /**
-     * @var DriverInterface
-     */
+    /** @var DriverInterface */
     private $_fs;
 
-    /**
-     * @var Curl
-     */
+    /** @var Curl */
     private $_curl;
+
+    /** @var ApiAvailabilityMonitor */
+    private $_apiAvailabilityMonitor;
 
     /**
      * Constructor
@@ -48,6 +44,7 @@ class Data extends AbstractHelper
      * @param DirectoryList $dir
      * @param DriverInterface $filesystem
      * @param Curl $curl
+     * @param ApiAvailabilityMonitor $apiAvailabilityMonitor
      * @return void
      */
     public function __construct(
@@ -55,12 +52,14 @@ class Data extends AbstractHelper
         StoreConfigHelper $storeConfigHelper,
         DirectoryList $dir,
         DriverInterface $filesystem,
-        Curl $curl
+        Curl $curl,
+        ApiAvailabilityMonitor $apiAvailabilityMonitor
     ) {
         $this->_storeConfigHelper = $storeConfigHelper;
         $this->_dir = $dir;
         $this->_fs = $filesystem;
         $this->_curl = $curl;
+        $this->_apiAvailabilityMonitor = $apiAvailabilityMonitor;
         parent::__construct($context);
     }
 
@@ -103,8 +102,9 @@ class Data extends AbstractHelper
     public function isDisabled($storeId = null): bool
     {
         return
-            false === $this->_storeConfigHelper->isSetFlag('enabled', $storeId)
-            || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->_storeConfigHelper->getValue('account_status', $storeId);
+            !$this->_storeConfigHelper->isEnabled($storeId)
+            || ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE != $this->_storeConfigHelper->getValue('account_status', $storeId)
+            || !$this->_apiAvailabilityMonitor->isAvailable();
     }
 
     /**

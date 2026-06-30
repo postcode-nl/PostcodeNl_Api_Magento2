@@ -41,6 +41,9 @@ class StoreConfigHelper extends AbstractHelper
         'supported_countries' => 'postcodenl_api/status/supported_countries',
         'account_name' => 'postcodenl_api/status/account_name',
         'account_status' => 'postcodenl_api/status/account_status',
+        'api_max_failures' => 'postcodenl_api/status/api_max_failures',
+        'api_failure_window_seconds' => 'postcodenl_api/status/api_failure_window_seconds',
+        'api_cooldown_seconds' => 'postcodenl_api/status/api_cooldown_seconds',
 
         // General
         'enabled' => 'postcodenl_api/general/enabled',

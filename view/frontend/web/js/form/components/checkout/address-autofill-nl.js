@@ -2,7 +2,9 @@ define([
     'PostcodeEu_AddressValidation/js/form/components/address-autofill-nl',
     'uiRegistry',
     'PostcodeEu_AddressValidation/js/model/address-nl',
-], function (AddressAutofillNl, Registry, AddressNlModel) {
+    'PostcodeEu_AddressValidation/js/model/service-status',
+    'Magento_Ui/js/model/messageList',
+], function (AddressAutofillNl, Registry, AddressNlModel, ServiceStatus, MessageList) {
     'use strict';
 
     return AddressAutofillNl.extend({
@@ -86,7 +88,7 @@ define([
             this.street().clearFields().clearErrors();
         },
 
-        toggleFields: function (state) {
+        toggleFields: function (state, force = false) {
             if (this.countrySelect()?.value() !== 'NL') {
                 // Always re-enable region.
                 // This is not needed for .visible() because the region field has its own logic for that.
@@ -103,7 +105,7 @@ define([
                 setProperty('disabled', !state);
                 break;
             case 'format':
-                setProperty('visible', false);
+                setProperty('visible', force || false);
                 break;
             case 'hide':
                 setProperty('visible', state);
@@ -122,6 +124,11 @@ define([
             }
 
             return this._super(address);
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            this._super(message);
+            MessageList.addErrorMessage({message});
         },
 
     });

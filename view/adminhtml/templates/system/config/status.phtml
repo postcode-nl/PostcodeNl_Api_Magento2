@@ -54,7 +54,7 @@ $moduleInfo = $block->getModuleInfo();
                 <?php endif ?>
                 <dt><?= $escaper->escapeHtml(__('Subscription status')) ?></dt>
                 <dd>
-                    <span class="badge-account-status badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>">
+                    <span class="postcode-eu-status-badge badge-account-status-<?= /* @noEscape */ $config['account_status'] ?>">
                         <?= /* @noEscape */ $block->getApiStatusDescription() ?>
                     </span>
 
@@ -77,6 +77,22 @@ $moduleInfo = $block->getModuleInfo();
                         <?= /* @noEscape */ $usage . ' / ' . /* @noEscape */ $limit ?>
                         <?= $escaper->escapeHtml(__('euro')) ?>
                     <?php endif ?>
+                </dd>
+                <dt><?= $escaper->escapeHtml(__('API status')) ?></dt>
+                <dd>
+                    <?php if ($block->isApiAvailable()): ?>
+                        <span class="postcode-eu-status-badge postcode-eu-status-badge-positive">
+                            <?= $escaper->escapeHtml(__('Up')) ?>
+                        </span>
+                    <?php else: ?>
+                        <span class="postcode-eu-status-badge postcode-eu-status-badge-negative">
+                            <?= $escaper->escapeHtml(__('Down')) ?>
+                        </span>
+                    <?php endif ?>
+                    -
+                    <a href="https://status.postcode.eu" target="_blank" rel="noopener">
+                        <?= $escaper->escapeHtml(__('View API status page')) ?>
+                    </a>
                 </dd>
             </dl>
 

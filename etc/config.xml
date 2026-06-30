@@ -5,6 +5,9 @@
             <status>
                 <module_version>4.1.1</module_version>
                 <account_status>new</account_status>
+                <api_max_failures>5</api_max_failures>
+                <api_failure_window_seconds>300</api_failure_window_seconds>
+                <api_cooldown_seconds>30</api_cooldown_seconds>
             </status>
             <general>
                 <enabled>1</enabled>

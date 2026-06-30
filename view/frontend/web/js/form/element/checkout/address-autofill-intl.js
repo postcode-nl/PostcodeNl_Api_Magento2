@@ -1,9 +1,11 @@
 define([
     'PostcodeEu_AddressValidation/js/form/element/address-autofill-intl',
+    'PostcodeEu_AddressValidation/js/model/service-status',
     'uiRegistry',
     'mage/translate',
     'mageUtils',
-], function (AddressAutofillIntl, Registry, $t, Utils) {
+    'Magento_Ui/js/model/messageList',
+], function (AddressAutofillIntl, ServiceStatus, Registry, $t, Utils, MessageList) {
     'use strict';
 
     return AddressAutofillIntl.extend({
@@ -84,7 +86,7 @@ define([
             this.street().clearFields().clearErrors();
         },
 
-        toggleFields: function (state, force) {
+        toggleFields: function (state, force = false) {
             if (this.countryCode === 'NL' && Utils.isObject(Registry.get(`${this.parentName}.address_autofill_nl`))) {
                 return; // Toggle will be handled by NL component.
             }
@@ -118,6 +120,11 @@ define([
             }
 
             return this._super(address);
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            this._super(message);
+            MessageList.addErrorMessage({message});
         },
 
     });

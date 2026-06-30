@@ -2,8 +2,10 @@ define([
     'PostcodeEu_AddressValidation/js/form/components/address-autofill-nl',
     'PostcodeEu_AddressValidation/js/action/customer/address/get-validated-address',
     'PostcodeEu_AddressValidation/js/model/address-nl',
+    'PostcodeEu_AddressValidation/js/model/service-status',
+    'Magento_Customer/js/customer-data',
     'mage/translate',
-], function (Collection, getValidatedAddress, AddressNlModel, $t) {
+], function (Collection, getValidatedAddress, AddressNlModel, ServiceStatus, CustomerData, $t) {
     'use strict';
 
     return Collection.extend({
@@ -107,6 +109,13 @@ define([
                     this.status(AddressNlModel.status.VALID);
                     this.toggleFields(true);
                 })
+                .catch((error) => {
+                    if (error.cause?.status === 503) {
+                        this.setServiceUnavailable();
+                    } else {
+                        error.cause?.json().then(([{message}]) => this.childHouseNumber().error(message));
+                    }
+                })
                 .finally(() => {
                     this.loading(false);
                 });
@@ -124,7 +133,7 @@ define([
             this.inputs.toArray().forEach(input => { input.value = ''; });
         },
 
-        toggleFields: function (state) {
+        toggleFields: function (state, force = false) {
             if (this.countryCode !== 'NL') {
                 return; // Toggle will be handled by international component.
             }
@@ -134,11 +143,11 @@ define([
                 this.inputs.toArray().forEach(input => { input.disabled = !state; });
                 break;
             case 'format':
-                if (this.fields.street.style.display === 'none') {
+                state = force || false;
+
+                if (state === false && this.fields.street.style.display === 'none') {
                     return;
                 }
-
-                state = false;
 
             /* falls through */
             case 'hide':
@@ -149,6 +158,11 @@ define([
                 }
                 break;
             }
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            this._super(message);
+            CustomerData.set('messages', {messages: [{type: 'error', text: message}]});
         },
 
     });

@@ -15,7 +15,7 @@ use PostcodeEu\AddressValidation\Service\Exception\ForbiddenException;
 use PostcodeEu\AddressValidation\Service\Exception\InvalidJsonResponseException;
 use PostcodeEu\AddressValidation\Service\Exception\InvalidPostcodeException;
 use PostcodeEu\AddressValidation\Service\Exception\NotFoundException;
-use PostcodeEu\AddressValidation\Service\Exception\ServerUnavailableException;
+use PostcodeEu\AddressValidation\Service\Exception\ServiceUnavailableException;
 use PostcodeEu\AddressValidation\Service\Exception\TooManyRequestsException;
 use PostcodeEu\AddressValidation\Service\Exception\UnexpectedException;
 
@@ -52,16 +52,20 @@ class PostcodeApiClient
     protected $_storeConfigHelper;
     /** @var ProductMetadataInterface */
     protected $_productMetadata;
+    /** @var ApiAvailabilityMonitor */
+    protected $_availabilityMonitor;
 
     public function __construct(
         Curl $curl,
         HttpRequest $request,
         ProductMetadataInterface $productMetadata,
-        StoreConfigHelper $storeConfigHelper
+        StoreConfigHelper $storeConfigHelper,
+        ApiAvailabilityMonitor $availabilityMonitor
     ) {
         $this->_curl = $curl;
         $this->_productMetadata = $productMetadata;
         $this->_storeConfigHelper = $storeConfigHelper;
+        $this->_availabilityMonitor = $availabilityMonitor;
 
         $curl->setOptions([
             CURLOPT_CONNECTTIMEOUT => 2,
@@ -294,9 +298,11 @@ class PostcodeApiClient
                 $jsonResponse = json_decode($response, true);
                 if (!is_array($jsonResponse)) {
                     throw new InvalidJsonResponseException(
-                        sprintf('Invalid JSON response from the server for request: `%s`.' . $url)
+                        sprintf('Invalid JSON response from the server for request: `%s`.', $url)
                     );
                 }
+
+                $this->_availabilityMonitor->recordSuccess();
 
                 return $jsonResponse;
             case 400:
@@ -312,18 +318,18 @@ class PostcodeApiClient
                     'Your account currently has no access to the API, make sure you have an active subscription.'
                 );
             case 404:
-                throw new NotFoundException(
-                    'Combination not found.'
-                );
+                throw new NotFoundException('Combination not found.');
             case 429:
                 throw new TooManyRequestsException(
                     sprintf('Too many requests made, please slow down: `%s`.', $response)
                 );
             case 503:
-                throw new ServerUnavailableException(
-                    sprintf('The international API server is currently not available: `%s`.', $response)
+                $this->_availabilityMonitor->recordFailure();
+                throw new ServiceUnavailableException(
+                    sprintf('The address API service is currently not available: `%s`.', $response)
                 );
             default:
+                $this->_availabilityMonitor->recordFailure();
                 throw new UnexpectedException(
                     sprintf('Unexpected server response code `%s`.', $statusCode)
                 );
