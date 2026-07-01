@@ -47,25 +47,41 @@ class Api extends Action implements HttpGetActionInterface
             switch ($request->getParam('method')) {
                 case 'postcode':
                     $serviceMethod = 'getNlAddress';
-                    $params = ['postcode', 'house_number'];
+                    $required = ['postcode', 'house_number'];
                     break;
                 case 'autocomplete':
                     $serviceMethod = 'getAddressAutocomplete';
-                    $params = ['context', 'term'];
+                    $required = ['context', 'term'];
                     break;
                 case 'address_details':
                     $serviceMethod = 'getAddressDetails';
-                    $params = ['context'];
+                    $required = ['context'];
                     break;
                 default:
-                    throw new \Exception('Invalid service method');
+                    throw new \InvalidArgumentException('Invalid service method');
             }
 
-            $values = array_filter($request->getParams(), fn($key) => in_array($key, $params), ARRAY_FILTER_USE_KEY);
-            $result = $this->_postcodeModel->$serviceMethod(...array_values($values));
+            $values = [];
+
+            foreach ($required as $param) {
+                $value = $request->getParam($param) ?? '';
+
+                if (!is_scalar($value)) {
+                    throw new \InvalidArgumentException(sprintf('Invalid parameter `%s`', $param));
+                }
+
+                if (trim($value) === '') {
+                    throw new \InvalidArgumentException(sprintf('Missing parameter `%s`', $param));
+                }
+
+                $values[] = $value;
+            }
+
+            $result = $this->_postcodeModel->$serviceMethod(...$values);
             $result = $this->_serviceOutputProcessor->process($result, PostcodeModelInterface::class, $serviceMethod);
+
             return $resultJson->setData($result);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $resultJson->setHttpResponseCode(400)->setData(['error' => $e->getMessage()]);
         }
     }

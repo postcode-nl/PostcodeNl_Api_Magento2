@@ -5,7 +5,6 @@ namespace PostcodeEu\AddressValidation\Service;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\App\Request\Http as HttpRequest;
 
 use PostcodeEu\AddressValidation\HTTP\Client\Curl;
 use PostcodeEu\AddressValidation\Service\Exception\AuthenticationException;
@@ -57,7 +56,6 @@ class PostcodeApiClient
 
     public function __construct(
         Curl $curl,
-        HttpRequest $request,
         ProductMetadataInterface $productMetadata,
         StoreConfigHelper $storeConfigHelper,
         ApiAvailabilityMonitor $availabilityMonitor
@@ -72,9 +70,7 @@ class PostcodeApiClient
             CURLOPT_TIMEOUT => 5,
         ]);
 
-        if (null !== $request->getServer('HTTP_REFERER')) {
-            $curl->setOption(CURLOPT_REFERER, $request->getServer('HTTP_REFERER'));
-        }
+        $curl->setOption(CURLOPT_REFERER, $this->_storeConfigHelper->getCurrentStoreBaseUrl());
     }
 
     public function getUserAgent(): string

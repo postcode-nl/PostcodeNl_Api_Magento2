@@ -482,7 +482,8 @@ class ApiClientHelper extends AbstractHelper
     {
         $args = func_get_args();
         if (strlen($args[0]) === 2) {
-            $args[0] = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
+            // Support country ISO 2 code. "INVALID" will throw in client.
+            $args[0] = $this->getCountryIso3Code($args[0]) ?? 'INVALID';
         }
 
         try {
