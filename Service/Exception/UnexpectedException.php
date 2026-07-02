@@ -4,5 +4,6 @@ namespace PostcodeEu\AddressValidation\Service\Exception;
 
 class UnexpectedException extends ClientException
 {
-    protected $code = 500;
+    /** @var int HTTP status code */
+    protected int $code = 500;
 }

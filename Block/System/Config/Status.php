@@ -196,7 +196,6 @@ class Status extends Template implements RendererInterface
         return $this->_storeConfigHelper->getValue('account_status') === ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
 
-
     /**
      * Check if API is available.
      *

@@ -12,7 +12,7 @@ use PostcodeEu\AddressValidation\Api\PostcodeModelInterface;
 
 class Api extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'PostcodeEu_AddressValidation::config_postcode_eu';
+    public const ADMIN_RESOURCE = 'PostcodeEu_AddressValidation::config_postcode_eu';
 
     /** @var JsonFactory */
     protected $_resultJsonFactory;
@@ -21,6 +21,12 @@ class Api extends Action implements HttpGetActionInterface
     /** @var ServiceOutputProcessor */
     protected $_serviceOutputProcessor;
 
+    /**
+     * @param Context $context
+     * @param JsonFactory $resultJsonFactory
+     * @param PostcodeModelInterface $postcodeModel
+     * @param ServiceOutputProcessor $serviceOutputProcessor
+     */
     public function __construct(
         Context $context,
         JsonFactory $resultJsonFactory,

@@ -38,9 +38,8 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
         Context $context,
         StoreConfigHelper $storeConfigHelper,
         DataHelper $dataHelper,
-        array $data = [],
-    )
-    {
+        array $data = []
+    ) {
         $this->storeConfigHelper = $storeConfigHelper;
         $this->dataHelper = $dataHelper;
 

@@ -382,7 +382,7 @@ class ApiClientHelper extends AbstractHelper
     private function _formatHouseNumberAdditionOption(
         int $houseNumber,
         string $addition,
-        ?string $labelSuffix = null,
+        ?string $labelSuffix = null
     ): array {
         $houseNumberWithAddition = rtrim($houseNumber . ' ' . $addition);
         return [
@@ -403,7 +403,7 @@ class ApiClientHelper extends AbstractHelper
     {
         if ($exception instanceof NotFoundException) {
             $this->_response->setHttpResponseCode(404);
-        } else if (!$this->isApiAvailable()) {
+        } elseif (!$this->isApiAvailable()) {
             $this->_response->setHttpResponseCode(503);
         } else {
             $this->_logger->error($exception->getMessage(), ['exception' => $exception]);

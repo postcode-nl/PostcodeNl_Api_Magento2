@@ -54,6 +54,12 @@ class PostcodeApiClient
     /** @var ApiAvailabilityMonitor */
     protected $_availabilityMonitor;
 
+    /**
+     * @param Curl $curl
+     * @param ProductMetadataInterface $productMetadata
+     * @param StoreConfigHelper $storeConfigHelper
+     * @param ApiAvailabilityMonitor $availabilityMonitor
+     */
     public function __construct(
         Curl $curl,
         ProductMetadataInterface $productMetadata,
@@ -73,6 +79,11 @@ class PostcodeApiClient
         $curl->setOption(CURLOPT_REFERER, $this->_storeConfigHelper->getCurrentStoreBaseUrl());
     }
 
+    /**
+     * Get the user agent string for API requests.
+     *
+     * @return string
+     */
     public function getUserAgent(): string
     {
         if ($this->_userAgent === null) {
@@ -179,6 +190,11 @@ class PostcodeApiClient
         return $this->_fetch(implode('/', $urlParts), null);
     }
 
+    /**
+     * Get account information from the API.
+     *
+     * @return array
+     */
     public function accountInfo(): array
     {
         return $this->_fetch('account/v1/info', null);
@@ -262,11 +278,23 @@ class PostcodeApiClient
         return (bool) preg_match('~^[1-9]\d{3}\s?[a-zA-Z]{2}$~', $postcode);
     }
 
+    /**
+     * Generate a random session string.
+     *
+     * @return string
+     */
     protected function _generateSessionString(): string
     {
         return bin2hex(random_bytes(8));
     }
 
+    /**
+     * Perform an API request.
+     *
+     * @param string $path
+     * @param string|null $session
+     * @return array
+     */
     protected function _fetch(string $path, ?string $session = null): array
     {
         if ($this->_key === null || $this->_secret === null) {

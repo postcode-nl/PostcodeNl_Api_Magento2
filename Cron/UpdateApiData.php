@@ -227,8 +227,11 @@ class UpdateApiData
 
     /**
      * Get credentials explicitly defined at the given scope.
+     *
      * Does NOT fall back to parent scopes.
      *
+     * @param string $scopeType
+     * @param int $scopeId
      * @return array [key, secret]
      */
     private function _getCredentials(string $scopeType, int $scopeId): array

@@ -17,6 +17,11 @@ class CsrfValidator
     /** @var State */
     private State $_appState;
 
+    /**
+     * @param FormKeyValidator $formKeyValidator
+     * @param HttpRequest $request
+     * @param State $appState
+     */
     public function __construct(
         FormKeyValidator $formKeyValidator,
         HttpRequest $request,
@@ -27,6 +32,9 @@ class CsrfValidator
         $this->_appState = $appState;
     }
 
+    /**
+     * Validate the request.
+     */
     public function validate(): void
     {
         try {
