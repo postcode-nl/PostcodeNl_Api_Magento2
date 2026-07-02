@@ -12,12 +12,17 @@ class RebrandNotice implements MessageInterface
     /** @var ModuleListInterface */
     protected $moduleList;
 
+    /**
+     * @param ModuleListInterface $moduleList
+     */
     public function __construct(ModuleListInterface $moduleList)
     {
         $this->moduleList = $moduleList;
     }
 
     /**
+     * Get message identity.
+     *
      * @return string
      */
     public function getIdentity(): string
@@ -26,6 +31,8 @@ class RebrandNotice implements MessageInterface
     }
 
     /**
+     * Check if the notice should be displayed.
+     *
      * @return bool
      */
     public function isDisplayed(): bool
@@ -40,19 +47,24 @@ class RebrandNotice implements MessageInterface
     }
 
     /**
+     * Get notification text.
+     *
      * @return string
      */
     public function getText(): string
     {
         return (string)__(
             'Compatibility notice: The Postcode.eu Address Validation module has been rebranded. ' .
-            'The PHP namespace has changed from <code>Flekto\Postcode</code> to <code>PostcodeEu\AddressValidation</code>. ' .
+            'The PHP namespace has changed from <code>Flekto\Postcode</code> ' .
+            'to <code>PostcodeEu\AddressValidation</code>. ' .
             'Since your installation contains custom code or integrations relying on the old namespace, ' .
             'please update your references to ensure continued compatibility. '
         );
     }
 
     /**
+     * Get message severity.
+     *
      * @return int
      */
     public function getSeverity(): int

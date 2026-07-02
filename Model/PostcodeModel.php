@@ -22,6 +22,7 @@ class PostcodeModel implements PostcodeModelInterface
      *
      * @access public
      * @param ApiClientHelper $apiClientHelper
+     * @param CsrfValidator $csrfValidator
      * @return void
      */
     public function __construct(

@@ -2,8 +2,9 @@ define([
     'Magento_Ui/js/form/element/abstract',
     'mage/translate',
     'uiRegistry',
+    'PostcodeEu_AddressValidation/js/model/service-status',
     'PostcodeEu_AddressValidation/js/ko/bindings/init-intl-autocomplete',
-], function (Abstract, $t, Registry) {
+], function (Abstract, $t, Registry, ServiceStatus) {
     'use strict';
 
     return Abstract.extend({
@@ -58,6 +59,10 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
+            if (!ServiceStatus.isAvailable) {
+                return;
+            }
+
             const isEnabled = this.isEnabledCountry(countryCode);
 
             this.reset();
@@ -123,6 +128,17 @@ define([
                 setValue(this.inputs.region, result.region.name ?? '');
             }
         },
+
+        destruct: function () {
+            this.visible(false);
+            this.toggleFields(true, true);
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            ServiceStatus.isAvailable = false;
+            this.destruct();
+            console.error(message);
+        }
 
     });
 });

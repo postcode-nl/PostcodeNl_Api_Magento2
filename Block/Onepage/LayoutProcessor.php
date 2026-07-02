@@ -7,6 +7,7 @@ use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
 
 class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {
@@ -17,10 +18,11 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     protected $jsLayout;
 
-    /**
-     * @var StoreConfigHelper
-     */
+    /** @var StoreConfigHelper */
     private $storeConfigHelper;
+
+    /** @var DataHelper */
+    private $dataHelper;
 
     /**
      * Constructor
@@ -28,12 +30,18 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      * @access public
      * @param Context $context
      * @param StoreConfigHelper $storeConfigHelper
+     * @param DataHelper $dataHelper
      * @param array $data (default: [])
      * @return void
      */
-    public function __construct(Context $context, StoreConfigHelper $storeConfigHelper, array $data = [])
-    {
+    public function __construct(
+        Context $context,
+        StoreConfigHelper $storeConfigHelper,
+        DataHelper $dataHelper,
+        array $data = []
+    ) {
         $this->storeConfigHelper = $storeConfigHelper;
+        $this->dataHelper = $dataHelper;
 
         parent::__construct($context, $data);
     }
@@ -47,7 +55,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     public function process($jsLayout): array
     {
-        if (!$this->storeConfigHelper->isEnabled()) {
+        if ($this->dataHelper->isDisabled()) {
             return $jsLayout;
         }
 

@@ -71,10 +71,17 @@ define([
             });
 
             element.addEventListener('autocomplete-error', (e) => {
-                console.error('Autocomplete XHR error', e);
-                viewModel.toggleFields(true);
+                if (e.detail.request.status === 503) {
+                    viewModel.setServiceUnavailable();
+                } else {
+                    console.error('Autocomplete XHR error', e);
+                    viewModel.toggleFields(true, true);
+                    viewModel.error(
+                        $t('An error has occurred while retrieving address data. Please contact us if the problem persists.')
+                    );
+                }
+
                 viewModel.loading(false);
-                viewModel.error($t('An error has occurred while retrieving address data. Please contact us if the problem persists.'));
             });
 
             // Clear the previous values when searching for a new address.

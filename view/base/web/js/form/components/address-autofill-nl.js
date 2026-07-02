@@ -2,7 +2,8 @@ define([
     'uiCollection',
     'jquery',
     'PostcodeEu_AddressValidation/js/model/address-nl',
-], function (Collection, $, AddressNlModel) {
+    'PostcodeEu_AddressValidation/js/model/service-status',
+], function (Collection, $, AddressNlModel, ServiceStatus) {
     'use strict';
 
     return Collection.extend({
@@ -54,7 +55,7 @@ define([
         },
 
         onChangeCountry: function (countryCode) {
-            if (countryCode !== 'NL') {
+            if (!ServiceStatus.isAvailable || countryCode !== 'NL') {
                 this.visible(false);
                 return;
             }
@@ -164,8 +165,16 @@ define([
                     } else {
                         this.toggleFields(true);
                     }
+                },
+            }).always(() => {
+                this.loading(false);
+            }).fail((jqXhr) => {
+                if (jqXhr.status === 503) {
+                    this.setServiceUnavailable(); // API seems to be down, restore standard address fields.
+                } else {
+                    this.childHouseNumber().error(jqXhr.responseJSON[0].message);
                 }
-            }).always(this.loading.bind(this, false));
+            });
         },
 
         validateAddress: function () {
@@ -233,5 +242,16 @@ define([
             }
         },
 
+        destruct: function () {
+            clearTimeout(this.lookupTimeout);
+            this.visible(false);
+            this.toggleFields(true, true);
+        },
+
+        setServiceUnavailable: function (message = ServiceStatus.defaultUnavailableMessage) {
+            ServiceStatus.isAvailable = false;
+            this.destruct();
+            console.error(message);
+        }
     });
 });

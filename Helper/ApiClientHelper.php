@@ -5,7 +5,9 @@ namespace PostcodeEu\AddressValidation\Helper;
 use Exception;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use PostcodeEu\AddressValidation\Service\Exception\NotFoundException;
+use PostcodeEu\AddressValidation\Service\Exception\ServiceUnavailableException;
 use PostcodeEu\AddressValidation\Service\PostcodeApiClient;
+use PostcodeEu\AddressValidation\Service\ApiAvailabilityMonitor;
 use Magento\Customer\Helper\Address as AddressHelper;
 use Magento\Developer\Helper\Data;
 use Magento\Directory\Model\RegionFactory;
@@ -51,6 +53,8 @@ class ApiClientHelper extends AbstractHelper
     protected $_addressHelper;
     /** @var LoggerInterface */
     protected $_logger;
+    /** @var ApiAvailabilityMonitor */
+    protected ApiAvailabilityMonitor $_availabilityMonitor;
 
     /**
      * __construct function.
@@ -68,6 +72,7 @@ class ApiClientHelper extends AbstractHelper
      * @param RegionFactory $regionFactory
      * @param AddressHelper $addressHelper
      * @param LoggerInterface $logger
+     * @param ApiAvailabilityMonitor $availabilityMonitor
      * @return void
      */
     public function __construct(
@@ -82,7 +87,8 @@ class ApiClientHelper extends AbstractHelper
         ProductMetadataInterface $productMetadata,
         RegionFactory $regionFactory,
         AddressHelper $addressHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ApiAvailabilityMonitor $availabilityMonitor
     ) {
         $this->_moduleList = $moduleList;
         $this->_developerHelper = $developerHelper;
@@ -95,6 +101,7 @@ class ApiClientHelper extends AbstractHelper
         $this->_regionFactory = $regionFactory;
         $this->_addressHelper = $addressHelper;
         $this->_logger = $logger;
+        $this->_availabilityMonitor = $availabilityMonitor;
         parent::__construct($context);
     }
 
@@ -106,7 +113,11 @@ class ApiClientHelper extends AbstractHelper
      */
     public function getApiClient(): PostcodeApiClient
     {
-        return $this->_client;
+        if ($this->isApiAvailable()) {
+            return $this->_client;
+        }
+
+        throw new ServiceUnavailableException('The address lookup service is temporarily unavailable.');
     }
 
     /**
@@ -126,12 +137,10 @@ class ApiClientHelper extends AbstractHelper
         $language = explode('_', $this->_localeResolver->getLocale())[0];
 
         try {
-
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalAutocomplete($context, $term, $sessionId, $language);
             return $this->_prepareResponse($response, $client);
-
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
@@ -147,7 +156,6 @@ class ApiClientHelper extends AbstractHelper
     public function getAddressDetails(string $context): array
     {
         try {
-
             $client = $this->getApiClient();
             $sessionId = $this->_getSessionId();
             $response = $client->internationalGetDetails($context, $sessionId);
@@ -156,7 +164,6 @@ class ApiClientHelper extends AbstractHelper
             $response = $this->_prepareResponse($response, $client);
 
             return $response;
-
         } catch (\Exception $e) {
             return $this->_handleClientException($e);
         }
@@ -372,8 +379,11 @@ class ApiClientHelper extends AbstractHelper
      * @param string $labelSuffix - Additional text to append to the label.
      * @return array
      */
-    private function _formatHouseNumberAdditionOption(int $houseNumber, string $addition, ?string $labelSuffix = null): array
-    {
+    private function _formatHouseNumberAdditionOption(
+        int $houseNumber,
+        string $addition,
+        ?string $labelSuffix = null
+    ): array {
         $houseNumberWithAddition = rtrim($houseNumber . ' ' . $addition);
         return [
             'label' => rtrim($houseNumberWithAddition . ' ' . ($labelSuffix ?? '')),
@@ -383,7 +393,7 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * _handleClientException function.
+     * Handle API client exception.
      *
      * @access private
      * @param mixed $exception
@@ -393,9 +403,11 @@ class ApiClientHelper extends AbstractHelper
     {
         if ($exception instanceof NotFoundException) {
             $this->_response->setHttpResponseCode(404);
+        } elseif (!$this->isApiAvailable()) {
+            $this->_response->setHttpResponseCode(503);
         } else {
             $this->_logger->error($exception->getMessage(), ['exception' => $exception]);
-            $this->_response->setHttpResponseCode(400);
+            $this->_response->setHttpResponseCode($exception->getCode() >= 500 ? 500 : 400);
         }
 
         $result = ['error' => true, 'message' => __('Something went wrong. Please try again.')];
@@ -413,7 +425,7 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * _prepareResponse function.
+     * Prepare response.
      *
      * @access private
      * @param array $apiResult
@@ -470,7 +482,8 @@ class ApiClientHelper extends AbstractHelper
     {
         $args = func_get_args();
         if (strlen($args[0]) === 2) {
-            $args[0] = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
+            // Support country ISO 2 code. "INVALID" will throw in client.
+            $args[0] = $this->getCountryIso3Code($args[0]) ?? 'INVALID';
         }
 
         try {
@@ -529,7 +542,17 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * _getModuleInfo function.
+     * Check if the API is available.
+     *
+     * @return bool True if the API is available, false otherwise.
+     */
+    public function isApiAvailable(): bool
+    {
+        return $this->_availabilityMonitor->isAvailable();
+    }
+
+    /**
+     * Get module info.
      *
      * @access protected
      * @param mixed $moduleName
@@ -547,7 +570,7 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * _getMagentoModules function.
+     * Get Magento modules.
      *
      * @access private
      * @return array
@@ -565,7 +588,7 @@ class ApiClientHelper extends AbstractHelper
     }
 
     /**
-     * _getDebugInfo function.
+     * Get debug info.
      *
      * @access private
      * @return array
@@ -594,7 +617,7 @@ class ApiClientHelper extends AbstractHelper
             $debug['magento_version'] = 'MagentoProfessional/' . $version;
         }
 
-        $debug['client'] = $this->getApiClient()->getUserAgent();
+        $debug['client'] = $this->_client->getUserAgent();
         $debug['session'] = $this->_getSessionId();
         return $debug;
     }

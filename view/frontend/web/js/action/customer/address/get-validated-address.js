@@ -17,7 +17,7 @@ define([
                 return response.json();
             }
 
-            throw new Error(response.statusText);
+            throw new Error(response.statusText, {cause: response});
         });
     }
 
@@ -39,7 +39,7 @@ define([
             })
             .catch((error) => {
                 console.error(error);
-                return null;
+                throw error;
             });
     };
 });
