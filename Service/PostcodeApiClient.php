@@ -5,8 +5,6 @@ namespace PostcodeEu\AddressValidation\Service;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\App\Request\Http as HttpRequest;
-
 use PostcodeEu\AddressValidation\HTTP\Client\Curl;
 use PostcodeEu\AddressValidation\Service\Exception\AuthenticationException;
 use PostcodeEu\AddressValidation\Service\Exception\BadRequestException;
@@ -55,7 +53,6 @@ class PostcodeApiClient
 
     public function __construct(
         Curl $curl,
-        HttpRequest $request,
         ProductMetadataInterface $productMetadata,
         StoreConfigHelper $storeConfigHelper
     ) {
@@ -67,10 +64,6 @@ class PostcodeApiClient
             CURLOPT_CONNECTTIMEOUT => 2,
             CURLOPT_TIMEOUT => 5,
         ]);
-
-        if (null !== $request->getServer('HTTP_REFERER')) {
-            $curl->setOption(CURLOPT_REFERER, $request->getServer('HTTP_REFERER'));
-        }
     }
 
     public function getUserAgent(): string
@@ -294,7 +287,7 @@ class PostcodeApiClient
                 $jsonResponse = json_decode($response, true);
                 if (!is_array($jsonResponse)) {
                     throw new InvalidJsonResponseException(
-                        sprintf('Invalid JSON response from the server for request: `%s`.' . $url)
+                        sprintf('Invalid JSON response from the server for request: `%s`.', $url)
                     );
                 }
 

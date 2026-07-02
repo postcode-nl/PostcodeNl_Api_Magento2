@@ -4,6 +4,7 @@ namespace PostcodeEu\AddressValidation\Helper;
 
 use Exception;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use PostcodeEu\AddressValidation\Service\Exception\BadRequestException;
 use PostcodeEu\AddressValidation\Service\Exception\NotFoundException;
 use PostcodeEu\AddressValidation\Service\PostcodeApiClient;
 use Magento\Customer\Helper\Address as AddressHelper;
@@ -469,11 +470,18 @@ class ApiClientHelper extends AbstractHelper
     public function validateAddress(): array
     {
         $args = func_get_args();
-        if (strlen($args[0]) === 2) {
-            $args[0] = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
-        }
 
         try {
+            if (strlen($args[0]) === 2) {
+                $countryIso3Code = $this->getCountryIso3Code($args[0]); // Support country ISO 2 code.
+
+                if ($countryIso3Code === null) {
+                    throw new BadRequestException('Country not supported', 400);
+                }
+
+                $args[0] = $countryIso3Code;
+            }
+
             $client = $this->getApiClient();
             $response = $client->validateAddress(...$args);
 
