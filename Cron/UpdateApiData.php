@@ -102,7 +102,7 @@ class UpdateApiData
                 continue;
             }
 
-            $hash = md5($key . ':' . $secret);
+            $hash = hash('sha256', $key . ':' . $secret);
             $groupedScopes[$hash] ??= ['key' => $key, 'secret' => $secret, 'scopes' => []];
             $groupedScopes[$hash]['scopes'][] = $scope;
 
