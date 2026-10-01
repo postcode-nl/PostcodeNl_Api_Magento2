@@ -65,6 +65,8 @@ Although we can't guarantee compatibility with other checkout modules, our modul
 
 If you found the solution already and have some code to contribute, feel free to open a pull request in this repository.
 
+We provide a [separate module for Hyvä theme compatibility](https://github.com/postcode-nl/PostcodeEu_Api_Hyva). This enables address autocompletion and validation in Hyvä themes. Please note that Hyvä Checkout is currently not supported.
+
 ## Address API documentation
 
 You can find our API documentation at https://developer.postcode.eu/documentation.

@@ -110,9 +110,9 @@ class UpdateApiStatusConfig implements DataPatchInterface
                     $client->setCredentials($credentials[StoreConfigHelper::PATH['api_key']], $credentials[StoreConfigHelper::PATH['api_secret']]);
                     $accountInfo = $client->accountInfo();
 
-                    $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_name'], $accountInfo['name'], $scope, $scopeId);
+                    $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_name'], $accountInfo['name'] ?? '', $scope, $scopeId);
 
-                    if ($accountInfo['hasAccess']) {
+                    if ($accountInfo['hasAccess'] ?? false) {
 
                         $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE, $scope, $scopeId);
                         $countries = $client->internationalGetSupportedCountries();

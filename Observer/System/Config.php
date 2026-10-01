@@ -97,8 +97,8 @@ class Config implements ObserverInterface
 
             // Credential(s) missing. Delete account info (status will fallback to "new" via default config).
             if (!$this->_storeConfigHelper->hasCredentials()) {
-                $this->_configWriter->delete('account_name');
-                $this->_configWriter->delete('account_status');
+                $this->_deleteConfig('account_name');
+                $this->_deleteConfig('account_status');
                 $this->_purgeCachedData();
                 return;
             }

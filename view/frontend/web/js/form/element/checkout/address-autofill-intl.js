@@ -86,6 +86,12 @@ define([
             this.street().clearFields().clearErrors();
         },
 
+        resetAddress: function () {
+            // Clear checkout provider storage (localStorage) so value is not restored on page reload/navigation.
+            this.source.set(this.dataScope, '');
+            this._super();
+        },
+
         toggleFields: function (state, force = false) {
             if (this.countryCode === 'NL' && Utils.isObject(Registry.get(`${this.parentName}.address_autofill_nl`))) {
                 return; // Toggle will be handled by NL component.

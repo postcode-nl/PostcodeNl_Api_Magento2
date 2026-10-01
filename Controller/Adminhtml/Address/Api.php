@@ -14,6 +14,12 @@ class Api extends Action implements HttpGetActionInterface
 {
     public const ADMIN_RESOURCE = 'PostcodeEu_AddressValidation::config_postcode_eu';
 
+    private const SERVICES = [
+        'postcode' => ['method' => 'getNlAddress', 'required' => ['postcode', 'house_number']],
+        'autocomplete' => ['method' => 'getAddressAutocomplete', 'required' => ['context', 'term']],
+        'address_details' => ['method' => 'getAddressDetails', 'required' => ['context']],
+    ];
+
     /** @var JsonFactory */
     protected $_resultJsonFactory;
     /** @var PostcodeModelInterface */
@@ -50,26 +56,17 @@ class Api extends Action implements HttpGetActionInterface
         $request = $this->getRequest();
 
         try {
-            switch ($request->getParam('method')) {
-                case 'postcode':
-                    $serviceMethod = 'getNlAddress';
-                    $required = ['postcode', 'house_number'];
-                    break;
-                case 'autocomplete':
-                    $serviceMethod = 'getAddressAutocomplete';
-                    $required = ['context', 'term'];
-                    break;
-                case 'address_details':
-                    $serviceMethod = 'getAddressDetails';
-                    $required = ['context'];
-                    break;
-                default:
-                    throw new \InvalidArgumentException('Invalid service method');
+            $method = $request->getParam('method');
+            $service = is_string($method) ? self::SERVICES[$method] ?? null : null;
+
+            if ($service === null) {
+                throw new \InvalidArgumentException('Invalid service method');
             }
 
+            $serviceMethod = $service['method'];
             $values = [];
 
-            foreach ($required as $param) {
+            foreach ($service['required'] as $param) {
                 $value = $request->getParam($param) ?? '';
 
                 if (!is_scalar($value)) {

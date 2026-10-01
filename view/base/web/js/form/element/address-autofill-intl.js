@@ -138,7 +138,19 @@ define([
             ServiceStatus.isAvailable = false;
             this.destruct();
             console.error(message);
-        }
+        },
+
+        resetAddress: function () {
+            if (!this.visible()) {
+                return;
+            }
+
+            this.resetInputAddress();
+            this.clear().error(false);
+            this.address(null);
+            this.intlAutocompleteInstance.reset();
+            this.focused(true);
+        },
 
     });
 });

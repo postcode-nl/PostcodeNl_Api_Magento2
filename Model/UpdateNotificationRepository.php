@@ -58,7 +58,7 @@ class UpdateNotificationRepository implements UpdateNotificationRepositoryInterf
 
         $notification->setVersion($version);
         $notification->setNotified(true);
-        $this->_resource->save($notification);
+        $this->save($notification);
     }
 
     public function isVersionNotified(string $version): bool

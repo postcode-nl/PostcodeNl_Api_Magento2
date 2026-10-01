@@ -182,7 +182,7 @@ define([
         },
 
         onChangeHouseNumberAddition: function (value) {
-            if (!this.childHouseNumberSelect().visible()) {
+            if (!this.childHouseNumberSelect().visible() || this.address() === null) {
                 return;
             }
 
@@ -196,7 +196,9 @@ define([
         },
 
         resetHouseNumberSelect: function () {
-            this.childHouseNumberSelect(component => component.setOptions([]));
+            this.childHouseNumberSelect((component) => {
+                component.setOptions([]).clear(); // Make sure knockout observable value is cleared.
+            });
         },
 
         getAddressParts: function (address) {
@@ -252,6 +254,20 @@ define([
             ServiceStatus.isAvailable = false;
             this.destruct();
             console.error(message);
-        }
+        },
+
+        resetAddress: function () {
+            if (!this.visible()) {
+                return;
+            }
+
+            this.resetInputAddress();
+            this.address(null);
+            this.status(null);
+            this.resetHouseNumberSelect();
+            this.childPostcode().clear().error(false);
+            this.childHouseNumber().clear().error(false);
+            this.childPostcode().focused(true);
+        },
     });
 });

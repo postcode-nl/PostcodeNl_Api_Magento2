@@ -88,6 +88,12 @@ define([
             this.street().clearFields().clearErrors();
         },
 
+        resetAddress: function () {
+            // Clear checkout provider storage (localStorage) so child values are not restored on page reload/navigation.
+            this.source.set(this.dataScope, {});
+            this._super();
+        },
+
         toggleFields: function (state, force = false) {
             if (this.countrySelect()?.value() !== 'NL') {
                 // Always re-enable region.

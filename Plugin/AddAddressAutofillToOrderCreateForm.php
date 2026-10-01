@@ -70,11 +70,22 @@ class AddAddressAutofillToOrderCreateForm
         );
         $addressType = $subject->getIsShipping() ? 'shipping' : 'billing';
         $fieldId = $addressType . '_address_autofill';
-        $countryId = $subject->getAddress()->getCountryId() ?? $this->_directoryHelper->getDefaultCountry();
-        $isVisible = in_array($countryId, $this->_storeConfigHelper->getEnabledCountries($storeId));
+        $address = $subject->getAddress();
 
-        if ($autocompleteBehavior !== AdminAddressAutocompleteBehavior::DEFAULT) {
-            $isNlComponentDisabled = $autocompleteBehavior === AdminAddressAutocompleteBehavior::SINGLE_INPUT;
+        if ($address === null) {
+            $countryId = $this->_directoryHelper->getDefaultCountry();
+        } else {
+            $countryId = $address->getCountryId() ?? $this->_directoryHelper->getDefaultCountry();
+        }
+
+        $isVisible = in_array($countryId, $this->_storeConfigHelper->getEnabledCountries($storeId), true);
+
+        if ($autocompleteBehavior === AdminAddressAutocompleteBehavior::SINGLE_INPUT) {
+            $isNlComponentDisabled = true;
+        } elseif ($autocompleteBehavior === AdminAddressAutocompleteBehavior::DUTCH_LOOKUP) {
+            $isNlComponentDisabled = false;
+        } else {
+            $isNlComponentDisabled = $this->_dataHelper->isNlComponentDisabled($storeId);
         }
 
         if ($form->getElement($fieldId) === null) {
@@ -89,7 +100,7 @@ class AddAddressAutofillToOrderCreateForm
                     'countryCode' => $countryId,
                     'visible' => $isVisible,
                     'css_class' => $isVisible ? '' : 'hidden',
-                    'isNlComponentDisabled' => $isNlComponentDisabled ?? $this->_dataHelper->isNlComponentDisabled($storeId),
+                    'isNlComponentDisabled' => $isNlComponentDisabled,
                 ],
                 'country_id',
             );

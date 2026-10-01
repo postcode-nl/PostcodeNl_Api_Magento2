@@ -53,7 +53,7 @@ class LicenceCheck implements MessageInterface
      */
     public function isDisplayed(): bool
     {
-        return $this->_storeConfigHelper->getValue('account_status') != \PostcodeEu\AddressValidation\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
+        return $this->_storeConfigHelper->getValue('account_status') !== \PostcodeEu\AddressValidation\Helper\ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE;
     }
 
     /**

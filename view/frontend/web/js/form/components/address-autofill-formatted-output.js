@@ -102,5 +102,10 @@ define([
             }
         },
 
+        resetAddress: function () {
+            this.addressAutofillNl()?.resetAddress();
+            this.addressAutofillIntl()?.resetAddress();
+        },
+
     });
 });

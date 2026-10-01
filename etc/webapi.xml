@@ -14,13 +14,6 @@
         </resources>
     </route>
 
-    <route url="/V1/international/address/:context/:dispatchCountry" method="GET">
-        <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getAddressDetailsCountry"/>
-        <resources>
-           <resource ref="anonymous" />
-        </resources>
-    </route>
-
     <route url="/V1/nl/address/:zipCode/:houseNumber" method="GET">
         <service class="PostcodeEu\AddressValidation\Api\PostcodeModelInterface" method="getNlAddress"/>
         <resources>

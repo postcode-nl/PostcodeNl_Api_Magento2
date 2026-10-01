@@ -144,7 +144,19 @@ class StoreConfigHelper extends AbstractHelper
      */
     public function getSupportedCountries($storeId = null): array
     {
-        return json_decode($this->getValue('supported_countries', $storeId) ?? '[]');
+        $value = $this->getValue('supported_countries', $storeId) ?? '[]';
+        $decoded = json_decode($value);
+
+        if (!is_array($decoded)) {
+            $this->_logger->error(
+                'Invalid supported_countries configuration; treating as empty.',
+                ['value' => $value]
+            );
+
+            return [];
+        }
+
+        return $decoded;
     }
 
     /**
@@ -340,7 +352,7 @@ class StoreConfigHelper extends AbstractHelper
             if ($this->_appState->getAreaCode() === \Magento\Backend\App\Area\FrontNameResolver::AREA_CODE) {
                 [$scope, $scopeId] = $this->getScopeFromRequest();
 
-                return [$scope, $scopeId ?: null];
+                return [$scope, $scopeId];
             }
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             // Area code not set, fall through.

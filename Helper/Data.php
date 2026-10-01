@@ -133,7 +133,11 @@ class Data extends AbstractHelper
 
         try {
             $data = $this->_getPackageData();
-            $latest_version = $data['packages'][self::VENDOR_PACKAGE][0]['version'];
+            $latest_version = $data['packages'][self::VENDOR_PACKAGE][0]['version'] ?? null;
+
+            if (!is_string($latest_version) || $latest_version === '') {
+                throw new LocalizedException(__('Unexpected package data shape.'));
+            }
         } catch (LocalizedException $e) {
             $this->_logger->error('Failed to get package data:', ['exception' => $e]);
             $latest_version = $version;
@@ -164,7 +168,8 @@ class Data extends AbstractHelper
 
         $filePath = $path . '/package-data.json';
         if ($this->_fs->isExists($filePath)) {
-            $lastModified = $this->_fs->stat($filePath)['mtime'];
+            $stat = $this->_fs->stat($filePath);
+            $lastModified = is_array($stat) ? ($stat['mtime'] ?? false) : false;
 
             if ($lastModified !== false) {
                 $this->_curl->setHeaders(['If-Modified-Since' => gmdate('D, d M Y H:i:s T', $lastModified)]);
@@ -186,7 +191,7 @@ class Data extends AbstractHelper
             }
 
             $result = json_decode($response, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($result)) {
                 throw new LocalizedException(__('Invalid JSON response from Packagist.'));
             }
 
@@ -200,7 +205,7 @@ class Data extends AbstractHelper
             }
 
             $result = json_decode($data, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($result)) {
                 throw new LocalizedException(__('Invalid cached JSON data.'));
             }
 

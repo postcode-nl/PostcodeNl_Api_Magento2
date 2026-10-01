@@ -58,17 +58,6 @@ class PostcodeModel implements PostcodeModelInterface
     /**
      * @inheritdoc
      */
-    public function getAddressDetailsCountry(string $context, string $dispatchCountry): array
-    {
-        $this->_validateRequest();
-
-        $result = $this->_apiClientHelper->getAddressDetails($context, $dispatchCountry);
-        return [$result];
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getNlAddress(string $zipCode, string $houseNumber): array
     {
         $this->_validateRequest();
