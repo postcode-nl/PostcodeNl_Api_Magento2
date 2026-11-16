@@ -6,7 +6,6 @@ use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Data\Form;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Data\Form\Element\Fieldset;
-use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\Sales\Block\Adminhtml\Order\Address\Form as EditForm;
 use Magento\Sales\Block\Adminhtml\Order\Create\Form\Address as AddressBlock;
 use Magento\Sales\Model\Order\Address;
@@ -19,6 +18,7 @@ use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
 use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 use PostcodeEu\AddressValidation\Model\Config\Source\AdminAddressAutocompleteBehavior;
 use PostcodeEu\AddressValidation\Plugin\AddAddressAutofillToOrderCreateForm;
+use PostcodeEu\AddressValidation\Test\Unit\Helper\PartialMockTrait;
 
 /**
  * Address autofill field injection on the admin order create form.
@@ -28,7 +28,7 @@ use PostcodeEu\AddressValidation\Plugin\AddAddressAutofillToOrderCreateForm;
 #[AllowMockObjectsWithoutExpectations]
 class AddAddressAutofillToOrderCreateFormTest extends TestCase
 {
-    use MockCreationTrait;
+    use PartialMockTrait;
 
     private const STORE_ID = 7;
     private const HTML_ID_PREFIX = 'order_';

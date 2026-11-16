@@ -3,18 +3,18 @@
 namespace PostcodeEu\AddressValidation\Test\Unit\Model\Validator;
 
 use Magento\Customer\Model\Customer;
-use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use PostcodeEu\AddressValidation\Model\Validator\City;
+use PostcodeEu\AddressValidation\Test\Unit\Helper\PartialMockTrait;
 
 /**
  * City field validation: allowed characters, length limit, and failure messages.
  */
 class CityTest extends TestCase
 {
-    use MockCreationTrait;
+    use PartialMockTrait;
 
     #[Test]
     public function null_city_passes_without_messages(): void
