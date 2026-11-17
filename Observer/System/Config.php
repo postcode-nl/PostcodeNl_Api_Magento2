@@ -129,7 +129,7 @@ class Config implements ObserverInterface
             $this->_messageManager->addErrorMessage(__('Failed to update account info: %1', $e->getMessage()));
         }
 
-        if ($hasAccess) {
+        if ($hasAccess && isset($client)) {
             try {
                 $countries = $client->internationalGetSupportedCountries();
                 $this->_saveConfig(

@@ -51,7 +51,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
      */
     public function getAliases(): array
     {
-        return [\Flekto\Postcode\Setup\Patch\Data\UpdateApiStatusConfig::class];
+        return ['Flekto\\Postcode\\Setup\\Patch\\Data\\UpdateApiStatusConfig'];
     }
 
     /**
