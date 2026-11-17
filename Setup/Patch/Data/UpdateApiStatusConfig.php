@@ -51,7 +51,7 @@ class UpdateApiStatusConfig implements DataPatchInterface
      */
     public function getAliases(): array
     {
-        return ['Flekto\\Postcode\\Setup\\Patch\\Data\\UpdateApiStatusConfig'];
+        return [str_replace('PostcodeEu\\AddressValidation', 'Flekto\\Postcode', self::class)];
     }
 
     /**
@@ -87,7 +87,9 @@ class UpdateApiStatusConfig implements DataPatchInterface
 
         foreach ($scopeValues as $scope => $scopeIdValues) {
             foreach ($scopeIdValues as $scopeId => $credentials) {
-                if (empty($credentials[StoreConfigHelper::PATH['api_key']]) || empty($credentials[StoreConfigHelper::PATH['api_secret']])) {
+                if (empty($credentials[StoreConfigHelper::PATH['api_key']])
+                    || empty($credentials[StoreConfigHelper::PATH['api_secret']])
+                ) {
                     continue;
                 }
 
@@ -107,31 +109,62 @@ class UpdateApiStatusConfig implements DataPatchInterface
                 try {
 
                     $client = $this->_apiClientHelper->getApiClient();
-                    $client->setCredentials($credentials[StoreConfigHelper::PATH['api_key']], $credentials[StoreConfigHelper::PATH['api_secret']]);
+                    $client->setCredentials(
+                        $credentials[StoreConfigHelper::PATH['api_key']],
+                        $credentials[StoreConfigHelper::PATH['api_secret']]
+                    );
                     $accountInfo = $client->accountInfo();
 
-                    $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_name'], $accountInfo['name'], $scope, $scopeId);
+                    $this->_resourceConfig->saveConfig(
+                        StoreConfigHelper::PATH['account_name'],
+                        $accountInfo['name'],
+                        $scope,
+                        $scopeId
+                    );
 
                     if ($accountInfo['hasAccess']) {
 
-                        $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE, $scope, $scopeId);
+                        $this->_resourceConfig->saveConfig(
+                            StoreConfigHelper::PATH['account_status'],
+                            ApiClientHelper::API_ACCOUNT_STATUS_ACTIVE,
+                            $scope,
+                            $scopeId
+                        );
                         $countries = $client->internationalGetSupportedCountries();
-                        $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['supported_countries'], json_encode($countries), $scope, $scopeId);
+                        $this->_resourceConfig->saveConfig(
+                            StoreConfigHelper::PATH['supported_countries'],
+                            json_encode($countries),
+                            $scope,
+                            $scopeId
+                        );
 
                     } else {
 
-                        $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE, $scope, $scopeId);
+                        $this->_resourceConfig->saveConfig(
+                            StoreConfigHelper::PATH['account_status'],
+                            ApiClientHelper::API_ACCOUNT_STATUS_INACTIVE,
+                            $scope,
+                            $scopeId
+                        );
                     }
 
                 } catch (\PostcodeEu\AddressValidation\Service\Exception\AuthenticationException $e) {
 
-                    $this->_resourceConfig->saveConfig(StoreConfigHelper::PATH['account_status'], ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS, $scope, $scopeId);
+                    $this->_resourceConfig->saveConfig(
+                        StoreConfigHelper::PATH['account_status'],
+                        ApiClientHelper::API_ACCOUNT_STATUS_INVALID_CREDENTIALS,
+                        $scope,
+                        $scopeId
+                    );
                 }
 
                 // Remove obsolete config paths.
-                $this->_resourceConfig->deleteConfig('postcodenl_api/general/api_key_is_valid', $scope, $scopeId); // Replaced by postcodenl_api/status/account_status
-                $this->_resourceConfig->deleteConfig('postcodenl_api/general/supported_countries', $scope, $scopeId); // Replaced by postcodenl_api/status/supported_countries
-                $this->_resourceConfig->deleteConfig('postcodenl_api/general/account_name', $scope, $scopeId); // Replaced by postcodenl_api/status/account_name
+                // Replaced by postcodenl_api/status/account_status
+                $this->_resourceConfig->deleteConfig('postcodenl_api/general/api_key_is_valid', $scope, $scopeId);
+                // Replaced by postcodenl_api/status/supported_countries
+                $this->_resourceConfig->deleteConfig('postcodenl_api/general/supported_countries', $scope, $scopeId);
+                // Replaced by postcodenl_api/status/account_name
+                $this->_resourceConfig->deleteConfig('postcodenl_api/general/account_name', $scope, $scopeId);
             }
         }
 
