@@ -217,18 +217,19 @@ class LayoutProcessorTest extends TestCase
     }
 
     #[Test]
-    public function billing_form_without_data_scope_prefix_is_left_without_autofill(): void
+    public function billing_form_without_data_scope_prefix_is_left_untouched(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('warning');
 
-        $processor = $this->createProcessor($this->createStoreConfigStub(), null, $logger);
+        // Field positions are configured to change, but must not change in this form.
+        $processor = $this->createProcessor($this->createStoreConfigStub(changeFieldsPosition: true), null, $logger);
+        $layout = $this->createLayout();
+        $formPath = self::PAYMENTS_LIST . '.noprefix-form';
 
-        $result = $processor->process($this->createLayout());
-        $fields = $this->valueAt($result, self::PAYMENTS_LIST . '.noprefix-form.children.form-fields.children');
+        $result = $processor->process($layout);
 
-        $this->assertArrayHasKey('firstname', $fields);
-        $this->assertArrayNotHasKey('address_autofill_nl', $fields);
+        $this->assertSame($this->valueAt($layout, $formPath), $this->valueAt($result, $formPath));
     }
 
     #[Test]
@@ -413,6 +414,7 @@ class LayoutProcessorTest extends TestCase
             ],
             "$payments.billing-address-form.dataScopePrefix" => 'billingAddress',
             "$payments.noprefix-form.children.form-fields.children.firstname" => ['dataScope' => 'shippingAddress.firstname'],
+            "$payments.noprefix-form.children.form-fields.children.country_id" => ['sortOrder' => '10'],
             "$billingForm.firstname" => [
                 'dataScope' => 'shippingAddress.firstname',
                 'children' => ['nested' => ['dataScope' => 'shippingAddress.nested']],

@@ -162,20 +162,22 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
                 continue;
             }
 
-            $fields = $form['children']['form-fields']['children'];
             $dataScopePrefix = $form['dataScopePrefix'] ?? null;
 
+            // Without a data scope we can't integrate, so leave the form untouched (including field positions).
             if ($dataScopePrefix === null) {
                 $this->_logger->warning(sprintf(
                     'Billing form "%s" has no dataScopePrefix; skipping autofill fields.',
                     $key
                 ));
-                $fields = $this->_changeAddressFieldsPosition($fields);
-            } else {
-                $fields = $this->_addAutofillFields($fields, $autofillFields, $dataScopePrefix);
+                continue;
             }
 
-            $paymentForms[$key]['children']['form-fields']['children'] = $fields;
+            $paymentForms[$key]['children']['form-fields']['children'] = $this->_addAutofillFields(
+                $form['children']['form-fields']['children'],
+                $autofillFields,
+                $dataScopePrefix
+            );
         }
 
         return $paymentForms;
