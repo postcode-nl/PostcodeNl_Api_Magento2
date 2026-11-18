@@ -3,6 +3,7 @@
 namespace PostcodeEu\AddressValidation\Test\Unit\Block\Onepage;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Stdlib\ArrayManager;
 use Magento\Framework\View\Element\Template\Context;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,7 +34,12 @@ class LayoutProcessorTest extends TestCase
         $storeConfigHelper = $this->createMock(StoreConfigHelper::class);
         $storeConfigHelper->expects($this->never())->method('getJsinit');
 
-        $processor = new LayoutProcessor($this->createStub(Context::class), $storeConfigHelper, $dataHelper);
+        $processor = new LayoutProcessor(
+            $this->createStub(Context::class),
+            $storeConfigHelper,
+            $dataHelper,
+            new ArrayManager()
+        );
         $layout = $this->createLayout();
 
         $result = $processor->process($layout);
@@ -291,7 +297,8 @@ class LayoutProcessorTest extends TestCase
         return new LayoutProcessor(
             $context,
             $storeConfigHelper,
-            $dataHelper ?? $this->createDataHelperStub()
+            $dataHelper ?? $this->createDataHelperStub(),
+            new ArrayManager()
         );
     }
 
