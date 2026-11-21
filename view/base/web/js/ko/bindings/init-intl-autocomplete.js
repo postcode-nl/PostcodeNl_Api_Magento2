@@ -58,7 +58,17 @@ define([
                     const isValidAddress = viewModel.validateAddress(result[0]);
 
                     viewModel.loading(false);
-                    viewModel.address(isValidAddress ? result[0] : null);
+
+                    if (isValidAddress) {
+                        // Copy, so listeners can modify the address without affecting the address details cache.
+                        const address = {...result[0]};
+
+                        viewModel.trigger('selectAddress', address);
+                        viewModel.address(address);
+                    } else {
+                        viewModel.address(null);
+                    }
+
                     viewModel.toggleFields(isValidAddress);
                     isValidAddress && viewModel.validate();
                 });

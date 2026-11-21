@@ -1,7 +1,7 @@
 <input class="input-text" type="text" data-bind="
     event: {input: userChanges},
     value: value,
-    valueUpdate: 'input',
+    valueUpdate: valueUpdate,
     hasFocus: focused,
     attr: {
         name: inputName,
@@ -10,5 +10,6 @@
         'aria-required': required,
         'aria-invalid': error() ? true : 'false',
         id: uid,
-        disabled: disabled
+        disabled: disabled,
+        maxlength: $data.maxLength
     }" />

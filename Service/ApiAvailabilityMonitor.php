@@ -94,7 +94,10 @@ class ApiAvailabilityMonitor
         // A successful request while half-open closes the circuit.
         $state['half_open'] = false;
 
-        if ($state === $this->_getDefaultState()) { // Requires keys in fixed order.
+        if ($state['failure_times'] === []
+            && $state['unavailable_since'] === null
+            && $state['trip_count'] === 0
+        ) {
             return;
         }
 
@@ -207,7 +210,7 @@ class ApiAvailabilityMonitor
                 $decoded = json_decode($data, true);
 
                 if (is_array($decoded) && $this->_isValidState($decoded)) {
-                    return $decoded;
+                    return $decoded + $this->_getDefaultState();
                 }
             }
         } catch (\Throwable $e) {

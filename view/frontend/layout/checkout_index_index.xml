@@ -91,6 +91,16 @@
                                                                     <item name="sortOrder" xsi:type="string">68</item>
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_bypass</item>
                                                                 </item>
+                                                                <item name="address_autofill_residence" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">PostcodeEu_AddressValidation/js/form/components/checkout/address-autofill-residence</item>
+                                                                    <item name="label" translate="true" xsi:type="string">Building, apartment, residence, etc. (optional)</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="componentDisabled" xsi:type="helper" helper="PostcodeEu\AddressValidation\Helper\Data::isResidenceLineDisabled"/>
+                                                                    </item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="sortOrder" xsi:type="string">69</item>
+                                                                    <item name="dataScope" xsi:type="string">shippingAddress.address_autofill_residence</item>
+                                                                </item>
                                                             </item>
                                                         </item>
                                                     </item>

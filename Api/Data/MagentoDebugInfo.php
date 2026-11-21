@@ -27,7 +27,14 @@ class MagentoDebugInfo implements MagentoDebugInfoInterface
         $this->client = $data['client'] ?? '';
         $this->session = $data['session'] ?? '';
         $this->configuration = new MagentoDebugInfo\Configuration($data['configuration'] ?? []);
-        $this->modules = $data['modules'] ?? [];
+
+        $modules = $data['modules'] ?? [];
+        $this->modules = array_map(
+            static function ($module): MagentoDebugInfo\MagentoModule {
+                return new MagentoDebugInfo\MagentoModule(is_array($module) ? $module : []);
+            },
+            is_array($modules) ? $modules : []
+        );
     }
 
     /**

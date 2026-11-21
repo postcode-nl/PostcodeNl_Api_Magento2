@@ -48,7 +48,7 @@ define([
                     return [...this.street, this.city, this.postcode, this.regionId, this.region].filter((el) => el);
                 },
                 getStreetValue() {
-                    return [...this.street].map((input) => input.value).join(' ').trim();
+                    return [...this.street].map((input) => input.value.trim()).filter((value) => value !== '').join(' ');
                 },
             };
             this.countryCode = this.inputs.country.value;

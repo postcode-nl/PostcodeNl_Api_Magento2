@@ -111,12 +111,26 @@ define([
             }
 
             const setValue = (input, value) => {
-                input.value = value;
-                input.dispatchEvent(new Event('change', {bubbles: true}));
-            };
+                    input.value = value;
+                    input.dispatchEvent(new Event('change', {bubbles: true}));
+                },
+                residenceLine = result.residenceLine?.trim(),
+                streetLines = [...result.streetLines],
+                lineCount = this.inputs.street.length;
 
-            for (let i = 0; i < result.streetLines.length; i++) {
-                setValue(this.inputs.street[i], result.streetLines[i]);
+            if (residenceLine) {
+                streetLines.unshift(residenceLine);
+            }
+
+            // Join any extra lines into the last available street input.
+            if (streetLines.length > lineCount) {
+                streetLines.push(streetLines.splice(lineCount - 1).join(' '));
+            }
+
+            // Write every street input, so lines left over from a previous or longer address are cleared
+            // (e.g. after removing the residence line).
+            for (let i = 0; i < lineCount; i++) {
+                setValue(this.inputs.street[i], streetLines[i] ?? '');
             }
 
             setValue(this.inputs.city, result.address.locality);
@@ -138,7 +152,19 @@ define([
             ServiceStatus.isAvailable = false;
             this.destruct();
             console.error(message);
-        }
+        },
+
+        resetAddress: function () {
+            if (!this.visible()) {
+                return;
+            }
+
+            this.resetInputAddress();
+            this.clear().error(false);
+            this.address(null);
+            this.intlAutocompleteInstance.reset();
+            this.focused(true);
+        },
 
     });
 });

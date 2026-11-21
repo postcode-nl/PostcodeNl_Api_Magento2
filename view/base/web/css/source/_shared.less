@@ -12,8 +12,26 @@
 	background-size: auto;
 }
 
-.address-autofill-formatted-output address {
-    padding: 1em;
-    font-size: 1.8rem;
-    background-color: @color-white-smoke;
+.address-autofill-formatted-output {
+    position: relative;
+
+    address {
+        padding: 1em;
+        font-size: 1.8rem;
+        background-color: @color-white-smoke;
+    }
+
+    button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        line-height: 20px;
+        cursor: pointer;
+        text-align: center;
+        border-radius: 3px;
+        opacity: .75;
+    }
 }

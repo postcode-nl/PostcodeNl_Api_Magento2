@@ -13,6 +13,7 @@ define([
             template: 'ui/form/field',
             elementTmpl: 'PostcodeEu_AddressValidation/form/element/address-autofill-field',
             visible: false,
+            valueUpdate: 'input',
         },
 
         onSettings: function (settings) {

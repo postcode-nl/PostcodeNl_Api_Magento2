@@ -22,14 +22,6 @@ interface PostcodeModelInterface
 
     /**
      * @access public
-     * @param string $context
-     * @param string $dispatchCountry
-     * @return string[][]
-     */
-    public function getAddressDetailsCountry(String $context, String $dispatchCountry): array;
-
-    /**
-     * @access public
      * @param string $zipCode
      * @param string $houseNumber
      * @return string[][]

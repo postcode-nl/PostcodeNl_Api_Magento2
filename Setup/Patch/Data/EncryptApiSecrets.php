@@ -51,7 +51,7 @@ class EncryptApiSecrets implements DataPatchInterface
             }
 
             // Skip if already encrypted (Magento encrypted values start with '0:')
-            if (str_starts_with($row['value'], '0:')) {
+            if (strpos($row['value'], '0:') === 0) {
                 continue;
             }
 

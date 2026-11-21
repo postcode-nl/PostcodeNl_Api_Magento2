@@ -50,6 +50,6 @@ class UpdateNotifier
             \PostcodeEu\AddressValidation\Helper\Data::MODULE_RELEASE_URL
         );
         $this->_updateNotification->setVersionNotified($version);
-        return $this->_updateNotification->isVersionNotified($version);
+        return true;
     }
 }

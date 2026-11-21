@@ -29,8 +29,9 @@ define([
             if (this.visible() && this.value() === '') {
                 const postcode = this.inputs.postcode.value,
                     city = this.inputs.city.value,
-                    streetAndBuilding = this.inputs.getStreetValue(),
-                    prefilledAddressValue = `${postcode} ${city} ${streetAndBuilding}`.trim();
+                    {residenceLine, street} = this.splitResidenceLine();
+
+                let prefilledAddressValue = `${postcode} ${city} ${street}`.trim();
 
                 if (prefilledAddressValue === '') {
                     return;
@@ -38,10 +39,25 @@ define([
 
                 this.resetInputAddress();
 
-                if (streetAndBuilding && postcode && city) {
+                if (street && postcode && city) {
                     this.loading(true);
 
-                    getValidatedAddress(this.countryCode, streetAndBuilding, postcode, city)
+                    getValidatedAddress(this.countryCode, street, postcode, city)
+                        .then((result) => {
+                            if (result !== null) {
+                                return residenceLine ? {...result, residenceLine} : result;
+                            }
+
+                            // Not a residence line after all, retry with the full street.
+                            if (residenceLine) {
+                                const fullStreet = `${residenceLine} ${street}`;
+
+                                prefilledAddressValue = `${postcode} ${city} ${fullStreet}`.trim();
+                                return getValidatedAddress(this.countryCode, fullStreet, postcode, city);
+                            }
+
+                            return null;
+                        })
                         .then((result) => {
                             if (result !== null) {
                                 this.address(result);
@@ -64,6 +80,29 @@ define([
             }
 
             return this;
+        },
+
+        /**
+         * Split a residence line off the saved street lines.
+         *
+         * The first line is taken as residence line if the country uses one, and there are multiple lines.
+         * Not possible with a single street line, or with split street values (where multiple lines are normal).
+         *
+         * @access private
+         * @return {{residenceLine: string|null, street: string}}
+         */
+        splitResidenceLine: function () {
+            const lines = [...this.inputs.street].map((input) => input.value.trim()).filter((value) => value !== ''),
+                hasResidenceLine = this.settings.show_hide_address_fields === 'format'
+                    && this.settings.residence_line_countries?.includes(this.countryCode)
+                    && !this.settings.split_street_values
+                    && lines.length > 1;
+
+            if (!hasResidenceLine) {
+                return {residenceLine: null, street: lines.join(' ')};
+            }
+
+            return {residenceLine: lines[0], street: lines.slice(1).join(' ')};
         },
 
         onChangeCountry: function (countryCode) {

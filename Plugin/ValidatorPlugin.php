@@ -37,7 +37,10 @@ class ValidatorPlugin
         ValidatorInterface $validator,
         bool $breakChainOnFailure = false
     ): ?array {
-        if (substr($this->_productMetadata->getVersion(), 0, 5) === '2.4.8'
+        $version = $this->_productMetadata->getVersion();
+
+        if (version_compare($version, '2.4.8', '>=')
+            && version_compare($version, '2.4.9', '<')
             && method_exists($validator, 'getAlias')
             && $validator->getAlias() === 'city_validator'
         ) {

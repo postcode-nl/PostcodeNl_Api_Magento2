@@ -22,12 +22,16 @@ class City extends AbstractValidator
      */
     public function isValid($customer): bool
     {
+        $this->_clearMessages();
+
         $city = $customer->getCity();
         if ($city === null) {
             return true;
         }
 
-        if (preg_match('/^[\p{L}\p{M}\d\s\-_\'’\.,&\(\)]{1,100}$/u', $city, $matches)) {
+        $city = trim($city);
+
+        if (preg_match('/^[\p{L}\p{M}\d\h\-_\'’\.,&\(\)]{1,100}$/u', $city, $matches)) {
             if ($matches[0] === $city) {
                 return true;
             }

@@ -60,6 +60,7 @@ class StoreConfigHelper extends AbstractHelper
         'allow_pobox_shipping' => 'postcodenl_api/advanced_config/allow_pobox_shipping',
         'split_street_values' => 'postcodenl_api/advanced_config/split_street_values',
         'admin_address_autocomplete_behavior' => 'postcodenl_api/advanced_config/admin_address_autocomplete_behavior',
+        'residence_line_countries' => 'postcodenl_api/advanced_config/residence_line_countries',
     ];
 
     /**
@@ -144,7 +145,19 @@ class StoreConfigHelper extends AbstractHelper
      */
     public function getSupportedCountries($storeId = null): array
     {
-        return json_decode($this->getValue('supported_countries', $storeId) ?? '[]');
+        $value = $this->getValue('supported_countries', $storeId) ?? '[]';
+        $decoded = json_decode($value);
+
+        if (!is_array($decoded)) {
+            $this->_logger->error(
+                'Invalid supported_countries configuration; treating as empty.',
+                ['value' => $value]
+            );
+
+            return [];
+        }
+
+        return $decoded;
     }
 
     /**
@@ -164,6 +177,28 @@ class StoreConfigHelper extends AbstractHelper
         }
 
         return array_values(array_diff($supported, explode(',', $disabled)));
+    }
+
+    /**
+     * Get countries where the residence line may be shown.
+     *
+     * @access public
+     * @param int|string|null $storeId
+     * @return array
+     */
+    public function getResidenceLineCountries($storeId = null): array
+    {
+        $value = $this->getValue('residence_line_countries', $storeId);
+
+        if ($value === null || trim($value) === '') {
+            return [];
+        }
+
+        $countries = array_map('trim', explode(',', $value));
+        $countries = array_map('strtoupper', $countries);
+        $countries = array_filter($countries, static fn (string $country): bool => $country !== '');
+
+        return array_values(array_unique($countries));
     }
 
     /**
@@ -273,6 +308,7 @@ class StoreConfigHelper extends AbstractHelper
             'change_fields_position' => $this->isSetFlag('change_fields_position', $storeId),
             'allow_pobox_shipping' => $this->isSetFlag('allow_pobox_shipping', $storeId),
             'split_street_values' => $this->isSetFlag('split_street_values', $storeId),
+            'residence_line_countries' => $this->getResidenceLineCountries($storeId),
         ];
     }
 
@@ -340,7 +376,7 @@ class StoreConfigHelper extends AbstractHelper
             if ($this->_appState->getAreaCode() === \Magento\Backend\App\Area\FrontNameResolver::AREA_CODE) {
                 [$scope, $scopeId] = $this->getScopeFromRequest();
 
-                return [$scope, $scopeId ?: null];
+                return [$scope, $scopeId];
             }
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             // Area code not set, fall through.

@@ -2,27 +2,47 @@
 
 namespace PostcodeEu\AddressValidation\Block\Onepage;
 
-use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
-use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
-use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
+use Magento\Framework\Stdlib\ArrayManager;
+use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\Template\Context;
 use PostcodeEu\AddressValidation\Helper\Data as DataHelper;
+use PostcodeEu\AddressValidation\Helper\StoreConfigHelper;
 
 class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
 {
-    /**
-     * JS layout configuration
-     *
-     * @var array
-     */
-    protected $jsLayout;
+    private const STEPS = 'components/checkout/children/steps/children/';
+
+    private const SHIPPING_FIELDS = self::STEPS
+        . 'shipping-step/children/shippingAddress/children/shipping-address-fieldset/children';
+
+    private const PAYMENT_FORMS = self::STEPS . 'billing-step/children/payment/children/payments-list/children';
+
+    private const SHARED_BILLING_FIELDS = self::STEPS
+        . 'billing-step/children/payment/children/afterMethods/children/billing-address-form/children/'
+        . 'form-fields/children';
+
+    // Mageplaza One Step Checkout compatibility.
+    private const MAGEPLAZA_BILLING_FIELDS = self::STEPS
+        . 'shipping-step/children/billingAddress/children/billing-address-fieldset/children';
+
+    private const AUTOFILL_FIELD_NAMES = [
+        'address_autofill_nl' => 1,
+        'address_autofill_intl' => 1,
+        'address_autofill_formatted_output' => 1,
+        'address_autofill_bypass' => 1,
+        'address_autofill_residence' => 1,
+    ];
 
     /** @var StoreConfigHelper */
     private $storeConfigHelper;
 
     /** @var DataHelper */
     private $dataHelper;
+
+    /** @var ArrayManager */
+    private $arrayManager;
 
     /**
      * Constructor
@@ -31,6 +51,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      * @param Context $context
      * @param StoreConfigHelper $storeConfigHelper
      * @param DataHelper $dataHelper
+     * @param ArrayManager $arrayManager
      * @param array $data (default: [])
      * @return void
      */
@@ -38,10 +59,12 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
         Context $context,
         StoreConfigHelper $storeConfigHelper,
         DataHelper $dataHelper,
+        ArrayManager $arrayManager,
         array $data = []
     ) {
         $this->storeConfigHelper = $storeConfigHelper;
         $this->dataHelper = $dataHelper;
+        $this->arrayManager = $arrayManager;
 
         parent::__construct($context, $data);
     }
@@ -52,6 +75,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      * @access public
      * @param mixed $jsLayout
      * @return array
+     * @throws LocalizedException - If the shipping address fieldset is missing.
      */
     public function process($jsLayout): array
     {
@@ -59,129 +83,121 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             return $jsLayout;
         }
 
-        $this->jsLayout = $jsLayout;
-
         // Settings accessible via checkoutProvider.
-        $this->jsLayout['components']['checkoutProvider']['postcodeEuConfig'] = $this->storeConfigHelper->getJsInit();
+        $jsLayout['components']['checkoutProvider']['postcodeEuConfig'] = $this->storeConfigHelper->getJsInit();
 
-        // Shipping fields
-        $shippingFields = &$this->_getJsLayoutRef([
-            'components',
-            'checkout', 'children',
-            'steps', 'children',
-            'shipping-step', 'children',
-            'shippingAddress', 'children',
-            'shipping-address-fieldset', 'children'
-        ]);
-        $shippingFields = $this->_changeAddressFieldsPosition($shippingFields);
+        // Shipping fields. The shipping fieldset is a hard dependency of this integration; unlike the
+        // optional billing paths below, a missing one is a hard failure.
+        $shippingFields = $this->_getFields(self::SHIPPING_FIELDS, $jsLayout);
 
-        // Autofill fields copy
-        $autofillFields = array_intersect_key(
-            $shippingFields,
-            [
-                'address_autofill_nl' => 1,
-                'address_autofill_intl' => 1,
-                'address_autofill_formatted_output' => 1,
-                'address_autofill_bypass' => 1,
-            ]
-        );
-
-        // Billing step
-        try {
-            $billingConfiguration = &$this->_getJsLayoutRef([
-                'components',
-                'checkout', 'children',
-                'steps', 'children',
-                'billing-step', 'children',
-                'payment', 'children',
-                'payments-list', 'children',
-            ]);
-        } catch (LocalizedException $e) {
-
+        if ($shippingFields === null) {
+            throw new LocalizedException(
+                __('Invalid path in Javascript layout: `%1`', self::SHIPPING_FIELDS)
+            );
         }
 
-        if (isset($billingConfiguration)) {
-            foreach ($billingConfiguration as $key => &$billingForm) {
-                if (false === strpos($key, '-form')) {
-                    continue;
-                }
+        $shippingFields = $this->_changeAddressFieldsPosition($shippingFields);
+        $jsLayout = $this->arrayManager->replace(self::SHIPPING_FIELDS, $jsLayout, $shippingFields);
+        $autofillFields = array_intersect_key($shippingFields, self::AUTOFILL_FIELD_NAMES);
 
-                // Make sure form fields exist.
-                if (!isset($billingForm['children']['form-fields'])) {
-                    continue;
-                }
+        // Billing address forms per payment method.
+        $paymentForms = $this->_getFields(self::PAYMENT_FORMS, $jsLayout);
 
-                // Billing fields
-                $billingForm['children']['form-fields']['children'] += $this->_updateCustomScope($autofillFields, $billingForm['dataScopePrefix']);
-                $billingForm['children']['form-fields']['children'] = $this->_updateDataScope($billingForm['children']['form-fields']['children'], $billingForm['dataScopePrefix']);
-                $billingForm['children']['form-fields']['children'] = $this->_changeAddressFieldsPosition($billingForm['children']['form-fields']['children']);
+        if ($paymentForms !== null) {
+            $jsLayout = $this->arrayManager->replace(
+                self::PAYMENT_FORMS,
+                $jsLayout,
+                $this->_addAutofillFieldsToPaymentForms($paymentForms, $autofillFields)
+            );
+        }
+
+        // Shared billing address form on the payment page, and Mageplaza's billing fieldset.
+        $billingFieldsets = [
+            self::SHARED_BILLING_FIELDS => 'billingAddressshared',
+            self::MAGEPLAZA_BILLING_FIELDS => 'billingAddress',
+        ];
+
+        foreach ($billingFieldsets as $path => $dataScope) {
+            $fields = $this->_getFields($path, $jsLayout);
+
+            if ($fields !== null) {
+                $jsLayout = $this->arrayManager->replace(
+                    $path,
+                    $jsLayout,
+                    $this->_addAutofillFields($fields, $autofillFields, $dataScope)
+                );
             }
         }
 
-        // Billing address on payment page
-        try {
-            $billingFields = &$this->_getJsLayoutRef([
-                'components',
-                'checkout', 'children',
-                'steps', 'children',
-                'billing-step', 'children',
-                'payment', 'children',
-                'afterMethods', 'children',
-                'billing-address-form', 'children',
-                'form-fields', 'children',
-            ]);
-        } catch (LocalizedException $e) {
-
-        }
-
-        if (isset($billingFields)) {
-            $billingFields += $this->_updateCustomScope($autofillFields, 'billingAddressshared');
-            $billingFields = $this->_updateDataScope($billingFields, 'billingAddressshared');
-            $billingFields = $this->_changeAddressFieldsPosition($billingFields);
-        }
-
-        // Compatibility
-        try {
-            $magePlazaBillingFields = &$this->_getJsLayoutRef([
-                'components',
-                'checkout', 'children',
-                'steps', 'children',
-                'shipping-step', 'children',
-                'billingAddress', 'children',
-                'billing-address-fieldset', 'children',
-            ]);
-        } catch (LocalizedException $e) {
-
-        }
-
-        if (isset($magePlazaBillingFields)) {
-            $magePlazaBillingFields += $this->_updateCustomScope($autofillFields, 'billingAddress');
-            $magePlazaBillingFields = $this->_updateDataScope($magePlazaBillingFields, 'billingAddress');
-            $magePlazaBillingFields = $this->_changeAddressFieldsPosition($magePlazaBillingFields);
-        }
-
-        return $this->jsLayout;
+        return $jsLayout;
     }
 
     /**
-     * Get a reference to the specified path in $this->jsLayout.
+     * Get the fields array at the specified path in the Javascript layout.
      *
-     * @param array $path - Path in Javascript layout.
-     * @return array - Reference to path in $this->jsLayout.
-     * @throws LocalizedException - Throw exception if path wasn't found.
+     * @access private
+     * @param string $path
+     * @param array $jsLayout
+     * @return array|null
      */
-    private function &_getJsLayoutRef(array $path): array
+    private function _getFields(string $path, array $jsLayout): ?array
     {
-        $result = &$this->jsLayout;
-        foreach ($path as $key) {
-            if (isset($result[$key])) {
-                $result = &$result[$key];
-            } else {
-                throw new LocalizedException(__('Invalid path in Javascript layout: `%1`', implode('.', $path)));
+        $fields = $this->arrayManager->get($path, $jsLayout);
+
+        return is_array($fields) ? $fields : null;
+    }
+
+    /**
+     * Add autofill fields to the billing address form of each payment method.
+     *
+     * @access private
+     * @param array $paymentForms - Children of payments-list
+     * @param array $autofillFields
+     * @return array - Updated children of payments-list
+     */
+    private function _addAutofillFieldsToPaymentForms(array $paymentForms, array $autofillFields): array
+    {
+        foreach ($paymentForms as $key => $form) {
+            if (false === strpos($key, '-form') || !isset($form['children']['form-fields']['children'])) {
+                continue;
             }
+
+            $dataScopePrefix = $form['dataScopePrefix'] ?? null;
+
+            // Without a data scope we can't integrate, so leave the form untouched (including field positions).
+            if ($dataScopePrefix === null) {
+                $this->_logger->warning(sprintf(
+                    'Billing form "%s" has no dataScopePrefix; skipping autofill fields.',
+                    $key
+                ));
+                continue;
+            }
+
+            $paymentForms[$key]['children']['form-fields']['children'] = $this->_addAutofillFields(
+                $form['children']['form-fields']['children'],
+                $autofillFields,
+                $dataScopePrefix
+            );
         }
 
-        return $result;
+        return $paymentForms;
+    }
+
+    /**
+     * Add autofill fields to a billing address fieldset and scope all fields to the billing address.
+     *
+     * @access private
+     * @param array $fields - Billing address fields
+     * @param array $autofillFields - Copied from the shipping address fieldset
+     * @param string $dataScope - Billing address data scope
+     * @return array
+     */
+    private function _addAutofillFields(array $fields, array $autofillFields, string $dataScope): array
+    {
+        $fields += $this->_updateCustomScope($autofillFields, $dataScope);
+        $fields = $this->_updateDataScope($fields, $dataScope);
+
+        return $this->_changeAddressFieldsPosition($fields);
     }
 
     /**
@@ -190,7 +206,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      * @access private
      * @param array $fields
      * @param string $dataScope
-     * @return array - Fields with modified customScope.
+     * @return array - Fields with modified customScope
      */
     private function _updateCustomScope($fields, $dataScope): array
     {
@@ -210,7 +226,8 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
     /**
      * Find and update dataScope
      *
-     * The default dataScope is 'shippingAddress.item-name'. But, it needs to be '$dataScope.item-name' for the billingAddress and billingAddressshared
+     * The default dataScope is `shippingAddress.item-name`.
+     * But, it needs to be `$dataScope.item-name` for the billingAddress and billingAddressshared.
      *
      * @access private
      * @param array $fields
@@ -219,9 +236,20 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
      */
     private function _updateDataScope($fields, $dataScope): array
     {
+        $shippingAddressScope = 'shippingAddress';
+
         foreach ($fields as $name => $items) {
             if (isset($items['dataScope'])) {
-                $fields[$name]['dataScope'] = str_replace('shippingAddress', $dataScope, $items['dataScope']);
+                $itemDataScope = $items['dataScope'];
+
+                if ($itemDataScope === $shippingAddressScope
+                    || strpos($itemDataScope, $shippingAddressScope . '.') === 0
+                ) {
+                    $fields[$name]['dataScope'] = $dataScope . substr(
+                        $itemDataScope,
+                        strlen($shippingAddressScope)
+                    );
+                }
             }
 
             if (isset($items['children'])) {
@@ -251,6 +279,7 @@ class LayoutProcessor extends AbstractBlock implements LayoutProcessorInterface
             'address_autofill_nl' => '920',
             'address_autofill_formatted_output' => '930',
             'address_autofill_bypass' => '935',
+            'address_autofill_residence' => '936',
             'street' => '940',
             'postcode' => '950',
             'city' => '960',

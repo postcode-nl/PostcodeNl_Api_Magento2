@@ -55,6 +55,12 @@ define([
                 }
             }
 
+            const residenceLine = result.residenceLine?.trim();
+
+            if (residenceLine) {
+                streetLines = [residenceLine, ...streetLines];
+            }
+
             // Street children may not yet be available at this point, so value needs to be set asynchronously.
             this.street().asyncSetValues(...streetLines);
 
@@ -84,6 +90,12 @@ define([
 
             // Must run last because the checkout data in local storage will not change if the street fields are empty.
             this.street().clearFields().clearErrors();
+        },
+
+        resetAddress: function () {
+            // Clear checkout provider storage (localStorage) so value is not restored on page reload/navigation.
+            this.source.set(this.dataScope, '');
+            this._super();
         },
 
         toggleFields: function (state, force = false) {

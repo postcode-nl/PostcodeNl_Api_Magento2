@@ -31,12 +31,12 @@ class AutocompleteMatch implements MatchInterface
      */
     public function __construct(array $match)
     {
-        $this->value = $match['value'];
-        $this->label = $match['label'];
-        $this->description = $match['description'];
-        $this->precision = $match['precision'];
-        $this->context = $match['context'];
-        $this->highlights = $match['highlights'];
+        $this->value = $match['value'] ?? '';
+        $this->label = $match['label'] ?? '';
+        $this->description = $match['description'] ?? '';
+        $this->precision = $match['precision'] ?? '';
+        $this->context = $match['context'] ?? '';
+        $this->highlights = $match['highlights'] ?? [];
     }
 
     public function getValue(): string
